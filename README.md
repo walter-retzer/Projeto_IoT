@@ -21,6 +21,14 @@ Com o auxílio do monitoramento contínuo de determinadas variáveis, como por e
 ### Link para acompanhamento "online" do valor das variáveis enviadas ao Server ThingSpeak, Channel ID: 1451371, Canal Público IoT - Vinhedo (PIEDADE-SP):
 [Channel ID: 1451371](https://thingspeak.com/channels/1451371)
 
+### Link do vídeo do YouTube referente ao funcionamento de leitura dos sensores do Protótipo Nano Smart Agro:
+
+[Funcionamento do Protótipo NSAGRO](https://www.youtube.com/watch?v=MGhgLQITPXU)
+
+### Link do vídeo do YouTube referente ao envio dos dados aos Servers Ubidots e ThingSpeak do Protótipo Nano Smart Agro:
+
+[Funcionamento do Protótipo NSAGRO](https://www.youtube.com/watch?v=kZP03ruk-PY)
+
 ### Dashboard do Server Ubidots com os valores dos sensores do Device NSAGRO-V0:
 
 ![Gráfico](Dashboard1.PNG)
