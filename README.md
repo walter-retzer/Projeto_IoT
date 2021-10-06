@@ -23,11 +23,11 @@ Com o auxílio do monitoramento contínuo de determinadas variáveis, como por e
 
 ### Link do vídeo do YouTube referente ao funcionamento de leitura dos sensores do Protótipo Nano Smart Agro:
 
-[Exibindo os Valores dos Sensores](https://www.youtube.com/watch?v=MGhgLQITPXU)
+[Youtube: Projeto IoT - Nano Smart Agro exibindo os valores dos sensores](https://www.youtube.com/watch?v=MGhgLQITPXU)
 
 ### Link do vídeo do YouTube referente ao envio dos dados aos Servers Ubidots e ThingSpeak do Protótipo Nano Smart Agro:
 
-[Protótipo NSAGRO enviando os dados](https://www.youtube.com/watch?v=kZP03ruk-PY)
+[YouTube: Projeto IoT - Nano Smart Agro enviando dados ao Ubidots e ThingSpeak.](https://www.youtube.com/watch?v=kZP03ruk-PY)
 
 ### Dashboard do Server Ubidots com os valores dos sensores do Device NSAGRO-V0:
 
