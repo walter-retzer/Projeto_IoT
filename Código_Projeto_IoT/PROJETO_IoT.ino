@@ -4,16 +4,24 @@
 
   PROJETO: NANO SMART AGRO PARA AGRICULTURA DE PRECISÃO
 
-  VERSÃO: 4.01.28
-  DATA: 30/09/2021
-  HORÁRIO:13H33MIN
+  VERSÃO: 4.01.29
+  DATA: 18/12/2021
+  HORÁRIO:20H25MIN
   ARQUIVO: PROJETO_IoT
 
 *********************************************************************
 
   COMENTÁRIOS COM AS ALTERAÇÕES PARA REGISTRO DE CONTROLE DAS VERSÕES:
 
-  VERSÃO: 4.01.28:  INCLUÍDO FUNÇÃO ENVIASMS8 PARA VERIFICAR SALDO DO CHIP DO CELULAR DO MÓDULO SIM 800L.
+  VERSÃO: 
+ 
+  4.01.29:        ALTERADO A BIBLIOTECA PUBSUBCLIENT TIME MQTT_SOCKET_TIMEOUT DE 15 PARA 60 SEGUNDOS PARA MELHORAR O TEMPO DE CONEXÃO COM O SERVER UBIDOTS.
+                  ALTERADO A BIBLIOTECA PUBSUBCLIENT TIME MQTT_SOCKET_TIMEOUT DE 15 PARA 60 SEGUNDOS PARA MELHORAR O TEMPO DE CONEXÃO COM O SERVER UBIDOTS.
+                  ALTERADO A BIBLIOTECA SOFTWARE SERIAL RX BUFFER DE 64 PARA 512 PARA MELHORAR A RECEPÇÃO DAS MSGS SMS E NÃO HAVER "CORTES NO TEXTO DAS MSGS".
+                  CORRIGIDO A EXIBIÇÃO NO DISPLAY DO CLIENT.STATE QUANDO HOUVER ERRO DE CONEXÃO AOS SERVER IOT.
+                  ALTERADO FUNÇÃO PARA CONSULTA SALDO DO CHIP NA VIVO, DEVIDO A MUDANÇA DE NÚMERO PARA ENVIAR SMS  DE CONSULTA SALDO DA OPERADORA VIVO.
+                  
+  4.01.28:        INCLUÍDO FUNÇÃO ENVIASMS8 PARA VERIFICAR SALDO DO CHIP DO CELULAR DO MÓDULO SIM 800L.
 
 *********************************************************************
   CONFIGURAÇÃO DOS BORNES DA PLACA DE ALIMENTAÇÃO EXTERNA DOS SENSORES:
@@ -196,6 +204,8 @@ unsigned long aux_display_menu;
 unsigned long aux_display_menu1;
 
 int cont1;
+
+unsigned long testLines_SD(uint16_t color);
 
 // ========================================================================================================
 // DEFINIÇÃO DAS CORES NO DISPLAY TFT:
@@ -382,6 +392,7 @@ unsigned int msg_counternok_t1_resete; // msg não enviada ThingSpeak 1
 unsigned int msg_counternok_t2_resete; // msg não enviada ThingSpeak 2
 unsigned int configuraGSM_nok_resete; // GSM nok
 
+
 //========================================================================================================
 //DEFINIÇÃO DOS PINOS DE COMUNICAÇÃO COM O MODULO GSM SIM800L
 
@@ -447,6 +458,7 @@ void enviaSMS8(String telefoneSMS, String mensagem);   // envia SMS para a Vivo 
 
 unsigned int msg_counter4;     // Contagem de mensagens SMS foram enviadas
 unsigned int msg_sms_rec;  // Contagem de mensagens SMS foram recebidas
+unsigned int msg_sms_env;     // Contagem de mensagens SMS foram enviadas
 String str1;
 
 // ========================================================================================================
@@ -2009,7 +2021,7 @@ void loop() {
     tft.fillRoundRect(5, 192, 230, 30, 5, RED);
     tft.drawRoundRect(5, 192, 230, 30, 5, WHITE);
     tft.setCursor(15, 200);
-    tft.println(F("NSAGRO Versao:4.05"));
+    tft.println(F("NSAGRO V:4.01.34 "));
 
     tft.setCursor(0, 260);
     tft.print(F(" Selecione a opcao:"));
@@ -2249,6 +2261,9 @@ void loop() {
         //========================================================================================================
         // EXIBE O MENU SELECIONADO QUANDO OCORRER O TOQUE NO BOTÃO 03:
 
+        //========================================================================================================
+        // EXIBE O MENU SELECIONADO QUANDO OCORRER O TOQUE NO BOTÃO 03:
+
         // BOTÃO 3 - ENVIO DE MENSAGEM SMS DE TESTE:
         if (tp.x > 484  && tp.x < 574  && tp.y > 175 && tp.y < 260) {
 
@@ -2259,286 +2274,785 @@ void loop() {
           tft.fillRoundRect(105, 290, 30, 30, 5, RED);
           tft.drawRoundRect(105, 290, 30, 30, 5, YELLOW);
           tft.setTextColor(BLACK);
-          tft.setTextSize(2);
+          //tft.setTextSize(2);
           tft.setCursor(115, 298);
           tft.println(F("X"));
           delay(2000);
 
+        //========================================================================================================
+        // APÓS A SELEÇÃO DO BOTÃO NÚMERO 03, DEVE SELECIONAR A OPÇÃO DE ENVIO DE SMS:
+
+          display_menu1 = true;
           tft.fillRect(0, 0, 240, 320, BLACK);
 
-          digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
-          delay(250);
-          digitalWrite(BUZZER_VCC, false);         // Seta o BUZZER
-          delay(250);
-          digitalWrite(BUZZER_VCC, true);        // Seta o BUZZER
-          delay(250);
-          digitalWrite(BUZZER_VCC, false);        // Seta o BUZZER
-          delay(250);
-          digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
-          delay(250);
-          digitalWrite(BUZZER_VCC, false);        // Seta o BUZZER
-
-          tft.fillRoundRect(0, 0, 240, 95, 15, RED);
-          tft.drawRoundRect(0, 0, 240, 95, 15, WHITE);
-          tft.setCursor(23, 10);
+          tft.fillRoundRect(5, 15, 230, 50, 15, RED);
+          tft.drawRoundRect(5, 15, 230, 50, 15, WHITE);
           tft.setTextColor(WHITE);
           tft.setTextSize(3);
-          tft.print(F("VERIFICANDO"));
+          tft.setCursor(15, 30);
+          tft.println(F("DISPLAY MENU"));
 
-          tft.setCursor(52, 37);
           tft.setTextColor(WHITE);
-          tft.setTextSize(3);
-          tft.print(F("ENVIO DE"));
+          tft.setTextSize(2);
+          tft.setCursor(0, 80);
+          tft.println(F("1-CONSULTA SALDO SMS"));
+          tft.setCursor(0, 100);
+          tft.println(F("2-ENVIO SMS TESTE"));
+          tft.setCursor(0, 120);
+          tft.println(F("3-CONFIRMA SALDO SMS"));
+//          tft.setCursor(0, 140);
+//          tft.println(F("9-DATA E HORA"));
+          tft.setCursor(0, 160);
+          tft.println(F("5-RETORNA"));
 
-          tft.setCursor(14, 64);
+          tft.fillRoundRect(5, 192, 230, 30, 5, RED);
+          tft.drawRoundRect(5, 192, 230, 30, 5, WHITE);
+          tft.setCursor(15, 200);
+          tft.println(F(" NSAGRO V:4.01.29 "));
+
+          tft.setCursor(0, 260);
+          tft.print(F(" Selecione a opcao:"));
+          tft.drawRoundRect(5, 282, 230, 30, 5, WHITE);
+
+          // DESENHANDO OS BOTÕES DE APLICAÇÃO:
+          tft.fillRoundRect(15, 290, 30, 30, 5, RED);
+          tft.drawRoundRect(15, 290, 30, 30, 5, WHITE);
           tft.setTextColor(WHITE);
-          tft.setTextSize(3);
-          tft.print(F("MENSAGEM SMS"));
+          tft.setTextSize(2);
+          tft.setCursor(24, 298);
+          tft.println(F("1"));
+      
+          // DESENHANDO OS BOTÕES DE APLICAÇÃO:
+          tft.fillRoundRect(60, 290, 30, 30, 5, RED);
+          tft.drawRoundRect(60, 290, 30, 30, 5, WHITE);
+          tft.setTextColor(WHITE);
+          //tft.setTextSize(2);
+          tft.setCursor(69, 298);
+          tft.println(F("2"));
+      
+          // DESENHANDO OS BOTÕES DE APLICAÇÃO:
+          tft.fillRoundRect(105, 290, 30, 30, 5, RED);
+          tft.drawRoundRect(105, 290, 30, 30, 5, WHITE);
+          tft.setTextColor(WHITE);
+          //tft.setTextSize(2);
+          tft.setCursor(114, 298);
+          tft.println(F("3"));
+//      
+//          // DESENHANDO OS BOTÕES DE APLICAÇÃO:
+//          tft.fillRoundRect(150, 290, 30, 30, 5, RED);
+//          tft.drawRoundRect(150, 290, 30, 30, 5, WHITE);
+//          tft.setTextColor(WHITE);
+//          //tft.setTextSize(2);
+//          tft.setCursor(159, 298);
+//          tft.println(F("4"));
+      
+          // DESENHANDO OS BOTÕES DE APLICAÇÃO:
+          tft.fillRoundRect(195, 290, 30, 30, 5, RED);
+          tft.drawRoundRect(195, 290, 30, 30, 5, WHITE);
+          tft.setTextColor(WHITE);
+          //tft.setTextSize(2);
+          tft.setCursor(204, 298);
+          tft.println(F("5"));
 
-          tft.fillRoundRect(10, 110, 220, 30, 15, YELLOW);
-          tft.drawRoundRect(10, 110, 220, 30, 15, RED);
-          tft.setCursor(30, 114);
-          tft.setTextColor(RED);
-          tft.setTextSize(3);
-          tft.print(F("ENVIAR SMS!"));
+          aux_display_menu1 = millis();
 
           //========================================================================================================
-          // Enviando SMS para o celular +5515*******
+          // EXIBE O PROXIMO MENU COM AS OPÇÕES DE 6 A 10 DOS BOTÕES NO DISPLAY:
 
-          tft.setCursor(10, 158);
-          tft.setTextColor(CYAN);
-          tft.setTextSize(2);
-          tft.print(F("SMS para:"));
-          tft.setTextColor(WHITE);
-          tft.print(F("Walter R."));
+          while (display_menu1) {
 
-          tft.setCursor(10, 178);
-          tft.setTextColor(CYAN);
-          tft.setTextSize(2);
-          tft.print(F("Cel:"));
-          tft.setTextColor(WHITE);
-          tft.print(F("+5515**********"));
+            // FUNÇÃO PARA RETORNAR AO LOOP PRINCIPAL SE O TEMPO FOR MAIOR QUE 10 SEG APÓS SELECIONADO O BOTÃO 5
+            if (millis() - aux_display_menu1 > 10000) {
+              display_menu1 = false;
+              display_menu = false;
 
-          tft.setCursor(10, 198);
-          tft.setTextColor(CYAN);
-          tft.setTextSize(2);
-          tft.print(F("Mensagem: "));
-          tft.setTextSize(2);
-          tft.setTextColor(WHITE);
-          tft.print(F("Envio de Mensagem SMS de Teste!!"));
+              // ========================================================================================================
+              // Sincronizar os tempos para iniciar o loop novamente para não ter superposição de função
 
-          delay(3000);
+              anterior = millis();
+              anterior2 = anterior;
+              anterior3 = anterior2;
+              anterior4 = anterior3;
+              anterior5 = anterior4;
+              anterior6 = anterior5;
+              anterior7 = anterior6;
+              anterior8 = anterior7;
+              anterior9 = anterior8;
+              anterior10 = anterior9;
+              anterior11 = anterior10;
+              anterior12 = anterior11;
+              anterior13 = anterior12;
+              anterior14 = anterior13;
+              anterior15 = anterior14;
+              anterior16 = anterior15;
+              anterior17 = anterior16;
+              anterior18 = anterior17;
+              anterior19 = anterior18;
+              anterior20 = anterior19;
 
-          enviaSMS("+5515********", "IoT NANO SMART AGRO \n**AVISO IMPORTANTE**");          // enviaSMS(telefoneSMS, o resumo de funcionamento do protótipo!
+              intervalo =  10000;
+              intervalo2 = 20000;
+              intervalo3 = 30000;
+              intervalo4 = 40000;
+              intervalo5 = 50000;
+              intervalo6 = 60000;
+              intervalo7 = 70000;
+              intervalo8 = 80000;
+              intervalo9 = 90000;
+              intervalo10 = 100000;
+              intervalo11 = 110000;
+              intervalo12 = 120000;
+              intervalo13 = 130000;
+              intervalo14 = 140000;
+              intervalo15 = 150000;
+              intervalo16 = 160000;
+              intervalo17 = 170000;
+              intervalo18 = 180000;
+              intervalo19 = 190000;
+              intervalo20 = 200000;
 
-          delay(3000);
-          tft.fillRect(0, 280, 240, 38, RED);
-          tft.setCursor(5, 282);
-          tft.setTextColor(WHITE);
-          tft.setTextSize(2);
-          tft.print(F("Valor dos Sensores!"));
-          tft.setCursor(25, 300);
-          tft.print(F("  SMS Enviado!  "));
+              return;
 
-          msg_counter4++;
+            } // FECHA IF DA FUNÇÃO PARA RETORNAR AO LOOP PRINCIPAL SE O TEMPO FOR MAIOR QUE 10 SEG APÓS SELECIONADO O BOTÃO 5
 
-          delay(2000);
-          int pino53 = 53;
-          pinMode(pino53, OUTPUT);
-          delay(500);
-          SD.begin(pino53);
-          delay(500);
+            // VERIFICA SE HOUVE TOQUE NA TELA E ARMEZA O PONTO SELECIONADO
+            tp = ts.getPoint();
+            pinMode(XM, OUTPUT);
+            pinMode(YP, OUTPUT);
 
-          myFile = SD.open("SMS.txt", FILE_WRITE);
-          myFile.print(F("NANO SMART AGRO - Mensagem SMS Enviada"));
-          myFile.print(F(";"));
-          myFile.print(F(" Envio de mensagem SMS para teste"));
-          myFile.print(F(";"));
-          myFile.print(F(" Cel:"));
-          myFile.print("+5515********");
-          myFile.print(F(";"));
-          myFile.print(F(" SMS Enviados: "));
-          myFile.print(msg_counter4);
-          myFile.print(F(";"));
-          myFile.print(F(" DATA: "));
-          myFile.print(t.date, DEC);
-          myFile.print(F("/"));
-          myFile.print(t.mon, DEC);
-          myFile.print(F("/"));
-          myFile.print(t.year, DEC);
-          myFile.print(F(";"));
-          myFile.print(F(" HORARIO: "));
-          myFile.print(rtc.getTimeStr());
-          myFile.print(F(";"));
-          myFile.println();
-          delay(1000);
-          myFile.close();
-          delay(1000);
-          SD.end();
+            // BOTÃO 1 - CONSULTA SALDO SMS NA OPERADORA VIVO:
+            if (tp.x > 225 && tp.x < 300  && tp.y > 175 && tp.y < 260) {
 
-          //========================================================================================================
-          // Enviando SMS para consultar o Saldo do celular:
+              tft.setTextColor(YELLOW, BLACK);
+              tft.setTextSize(2);
+              tft.setCursor(0, 80);
+              tft.println(F("1-CONSULTA SALDO SMS"));
+              tft.fillRoundRect(15, 290, 30, 30, 5, RED);
+              tft.drawRoundRect(15, 290, 30, 30, 5, YELLOW);
+              tft.setTextColor(BLACK);
+              tft.setCursor(25, 298);
+              tft.println(F("X"));
+              delay(2500);
+
+              //========================================================================================================
+              // Enviando SMS para consultar o Saldo do celular:
+    
+              tft.fillRect(0, 0, 240, 320, BLACK);
+    
+              digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
+              delay(250);
+              digitalWrite(BUZZER_VCC, false);         // Seta o BUZZER
+              delay(250);
+              digitalWrite(BUZZER_VCC, true);        // Seta o BUZZER
+              delay(250);
+              digitalWrite(BUZZER_VCC, false);        // Seta o BUZZER
+              delay(250);
+              digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
+              delay(250);
+              digitalWrite(BUZZER_VCC, false);        // Seta o BUZZER
+    
+              tft.fillRoundRect(0, 0, 240, 95, 15, RED);
+              tft.drawRoundRect(0, 0, 240, 95, 15, WHITE);
+              tft.setCursor(23, 10);
+              tft.setTextColor(WHITE);
+              tft.setTextSize(3);
+              tft.print(F("VERIFICANDO"));
+    
+              tft.setCursor(52, 37);
+              tft.setTextColor(WHITE);
+              tft.setTextSize(3);
+              tft.print(F("ENVIO DE"));
+    
+              tft.setCursor(14, 64);
+              tft.setTextColor(WHITE);
+              tft.setTextSize(3);
+              tft.print(F("MENSAGEM SMS"));
+    
+              tft.fillRoundRect(10, 110, 220, 30, 15, YELLOW);
+              tft.drawRoundRect(10, 110, 220, 30, 15, RED);
+              tft.setCursor(30, 114);
+              tft.setTextColor(RED);
+              tft.setTextSize(3);
+              tft.print(F("ENVIAR SMS!"));
+    
+              //========================================================================================================
+              // Enviando SMS para a VIVO:
+    
+              tft.setCursor(10, 158);
+              tft.setTextColor(CYAN);
+              tft.setTextSize(2);
+              tft.print(F("SMS para:"));
+              tft.setTextColor(WHITE);
+              tft.print(F("VIVO S.A."));
+    
+              tft.setCursor(10, 178);
+              tft.setTextColor(CYAN);
+              tft.print(F("Tel:"));
+              tft.setTextColor(WHITE);
+              tft.print(F(" 1058"));
+    
+              tft.setCursor(10, 198);
+              tft.setTextColor(CYAN);
+              tft.print(F("Mensagem: "));
+              tft.setTextColor(WHITE);
+              tft.print(F("Consulta Saldo!"));
+    
+              delay(2000);
+
+              tft.fillRect(0, 280, 240, 38, RED);
+              tft.setCursor(5, 282);
+              tft.setTextColor(WHITE);
+              tft.print(F(" Aguardando Saldo! "));
+              tft.setCursor(25, 300);
+              tft.print(F("  SMS Enviado!  "));
+              delay(3000);
+    
+              msg_sms_env++;
+    
+              int pino53 = 53;
+              pinMode(pino53, OUTPUT);
+              delay(500);
+              SD.begin(pino53);
+              delay(500);
+    
+              myFile = SD.open("SMS.txt", FILE_WRITE);
+              myFile.print(F("NANO SMART AGRO - Mensagem SMS Enviada"));
+              myFile.print(F(";"));
+              myFile.print(F(" Envio de mensagem SMS para consultar Saldo de Recarga Vivo!"));
+              myFile.print(F(";"));
+              myFile.print(F(" Tel: 1058"));
+              myFile.print(F(";"));
+              myFile.print(F(" SMS Enviados: "));
+              myFile.print(msg_sms_env);
+              myFile.print(F(";"));
+              myFile.print(F(" DATA: "));
+              myFile.print(t.date, DEC);
+              myFile.print(F("/"));
+              myFile.print(t.mon, DEC);
+              myFile.print(F("/"));
+              myFile.print(t.year, DEC);
+              myFile.print(F(";"));
+              myFile.print(F(" HORARIO: "));
+              myFile.print(rtc.getTimeStr());
+              myFile.print(F(";"));
+              myFile.println();
+              myFile.println();
+              
+              delay(1000);
+              myFile.close();
+              delay(1000);
+              SD.end();
+  
+              // ========================================================================================================
+              // Sincronizar os tempos para iniciar o loop novamente para não ter superposição de função
+
+              anterior = millis();
+              anterior2 = anterior;
+              anterior3 = anterior2;
+              anterior4 = anterior3;
+              anterior5 = anterior4;
+              anterior6 = anterior5;
+              anterior7 = anterior6;
+              anterior8 = anterior7;
+              anterior9 = anterior8;
+              anterior10 = anterior9;
+              anterior11 = anterior10;
+              anterior12 = anterior11;
+              anterior13 = anterior12;
+              anterior14 = anterior13;
+              anterior15 = anterior14;
+              anterior16 = anterior15;
+              anterior17 = anterior16;
+              anterior18 = anterior17;
+              anterior19 = anterior18;
+              anterior20 = anterior19;
+
+              intervalo =  10000;
+              intervalo2 = 20000;
+              intervalo3 = 30000;
+              intervalo4 = 40000;
+              intervalo5 = 50000;
+              intervalo6 = 60000;
+              intervalo7 = 70000;
+              intervalo8 = 80000;
+              intervalo9 = 90000;
+              intervalo10 = 100000;
+              intervalo11 = 110000;
+              intervalo12 = 120000;
+              intervalo13 = 130000;
+              intervalo14 = 140000;
+              intervalo15 = 150000;
+              intervalo16 = 160000;
+              intervalo17 = 170000;
+              intervalo18 = 180000;
+              intervalo19 = 190000;
+              intervalo20 = 200000;
+
+              enviaSMS8("1058", "DADOS");          // enviaSMS para a Vivo para consultar o Saldo de Recarga
+
+              display_menu = false;
+              display_menu1 = false;
+              cont1 = 0;
+             
+              delay(1000);
+              leGSM();
+              tft.setTextColor(CYAN, BLACK);
+              tft.setTextSize(2);
+              tft.setCursor(10, 238);
+              tft.print(F("GSM: "));
+              tft.setTextColor(WHITE);
+              ultimoGSM.trim();            // Estrutura: >+CMGS: XXX OK
+              tft.print(ultimoGSM);
+              delay(1000);
+              return;
+
+            }
+
+            // BOTÃO 2 - ENVIA SMS DE TESTE:
+            if (tp.x > 370 && tp.x < 445  && tp.y > 175 && tp.y < 260) {
+    
+              tft.setTextColor(YELLOW);
+              tft.setTextSize(2);
+              tft.setCursor(0, 100);
+              tft.println(F("2-ENVIO SMS TESTE"));
+              tft.fillRoundRect(60, 290, 30, 30, 5, RED);
+              tft.drawRoundRect(60, 290, 30, 30, 5, YELLOW);
+              tft.setTextColor(BLACK);
+              tft.setCursor(70, 298);
+              tft.println(F("X"));
+              delay(2000);
+
+              tft.fillRect(0, 0, 240, 320, BLACK);
+
+              digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
+              delay(250);
+              digitalWrite(BUZZER_VCC, false);         // Seta o BUZZER
+              delay(250);
+              digitalWrite(BUZZER_VCC, true);        // Seta o BUZZER
+              delay(250);
+              digitalWrite(BUZZER_VCC, false);        // Seta o BUZZER
+              delay(250);
+              digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
+              delay(250);
+              digitalWrite(BUZZER_VCC, false);        // Seta o BUZZER
+    
+              tft.fillRoundRect(0, 0, 240, 95, 15, RED);
+              tft.drawRoundRect(0, 0, 240, 95, 15, WHITE);
+              tft.setCursor(23, 10);
+              tft.setTextColor(WHITE);
+              tft.setTextSize(3);
+              tft.print(F("VERIFICANDO"));
+    
+              tft.setCursor(52, 37);
+              tft.setTextColor(WHITE);
+              tft.setTextSize(3);
+              tft.print(F("ENVIO DE"));
+    
+              tft.setCursor(14, 64);
+              tft.setTextColor(WHITE);
+              tft.setTextSize(3);
+              tft.print(F("MENSAGEM SMS"));
+    
+              tft.fillRoundRect(10, 110, 220, 30, 15, YELLOW);
+              tft.drawRoundRect(10, 110, 220, 30, 15, RED);
+              tft.setCursor(30, 114);
+              tft.setTextColor(RED);
+              tft.setTextSize(3);
+              tft.print(F("ENVIAR SMS!"));
+    
+              //========================================================================================================
+              // Enviando SMS para o celular +5515...........!
+    
+              tft.setCursor(10, 158);
+              tft.setTextColor(CYAN);
+              tft.setTextSize(2);
+              tft.print(F("SMS para:"));
+              tft.setTextColor(WHITE);
+              tft.print(F("Walter R."));
+    
+              tft.setCursor(10, 178);
+              tft.setTextColor(CYAN);
+              tft.print(F("Cel:"));
+              tft.setTextColor(WHITE);
+              tft.print(F("+5515999999999"));
+    
+              tft.setCursor(10, 198);
+              tft.setTextColor(CYAN);
+              tft.print(F("Mensagem: "));
+              tft.setTextColor(WHITE);
+              tft.print(F("Envio de Mensagem SMS Teste!"));
+   
+              tft.fillRect(0, 280, 240, 38, RED);
+              tft.setCursor(5, 282);
+              tft.setTextColor(WHITE);
+              tft.print(F("Valor dos Sensores!"));
+              tft.setCursor(25, 300);
+              tft.print(F("  SMS Enviado!  "));
+    
+              msg_sms_env++;
+    
+              delay(2000);
+              int pino53 = 53;
+              pinMode(pino53, OUTPUT);
+              delay(500);
+              SD.begin(pino53);
+              delay(500);
+    
+              myFile = SD.open("SMS.txt", FILE_WRITE);
+              myFile.print(F("NANO SMART AGRO - Mensagem SMS Enviada"));
+              myFile.print(F(";"));
+              myFile.print(F(" Envio de mensagem SMS para teste"));
+              myFile.print(F(";"));
+              myFile.print(F(" Cel:"));
+              myFile.print("+5515999999999");
+              myFile.print(F(";"));
+              myFile.print(F(" SMS Enviados: "));
+              myFile.print(msg_sms_env);
+              myFile.print(F(";"));
+              myFile.print(F(" DATA: "));
+              myFile.print(t.date, DEC);
+              myFile.print(F("/"));
+              myFile.print(t.mon, DEC);
+              myFile.print(F("/"));
+              myFile.print(t.year, DEC);
+              myFile.print(F(";"));
+              myFile.print(F(" HORARIO: "));
+              myFile.print(rtc.getTimeStr());
+              myFile.print(F(";"));
+              myFile.println();
+              myFile.println();
+              
+              delay(1000);
+              myFile.close();
+              delay(1000);
+              SD.end();
+
+              display_menu = false;
+              display_menu1 = false;
+              cont1 = 0;
+
+              // ========================================================================================================
+              // Sincronizar os tempos para iniciar o loop novamente para não ter superposição de função
+
+              anterior = millis();
+              anterior2 = anterior;
+              anterior3 = anterior2;
+              anterior4 = anterior3;
+              anterior5 = anterior4;
+              anterior6 = anterior5;
+              anterior7 = anterior6;
+              anterior8 = anterior7;
+              anterior9 = anterior8;
+              anterior10 = anterior9;
+              anterior11 = anterior10;
+              anterior12 = anterior11;
+              anterior13 = anterior12;
+              anterior14 = anterior13;
+              anterior15 = anterior14;
+              anterior16 = anterior15;
+              anterior17 = anterior16;
+              anterior18 = anterior17;
+              anterior19 = anterior18;
+              anterior20 = anterior19;
+
+              intervalo =  10000;
+              intervalo2 = 20000;
+              intervalo3 = 30000;
+              intervalo4 = 40000;
+              intervalo5 = 50000;
+              intervalo6 = 60000;
+              intervalo7 = 70000;
+              intervalo8 = 80000;
+              intervalo9 = 90000;
+              intervalo10 = 100000;
+              intervalo11 = 110000;
+              intervalo12 = 120000;
+              intervalo13 = 130000;
+              intervalo14 = 140000;
+              intervalo15 = 150000;
+              intervalo16 = 160000;
+              intervalo17 = 170000;
+              intervalo18 = 180000;
+              intervalo19 = 190000;
+              intervalo20 = 200000;
+    
+              enviaSMS("+5515999999999", "IoT NANO SMART AGRO \n**AVISO IMPORTANTE**");          // enviaSMS(telefoneSMS, o resumo de funcionamento do protótipo!
+    
+              delay(1000);
+              leGSM();
+              tft.setTextColor(CYAN, BLACK);
+              tft.setTextSize(2);
+              tft.setCursor(10, 238);
+              tft.print(F("GSM: "));
+              tft.setTextColor(WHITE);
+              ultimoGSM.trim();            // Estrutura: >+CMGS: XXX OK
+              tft.print(ultimoGSM);
+              delay(1000);
+              
+              return;
+
+            } //  FECHA IF DO BOTÃO 02 PARA ENVIO DE SMS TESTE. 
 
 
-          tft.fillRect(0, 0, 240, 320, BLACK);
+            // BOTÃO 3 - CONFIRMA SALDO SMS NA OPERADORA VIVO: 
+            if (tp.x > 484  && tp.x < 574  && tp.y > 175 && tp.y < 260) {
 
-          digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
-          delay(250);
-          digitalWrite(BUZZER_VCC, false);         // Seta o BUZZER
-          delay(250);
-          digitalWrite(BUZZER_VCC, true);        // Seta o BUZZER
-          delay(250);
-          digitalWrite(BUZZER_VCC, false);        // Seta o BUZZER
-          delay(250);
-          digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
-          delay(250);
-          digitalWrite(BUZZER_VCC, false);        // Seta o BUZZER
+              tft.setTextSize(2);
+              tft.setCursor(0, 120);
+              tft.setTextColor(YELLOW);
+              tft.println(F("3-CONFIRMA SALDO SMS"));
+              tft.fillRoundRect(105, 290, 30, 30, 5, RED);
+              tft.drawRoundRect(105, 290, 30, 30, 5, YELLOW);
+              tft.setTextColor(BLACK);
+              tft.setCursor(115, 298);
+              tft.println(F("X"));
+              delay(2500);
 
-          tft.fillRoundRect(0, 0, 240, 95, 15, RED);
-          tft.drawRoundRect(0, 0, 240, 95, 15, WHITE);
-          tft.setCursor(23, 10);
-          tft.setTextColor(WHITE);
-          tft.setTextSize(3);
-          tft.print(F("VERIFICANDO"));
+              //========================================================================================================
+              // Enviando SMS para consultar o Saldo do celular:
+    
+              tft.fillRect(0, 0, 240, 320, BLACK);
+    
+              digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
+              delay(250);
+              digitalWrite(BUZZER_VCC, false);         // Seta o BUZZER
+              delay(250);
+              digitalWrite(BUZZER_VCC, true);        // Seta o BUZZER
+              delay(250);
+              digitalWrite(BUZZER_VCC, false);        // Seta o BUZZER
+              delay(250);
+              digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
+              delay(250);
+              digitalWrite(BUZZER_VCC, false);        // Seta o BUZZER
+    
+              tft.fillRoundRect(0, 0, 240, 95, 15, RED);
+              tft.drawRoundRect(0, 0, 240, 95, 15, WHITE);
+              tft.setCursor(23, 10);
+              tft.setTextColor(WHITE);
+              tft.setTextSize(3);
+              tft.print(F("VERIFICANDO"));
+    
+              tft.setCursor(52, 37);
+              tft.setTextColor(WHITE);
+              tft.setTextSize(3);
+              tft.print(F("ENVIO DE"));
+    
+              tft.setCursor(14, 64);
+              tft.setTextColor(WHITE);
+              tft.setTextSize(3);
+              tft.print(F("MENSAGEM SMS"));
+    
+              tft.fillRoundRect(10, 110, 220, 30, 15, YELLOW);
+              tft.drawRoundRect(10, 110, 220, 30, 15, RED);
+              tft.setCursor(30, 114);
+              tft.setTextColor(RED);
+              tft.setTextSize(3);
+              tft.print(F("ENVIAR SMS!"));
+    
+              //========================================================================================================
+              // Enviando SMS para a VIVO!
+    
+              tft.setCursor(10, 158);
+              tft.setTextColor(CYAN);
+              tft.setTextSize(2);
+              tft.print(F("SMS para:"));
+              tft.setTextColor(WHITE);
+              tft.print(F("VIVO S.A."));
+    
+              tft.setCursor(10, 178);
+              tft.setTextColor(CYAN);
+              //tft.setTextSize(2);
+              tft.print(F("Tel:"));
+              tft.setTextColor(WHITE);
+              tft.print(F(" 1058"));
+    
+              tft.setCursor(10, 198);
+              tft.setTextColor(CYAN);
+              tft.print(F("Mensagem: "));
+              tft.setTextColor(WHITE);
+              tft.print(F("Confirma Saldo!"));
+    
+              delay(2000);
 
-          tft.setCursor(52, 37);
-          tft.setTextColor(WHITE);
-          tft.setTextSize(3);
-          tft.print(F("ENVIO DE"));
+              tft.fillRect(0, 280, 240, 38, RED);
+              tft.setCursor(5, 282);
+              tft.setTextColor(WHITE);
+              tft.print(F(" Aguardando Saldo! "));
+              tft.setCursor(25, 300);
+              tft.print(F("  SMS Enviado!  "));
+              delay(3000);
+    
+              msg_sms_env++;
+    
+              int pino53 = 53;
+              pinMode(pino53, OUTPUT);
+              delay(500);
+              SD.begin(pino53);
+              delay(500);
+    
+              myFile = SD.open("SMS.txt", FILE_WRITE);
+              myFile.print(F("NANO SMART AGRO - Mensagem SMS Enviada"));
+              myFile.print(F(";"));
+              myFile.print(F(" Envio de mensagem SMS para Confirmar Saldo de Recarga Vivo!"));
+              myFile.print(F(";"));
+              myFile.print(F(" Tel: 1058"));
+              myFile.print(F(";"));
+              myFile.print(F(" SMS Enviados: "));
+              myFile.print(msg_sms_env);
+              myFile.print(F(";"));
+              myFile.print(F(" DATA: "));
+              myFile.print(t.date, DEC);
+              myFile.print(F("/"));
+              myFile.print(t.mon, DEC);
+              myFile.print(F("/"));
+              myFile.print(t.year, DEC);
+              myFile.print(F(";"));
+              myFile.print(F(" HORARIO: "));
+              myFile.print(rtc.getTimeStr());
+              myFile.print(F(";"));
+              myFile.println();
+              myFile.println();
+              
+              delay(1000);
+              myFile.close();
+              delay(1000);
+              SD.end();
 
-          tft.setCursor(14, 64);
-          tft.setTextColor(WHITE);
-          tft.setTextSize(3);
-          tft.print(F("MENSAGEM SMS"));
+      
+              // ========================================================================================================
+              // Sincronizar os tempos para iniciar o loop novamente para não ter superposição de função
 
-          tft.fillRoundRect(10, 110, 220, 30, 15, YELLOW);
-          tft.drawRoundRect(10, 110, 220, 30, 15, RED);
-          tft.setCursor(30, 114);
-          tft.setTextColor(RED);
-          tft.setTextSize(3);
-          tft.print(F("ENVIAR SMS!"));
+              anterior = millis();
+              anterior2 = anterior;
+              anterior3 = anterior2;
+              anterior4 = anterior3;
+              anterior5 = anterior4;
+              anterior6 = anterior5;
+              anterior7 = anterior6;
+              anterior8 = anterior7;
+              anterior9 = anterior8;
+              anterior10 = anterior9;
+              anterior11 = anterior10;
+              anterior12 = anterior11;
+              anterior13 = anterior12;
+              anterior14 = anterior13;
+              anterior15 = anterior14;
+              anterior16 = anterior15;
+              anterior17 = anterior16;
+              anterior18 = anterior17;
+              anterior19 = anterior18;
+              anterior20 = anterior19;
 
-          //========================================================================================================
-          // Enviando SMS para a VIVO para consultar o Saldo
+              intervalo =  10000;
+              intervalo2 = 20000;
+              intervalo3 = 30000;
+              intervalo4 = 40000;
+              intervalo5 = 50000;
+              intervalo6 = 60000;
+              intervalo7 = 70000;
+              intervalo8 = 80000;
+              intervalo9 = 90000;
+              intervalo10 = 100000;
+              intervalo11 = 110000;
+              intervalo12 = 120000;
+              intervalo13 = 130000;
+              intervalo14 = 140000;
+              intervalo15 = 150000;
+              intervalo16 = 160000;
+              intervalo17 = 170000;
+              intervalo18 = 180000;
+              intervalo19 = 190000;
+              intervalo20 = 200000;
 
-          tft.setCursor(10, 158);
-          tft.setTextColor(CYAN);
-          tft.setTextSize(2);
-          tft.print(F("SMS para:"));
-          tft.setTextColor(WHITE);
-          tft.print(F("VIVO S.A."));
+              enviaSMS8("1058", "1");          // enviaSMS para a Vivo para confirmar o Saldo de Recarga
 
-          tft.setCursor(10, 178);
-          tft.setTextColor(CYAN);
-          tft.setTextSize(2);
-          tft.print(F("Tel:"));
-          tft.setTextColor(WHITE);
-          tft.print(F(" 8000"));
+              display_menu = false;
+              display_menu1 = false;
+              cont1 = 0;
 
-          tft.setCursor(10, 198);
-          tft.setTextColor(CYAN);
-          tft.setTextSize(2);
-          tft.print(F("Mensagem: "));
-          tft.setTextSize(2);
-          tft.setTextColor(WHITE);
-          tft.print(F("Consulta Saldo do Chip do Celular!"));
+              delay(1000);
+              leGSM();
+              tft.setTextColor(CYAN, BLACK);
+              tft.setTextSize(2);
+              tft.setCursor(10, 238);
+              tft.print(F("GSM: "));
+              tft.setTextColor(WHITE);
+              ultimoGSM.trim();            // Estrutura: >+CMGS: XXX OK
+              tft.print(ultimoGSM);
+              delay(1000);
+              return;
 
-          delay(3000);
-          tft.fillRect(0, 280, 240, 38, RED);
-          tft.setCursor(5, 282);
-          tft.setTextColor(WHITE);
-          tft.setTextSize(2);
-          tft.print(F(" Aguardando Saldo! "));
-          tft.setCursor(25, 300);
-          tft.print(F("  SMS Enviado!  "));
+            }
 
-          msg_counter4++;
+            // BOTÃO 5 - RETORNAR AO MENU INICIAL
+            if (tp.x > 800 && tp.x < 880  && tp.y > 175 && tp.y < 260) {
+    
+              tft.setTextColor(YELLOW, BLACK);
+              tft.setTextSize(2);
+              tft.setCursor(0, 160);
+              tft.println(F("5-RETORNA"));
+              tft.fillRoundRect(195, 290, 30, 30, 5, RED);
+              tft.drawRoundRect(195, 290, 30, 30, 5, YELLOW);
+              tft.setTextColor(BLACK);
+              tft.setCursor(204, 298);
+              tft.println(F("X"));
+              delay(2500);
+    
+              display_menu1 = false;
+              display_menu = false;
+              cont1 = 0;
 
-          delay(2000);
-          pinMode(pino53, OUTPUT);
-          delay(500);
-          SD.begin(pino53);
-          delay(500);
+              // ========================================================================================================
+              // Sincronizar os tempos para iniciar o loop novamente para não ter superposição de função
 
-          myFile = SD.open("SMS.txt", FILE_WRITE);
-          myFile.print(F("NANO SMART AGRO - Mensagem SMS Enviada"));
-          myFile.print(F(";"));
-          myFile.print(F(" Envio de mensagem SMS para consultar Saldo de Recarga Vivo!"));
-          myFile.print(F(";"));
-          myFile.print(F(" Tel:"));
-          myFile.print("8000");
-          myFile.print(F(";"));
-          myFile.print(F(" SMS Enviados: "));
-          myFile.print(msg_counter4);
-          myFile.print(F(";"));
-          myFile.print(F(" DATA: "));
-          myFile.print(t.date, DEC);
-          myFile.print(F("/"));
-          myFile.print(t.mon, DEC);
-          myFile.print(F("/"));
-          myFile.print(t.year, DEC);
-          myFile.print(F(";"));
-          myFile.print(F(" HORARIO: "));
-          myFile.print(rtc.getTimeStr());
-          myFile.print(F(";"));
-          myFile.println();
-          delay(1000);
-          myFile.close();
-          delay(1000);
-          SD.end();
+              anterior = millis();
+              anterior2 = anterior;
+              anterior3 = anterior2;
+              anterior4 = anterior3;
+              anterior5 = anterior4;
+              anterior6 = anterior5;
+              anterior7 = anterior6;
+              anterior8 = anterior7;
+              anterior9 = anterior8;
+              anterior10 = anterior9;
+              anterior11 = anterior10;
+              anterior12 = anterior11;
+              anterior13 = anterior12;
+              anterior14 = anterior13;
+              anterior15 = anterior14;
+              anterior16 = anterior15;
+              anterior17 = anterior16;
+              anterior18 = anterior17;
+              anterior19 = anterior18;
+              anterior20 = anterior19;
 
-          delay(3000);
+              intervalo =  10000;
+              intervalo2 = 20000;
+              intervalo3 = 30000;
+              intervalo4 = 40000;
+              intervalo5 = 50000;
+              intervalo6 = 60000;
+              intervalo7 = 70000;
+              intervalo8 = 80000;
+              intervalo9 = 90000;
+              intervalo10 = 100000;
+              intervalo11 = 110000;
+              intervalo12 = 120000;
+              intervalo13 = 130000;
+              intervalo14 = 140000;
+              intervalo15 = 150000;
+              intervalo16 = 160000;
+              intervalo17 = 170000;
+              intervalo18 = 180000;
+              intervalo19 = 190000;
+              intervalo20 = 200000;
+              return;
 
-          enviaSMS8("8000", "SALDO");          // enviaSMS para a Vivo para consultar o Saldo de Recarga
+            } // FECHA IF DO BOTÃO 5 PARA RETORNO AO MENU INICIAL.
 
-          display_menu = false;
-          cont1 = 0;
+          } // FECHA WHILE DAS OPÇÕES DO BOTÃO ENVIA SMS
 
-          //========================================================================================================
-          // Sincronizar os tempos para iniciar o loop novamente para não ter superposição de função
-
-          anterior = millis();
-          anterior2 = anterior;
-          anterior3 = anterior2;
-          anterior4 = anterior3;
-          anterior5 = anterior4;
-          anterior6 = anterior5;
-          anterior7 = anterior6;
-          anterior8 = anterior7;
-          anterior9 = anterior8;
-          anterior10 = anterior9;
-          anterior11 = anterior10;
-          anterior12 = anterior11;
-          anterior13 = anterior12;
-          anterior14 = anterior13;
-          anterior15 = anterior14;
-          anterior16 = anterior15;
-          anterior17 = anterior16;
-          anterior18 = anterior17;
-          anterior19 = anterior18;
-          anterior20 = anterior19;
-
-          intervalo =  10000;
-          intervalo2 = 20000;
-          intervalo3 = 30000;
-          intervalo4 = 40000;
-          intervalo5 = 50000;
-          intervalo6 = 60000;
-          intervalo7 = 70000;
-          intervalo8 = 80000;
-          intervalo9 = 90000;
-          intervalo10 = 100000;
-          intervalo11 = 110000;
-          intervalo12 = 120000;
-          intervalo13 = 130000;
-          intervalo14 = 140000;
-          intervalo15 = 150000;
-          intervalo16 = 160000;
-          intervalo17 = 170000;
-          intervalo18 = 180000;
-          intervalo19 = 190000;
-          intervalo20 = 200000;
-          break;
+        } // FECHA IF DO BOTÃO 03 DO MENU PRINCIPAL 
 
         } // FECHA IF DO BOTÃO 3 SELECIONADO
 
@@ -2658,7 +3172,7 @@ void loop() {
           tft.fillRoundRect(5, 192, 230, 30, 5, RED);
           tft.drawRoundRect(5, 192, 230, 30, 5, WHITE);
           tft.setCursor(15, 200);
-          tft.println(F("NSAGRO Versao:4.05"));
+          tft.println(F("NSAGRO V:4.01.34 "));
 
           tft.setCursor(0, 260);
           tft.print(F(" Selecione a opcao:"));
@@ -11929,7 +12443,6 @@ void iot_ubidots() {
   // ========================================================================================================
   //INICIANDO SETUP MODULO GSM/GPRS SIM 800L:
 
-
   tft.setCursor(5, 40);
   tft.setTextColor(CYAN);
   tft.setTextSize(2);
@@ -11937,14 +12450,13 @@ void iot_ubidots() {
   tft.setTextColor(WHITE);
   tft.print(F("NSAGRO-V0"));
 
-  sendATTCC("AT+GSMBUSY=1");
+  sendAT("AT+GSMBUSY=1");
   delay(1000);
 
   int sim = modemGSM.getSimStatus();
 
   tft.setCursor(5, 80);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Status SIM CARD:"));
   tft.setTextColor(WHITE);
   if (sim == 1) {
@@ -11953,18 +12465,18 @@ void iot_ubidots() {
     tft.setTextColor(RED);
     tft.print(F("NOK"));
 
-    msg_counternok ++;
+    msg_counternok++;
+    msg_counternok_resete++;
+    
     delay(1000);
     tft.setCursor(5, 278);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("Enviadas:"));
     tft.setTextColor(WHITE);
     tft.print(msg_counterok);
 
     tft.setCursor(5, 298);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("Nao Enviadas:"));
     tft.setTextColor(WHITE);
     tft.print(msg_counternok);
@@ -11976,11 +12488,17 @@ void iot_ubidots() {
     delay(500);
     SD.begin(pino53);
     delay(500);
-    myFile = SD.open("IoT0.txt", FILE_WRITE);
-    myFile.print(F("NANO SMART AGRO - Mensagem Não Enviada ao Sever UBIDOTS, Device: NSAGRO-V0"));
+    myFile = SD.open("IoT0.txt", FILE_WRITE);   
+    myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER UBIDOTS, DEVICE: NSAGRO-V0"));
+    myFile.print(F(";"));
+    myFile.print(F(" Mensagens Enviadas: "));
+    myFile.print(msg_counterok);
     myFile.print(F(";"));
     myFile.print(F(" Mensagens Não Enviadas: "));
     myFile.print(msg_counternok);
+    myFile.print(F(";"));
+    myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+    myFile.print(msg_counternok_resete);
     myFile.print(F(";"));
     myFile.print(F(" SIM CARD NOK! "));
     myFile.print(F(";"));
@@ -12006,7 +12524,6 @@ void iot_ubidots() {
   int ss = modemGSM.getSignalQuality();
   tft.setCursor(5, 100);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Sinal Quality:"));
 
   if ( ss >= 31) {
@@ -12031,12 +12548,10 @@ void iot_ubidots() {
 
   tft.setCursor(5, 120);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Sinal GSM:"));
 
   tft.setCursor(125, 120);
   tft.setTextColor(WHITE);
-  tft.setTextSize(2);
 
   if ( ss >= 31) {
     tft.print(F("EM FALHA!"));
@@ -12055,12 +12570,11 @@ void iot_ubidots() {
     tft.print(F("Fraco"));
   }
 
-  //client.setKeepAlive (60);
+  client.setKeepAlive (60);
   delay(1000);
 
   tft.setCursor(5, 140);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("GPRS Connection:"));
   tft.setTextColor(WHITE);
 
@@ -12080,18 +12594,18 @@ void iot_ubidots() {
       tft.setTextColor(RED);
       tft.print(F("NOK"));
 
-      msg_counternok ++;
+      msg_counternok++;
+      msg_counternok_resete++;
+      
       delay(1000);
       tft.setCursor(5, 278);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counterok);
 
       tft.setCursor(5, 298);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Nao Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counternok);
@@ -12104,10 +12618,16 @@ void iot_ubidots() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT0.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO - Mensagem Não Enviada ao Sever UBIDOTS, Device: NSAGRO-V0"));
+      myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER UBIDOTS, DEVICE: NSAGRO-V0"));
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Enviadas: "));
+      myFile.print(msg_counterok);
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Não Enviadas: "));
       myFile.print(msg_counternok);
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+      myFile.print(msg_counternok_resete);
       myFile.print(F(";"));
       myFile.print(F(" GPRS NOT CONNECT! "));
       myFile.print(F(";"));
@@ -12140,7 +12660,6 @@ void iot_ubidots() {
   IPAddress local = modemGSM.localIP();
   tft.setCursor(5, 160);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("IP:"));
   tft.setTextColor(WHITE);
   tft.print(local);
@@ -12148,42 +12667,63 @@ void iot_ubidots() {
   delay(1000);
   client.setServer(server, 1883);
 
-  tft.setCursor(5, 180);
-  tft.setTextColor(CYAN);
-  tft.setTextSize(2);
-  tft.print(F("ID:"));
-
   while (!!!client.connect(clientId, token, "")) {
     tft.setCursor(5, 180);
-    tft.setTextColor(CYAN);
-    tft.setTextSize(2);
+    tft.setTextColor(WHITE);
     tft.print(F("ID:"));
     tft.setTextColor(RED);
-    tft.setTextSize(2);
     tft.print(F("SEM CONEXAO!"));
 
     tft.setCursor(5, 200);
-    tft.setTextColor(CYAN);
-    tft.print(F("ERROR SERVER: "));
+    tft.setTextColor(WHITE);
+    tft.print(F("ERROR MQTT SERVER: "));
+    tft.setCursor(5, 220);
     tft.setTextColor(RED);
 
     status_server = client.state();
-    tft.print(status_server);
+    
+    if(status_server == -4){
+      tft.print(F("CONNECTION_TIMEOUT"));
+    }
+    if(status_server == -3){
+      tft.print(F("CONNECTION_LOST"));
+    }
+    if(status_server == -2){
+      tft.print(F("CONNECTION_FAILED"));
+    }
+    if(status_server == -1){
+      tft.print(F("MQTT_DISCONNECTED"));
+    }
+    if(status_server == 1){
+      tft.print(F("BAD_PROTOCOL"));
+    }
+    if(status_server == 2){
+      tft.print(F("BAD_CLIENT_ID"));
+    }
+    if(status_server == 3){
+      tft.print(F("CONNECT_UNAVAILABLE"));
+    }
+    if(status_server == 4){
+      tft.print(F("CONNECT_BAD_CREDENTIALS"));
+    }
+    if(status_server == 5){
+      tft.print(F("CONNECT_UNAUTHORIZED"));
+    }
 
-    msg_counternok ++;
+    msg_counternok++;
+    msg_counternok_resete++;
+    
     delay(1000);
     error_server = true;
 
     tft.setCursor(5, 278);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("Enviadas:"));
     tft.setTextColor(WHITE);
     tft.print(msg_counterok);
 
     tft.setCursor(5, 298);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("Nao Enviadas:"));
     tft.setTextColor(WHITE);
     tft.print(msg_counternok);
@@ -12192,9 +12732,11 @@ void iot_ubidots() {
     //ENCERRANDO CONEXÃO COM O SERVER:
 
     client.disconnect();
-    delay(1000);
-    modemGSM.gprsDisconnect();
     delay(5000);
+    
+    //modemGSM.gprsDisconnect();
+    //delay(5000);
+    
     break;
 
   }
@@ -12207,12 +12749,16 @@ void iot_ubidots() {
     SD.begin(pino53);
     delay(500);
     myFile = SD.open("IoT0.txt", FILE_WRITE);
-    myFile.print(F("NANO SMART AGRO - Mensagem Não Enviada ao Sever UBIDOTS, DEVICE: NSAGRO-V0"));
+    myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER UBIDOTS, DEVICE: NSAGRO-V0"));
     myFile.print(F(";"));
-    myFile.print(F("Falha em Conectar Client/Token"));
+    myFile.print(F(" Mensagens Enviadas: "));
+    myFile.print(msg_counterok);
     myFile.print(F(";"));
     myFile.print(F(" Mensagens Não Enviadas: "));
     myFile.print(msg_counternok);
+    myFile.print(F(";"));
+    myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+    myFile.print(msg_counternok_resete);
     myFile.print(F(";"));
     myFile.print(F(" DATA: "));
     myFile.print(t.date, DEC);
@@ -12242,16 +12788,15 @@ void iot_ubidots() {
 
   } else {
 
-    int status_client;
-    status_client = client.state();
+    status_server = client.state();
 
-
-    if (status_client == 0) {
+    tft.setCursor(5, 180);
+    tft.setTextColor(CYAN);
+    tft.print(F("ID:"));
+    if (status_server == 0) {
       tft.setTextColor(WHITE);
-      tft.setTextSize(2);
       tft.print(F("Conectado"));
     }
-
 
     String msg = createJsonString();
 
@@ -12269,26 +12814,23 @@ void iot_ubidots() {
 
     if (status_public) {
 
+      msg_counterok ++;
+      
       tft.setCursor(5, 258);
       tft.setTextColor(CYAN);
       tft.setTextSize(2);
       tft.print(F("Mensagem:"));
-
       tft.setTextColor(WHITE);
-      tft.setTextSize(2);
       tft.print(F("Publicada"));
-      msg_counterok ++;
-
       tft.setCursor(5, 278);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
+      
       tft.print(F("Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counterok);
 
       tft.setCursor(5, 298);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Nao Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counternok);
@@ -12297,7 +12839,10 @@ void iot_ubidots() {
       //ENCERRANDO CONEXÃO COM O SERVER:
 
       client.disconnect();
-      delay(1000);
+      delay(5000);
+
+      // ========================================================================================================
+      //GRAVANDO OD DADOS NO SD CARD:
 
       int pino53 = 53;
       pinMode(pino53, OUTPUT);
@@ -12310,6 +12855,12 @@ void iot_ubidots() {
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Enviadas: "));
       myFile.print(msg_counterok);
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Não Enviadas: "));
+      myFile.print(msg_counternok);
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+      myFile.print(msg_counternok_resete);
       myFile.print(F(";"));
       myFile.print(F(" DATA: "));
       myFile.print(t.date, DEC);
@@ -12344,16 +12895,21 @@ void iot_ubidots() {
       tft.setTextSize(2);
       tft.print(F("Msg:"));
       tft.setTextColor(RED);
-      tft.setTextSize(2);
       tft.print(F("NAO Publicada!"));
-      msg_counternok ++;
-
+      
+      msg_counternok++;
+      msg_counternok_resete++;
 
       client.disconnect();
-      delay(1000);
+      delay(2000);
+      modemGSM.restart();
+      delay(10000);
 
-      modemGSM.gprsDisconnect();
-      delay(5000);
+      //modemGSM.gprsDisconnect();  // caso a msg não for publicada, desconecta o GPRS para que haja um novo IP a ser identificado pelo Módulo SIM800L
+      //delay(5000);
+
+      // ========================================================================================================
+      //GRAVANDO OD DADOS NO SD CARD:
 
       int pino53 = 53;
       pinMode(pino53, OUTPUT);
@@ -12362,12 +12918,16 @@ void iot_ubidots() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT0.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO - Mensagem Não Enviada ao Sever UBIDOTS, Device: NSAGRO-V0"));
+      myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER UBIDOTS, DEVICE: NSAGRO-V0"));
       myFile.print(F(";"));
-      myFile.print(F("Falha em Publicar no Topic"));
+      myFile.print(F(" Mensagens Enviadas: "));
+      myFile.print(msg_counterok);
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Não Enviadas: "));
       myFile.print(msg_counternok);
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+      myFile.print(msg_counternok_resete);
       myFile.print(F(";"));
       myFile.print(F(" DATA: "));
       myFile.print(t.date, DEC);
@@ -12390,25 +12950,22 @@ void iot_ubidots() {
       myFile.println();
       delay(1000);
       myFile.close();
-      delay(2000);
-
+      
       tft.setCursor(5, 278);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counterok);
 
       tft.setCursor(5, 298);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Nao Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counternok);
 
+      delay(3000);
       return;
     }
-
   }
 }
 
@@ -12656,7 +13213,6 @@ void iot_ubidots1() {
   // ========================================================================================================
   //INICIANDO SETUP MODULO GSM/GPRS SIM 800L:
 
-
   tft.setCursor(5, 40);
   tft.setTextColor(CYAN);
   tft.setTextSize(2);
@@ -12664,14 +13220,13 @@ void iot_ubidots1() {
   tft.setTextColor(WHITE);
   tft.print(F("NSAGRO-V1"));
 
-  sendATTCC("AT+GSMBUSY=1");
+  sendAT("AT+GSMBUSY=1");
   delay(1000);
 
   int sim = modemGSM.getSimStatus();
 
   tft.setCursor(5, 80);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Status SIM CARD:"));
   tft.setTextColor(WHITE);
   if (sim == 1) {
@@ -12680,18 +13235,18 @@ void iot_ubidots1() {
     tft.setTextColor(RED);
     tft.print(F("NOK"));
 
-    msg_counternok1 ++;
+    msg_counternok1++;
+    msg_counternok1_resete++;
+    
     delay(1000);
     tft.setCursor(5, 278);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("Enviadas:"));
     tft.setTextColor(WHITE);
     tft.print(msg_counterok1);
 
     tft.setCursor(5, 298);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("Nao Enviadas:"));
     tft.setTextColor(WHITE);
     tft.print(msg_counternok1);
@@ -12704,10 +13259,16 @@ void iot_ubidots1() {
     SD.begin(pino53);
     delay(500);
     myFile = SD.open("IoT1.txt", FILE_WRITE);
-    myFile.print(F("NANO SMART AGRO - Mensagem Não Enviada ao Sever UBIDOTS, Device: NSAGRO-V1"));
+    myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER UBIDOTS, DEVICE: NSAGRO-V1"));
+    myFile.print(F(";"));
+    myFile.print(F(" Mensagens Enviadas: "));
+    myFile.print(msg_counterok1);
     myFile.print(F(";"));
     myFile.print(F(" Mensagens Não Enviadas: "));
     myFile.print(msg_counternok1);
+    myFile.print(F(";"));
+    myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+    myFile.print(msg_counternok1_resete);
     myFile.print(F(";"));
     myFile.print(F(" SIM CARD NOK! "));
     myFile.print(F(";"));
@@ -12733,7 +13294,6 @@ void iot_ubidots1() {
   int ss = modemGSM.getSignalQuality();
   tft.setCursor(5, 100);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Sinal Quality:"));
 
   if ( ss >= 31) {
@@ -12758,12 +13318,10 @@ void iot_ubidots1() {
 
   tft.setCursor(5, 120);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Sinal GSM:"));
 
   tft.setCursor(125, 120);
   tft.setTextColor(WHITE);
-  tft.setTextSize(2);
 
   if ( ss >= 31) {
     tft.print(F("EM FALHA!"));
@@ -12782,11 +13340,11 @@ void iot_ubidots1() {
     tft.print(F("Fraco"));
   }
 
+  //client.setKeepAlive (60);
   delay(1000);
 
   tft.setCursor(5, 140);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("GPRS Connection:"));
   tft.setTextColor(WHITE);
 
@@ -12807,17 +13365,17 @@ void iot_ubidots1() {
       tft.print(F("NOK"));
 
       msg_counternok1 ++;
+      msg_counternok1_resete++;
+      
       delay(1000);
       tft.setCursor(5, 278);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counterok1);
 
       tft.setCursor(5, 298);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Nao Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counternok1);
@@ -12830,10 +13388,16 @@ void iot_ubidots1() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT1.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO - Mensagem Não Enviada ao Sever UBIDOTS, Device: NSAGRO-V1"));
+      myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER UBIDOTS, DEVICE: NSAGRO-V1"));
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Enviadas: "));
+      myFile.print(msg_counterok1);
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Não Enviadas: "));
       myFile.print(msg_counternok1);
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+      myFile.print(msg_counternok1_resete);
       myFile.print(F(";"));
       myFile.print(F(" GPRS NOT CONNECT! "));
       myFile.print(F(";"));
@@ -12866,7 +13430,6 @@ void iot_ubidots1() {
   IPAddress local = modemGSM.localIP();
   tft.setCursor(5, 160);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("IP:"));
   tft.setTextColor(WHITE);
   tft.print(local);
@@ -12874,42 +13437,63 @@ void iot_ubidots1() {
   delay(1000);
   client.setServer(server1, 1883);
 
-  tft.setCursor(5, 180);
-  tft.setTextColor(CYAN);
-  tft.setTextSize(2);
-  tft.print(F("ID:"));
-
   while (!!!client.connect(clientId1, token1, "")) {
     tft.setCursor(5, 180);
-    tft.setTextColor(CYAN);
-    tft.setTextSize(2);
+    tft.setTextColor(WHITE);
     tft.print(F("ID:"));
     tft.setTextColor(RED);
-    tft.setTextSize(2);
     tft.print(F("SEM CONEXAO!"));
 
     tft.setCursor(5, 200);
-    tft.setTextColor(CYAN);
-    tft.print(F("ERROR SERVER: "));
+    tft.setTextColor(WHITE);
+    tft.print(F("ERROR MQTT SERVER: "));
+    tft.setCursor(5, 220);
     tft.setTextColor(RED);
 
     status_server1 = client.state();
-    tft.print(status_server1);
+    
+    if(status_server1 == -4){
+      tft.print(F("CONNECTION_TIMEOUT"));
+    }
+    if(status_server1 == -3){
+      tft.print(F("CONNECTION_LOST"));
+    }
+    if(status_server1 == -2){
+      tft.print(F("CONNECTION_FAILED"));
+    }
+    if(status_server1 == -1){
+      tft.print(F("MQTT_DISCONNECTED"));
+    }
+    if(status_server1 == 1){
+      tft.print(F("BAD_PROTOCOL"));
+    }
+    if(status_server1 == 2){
+      tft.print(F("BAD_CLIENT_ID"));
+    }
+    if(status_server1 == 3){
+      tft.print(F("CONNECT_UNAVAILABLE"));
+    }
+    if(status_server1 == 4){
+      tft.print(F("CONNECT_BAD_CREDENTIALS"));
+    }
+    if(status_server1 == 5){
+      tft.print(F("CONNECT_UNAUTHORIZED"));
+    }
 
     msg_counternok1 ++;
+    msg_counternok1_resete++;
+    
     delay(1000);
     error_server1 = true;
 
     tft.setCursor(5, 278);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("Enviadas:"));
     tft.setTextColor(WHITE);
     tft.print(msg_counterok1);
 
     tft.setCursor(5, 298);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("Nao Enviadas:"));
     tft.setTextColor(WHITE);
     tft.print(msg_counternok1);
@@ -12918,9 +13502,11 @@ void iot_ubidots1() {
     //ENCERRANDO CONEXÃO COM O SERVER:
 
     client.disconnect();
-    delay(1000);
-    modemGSM.gprsDisconnect();
     delay(5000);
+    
+    //modemGSM.gprsDisconnect();
+    //delay(5000);
+    
     break;
 
   }
@@ -12933,12 +13519,16 @@ void iot_ubidots1() {
     SD.begin(pino53);
     delay(500);
     myFile = SD.open("IoT1.txt", FILE_WRITE);
-    myFile.print(F("NANO SMART AGRO - Mensagem Não Enviada ao Sever UBIDOTS, DEVICE: NSAGRO-V1"));
+    myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER UBIDOTS, DEVICE: NSAGRO-V1"));
     myFile.print(F(";"));
-    myFile.print(F("Falha em Connectar no Client/Token"));
+    myFile.print(F(" Mensagens Enviadas: "));
+    myFile.print(msg_counterok1);
     myFile.print(F(";"));
     myFile.print(F(" Mensagens Não Enviadas: "));
     myFile.print(msg_counternok1);
+    myFile.print(F(";"));
+    myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+    myFile.print(msg_counternok1_resete);
     myFile.print(F(";"));
     myFile.print(F(" DATA: "));
     myFile.print(t.date, DEC);
@@ -12968,16 +13558,15 @@ void iot_ubidots1() {
 
   } else {
 
-    int status_client1;
-    status_client1 = client.state();
-
-
-    if (status_client1 == 0) {
+    status_server1 = client.state();
+    tft.setCursor(5, 180);
+    tft.setTextSize(2);
+    tft.setTextColor(CYAN);
+    tft.print(F("ID:"));
+    if (status_server1 == 0) {
       tft.setTextColor(WHITE);
-      tft.setTextSize(2);
       tft.print(F("Conectado"));
     }
-
 
     String msg = createJsonString1();
 
@@ -12993,27 +13582,24 @@ void iot_ubidots1() {
 
     bool status_public1 = client.publish(topic1, msg.c_str());
     if (status_public1) {
-
+      
+      msg_counterok1 ++;
+      
       tft.setCursor(5, 258);
       tft.setTextColor(CYAN);
       tft.setTextSize(2);
       tft.print(F("Mensagem:"));
-
       tft.setTextColor(WHITE);
-      tft.setTextSize(2);
       tft.print(F("Publicada"));
-      msg_counterok1 ++;
 
       tft.setCursor(5, 278);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counterok1);
 
       tft.setCursor(5, 298);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Nao Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counternok1);
@@ -13021,8 +13607,11 @@ void iot_ubidots1() {
       // ========================================================================================================
       //ENCERRANDO CONEXÃO COM O SERVER:
 
-      client.disconnect();
-      delay(1000);
+      client.disconnect();      
+      delay(5000);
+
+      // ========================================================================================================
+      //GRAVANDO OD DADOS NO SD CARD:
 
       int pino53 = 53;
       pinMode(pino53, OUTPUT);
@@ -13035,6 +13624,12 @@ void iot_ubidots1() {
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Enviadas: "));
       myFile.print(msg_counterok1);
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Não Enviadas: "));
+      myFile.print(msg_counternok1);
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+      myFile.print(msg_counternok1_resete);
       myFile.print(F(";"));
       myFile.print(F(" DATA: "));
       myFile.print(t.date, DEC);
@@ -13069,15 +13664,21 @@ void iot_ubidots1() {
       tft.setTextSize(2);
       tft.print(F("Msg:"));
       tft.setTextColor(RED);
-      tft.setTextSize(2);
       tft.print(F("NAO Publicada!"));
+      
       msg_counternok1 ++;
+      msg_counternok1_resete++;
 
       client.disconnect();
-      delay(1000);
+      delay(2000);
+      modemGSM.restart();
+      delay(10000);
 
-      modemGSM.gprsDisconnect();  // caso a msg não for publicada, desconecta o GPRS para que haja um novo IP a ser identificado pelo Módulo SIM800L
-      delay(5000);
+      //modemGSM.gprsDisconnect();  // caso a msg não for publicada, desconecta o GPRS para que haja um novo IP a ser identificado pelo Módulo SIM800L
+      //delay(5000);
+
+      // ========================================================================================================
+      //GRAVANDO OD DADOS NO SD CARD:
 
       int pino53 = 53;
       pinMode(pino53, OUTPUT);
@@ -13086,12 +13687,16 @@ void iot_ubidots1() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT1.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO - Mensagem Não Enviada ao Sever UBIDOTS, Device: NSAGRO-V1"));
+      myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER UBIDOTS, DEVICE: NSAGRO-V1"));
       myFile.print(F(";"));
-      myFile.print(F("Falha em Publicar no Topic"));
+      myFile.print(F(" Mensagens Enviadas: "));
+      myFile.print(msg_counterok1);
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Não Enviadas: "));
       myFile.print(msg_counternok1);
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+      myFile.print(msg_counternok1_resete);
       myFile.print(F(";"));
       myFile.print(F(" DATA: "));
       myFile.print(t.date, DEC);
@@ -13118,24 +13723,20 @@ void iot_ubidots1() {
 
       tft.setCursor(5, 278);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counterok1);
 
       tft.setCursor(5, 298);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Nao Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counternok1);
-      delay(2000);
+      delay(3000);
 
       return;
     }
-
   }
-
 }
 
 
@@ -13180,7 +13781,10 @@ String createJsonString1()
   // CÁLCULO PARA EXIBIR A VARIÁVEL VAZÃO:
 
   float v10 = Litros;
-
+  if (v10 <= 2.00){
+    v10 = 0.00;
+  }
+  
   // ========================================================================================================
   // CÁLCULO PARA EXIBIR A VARIÁVEL PRECIPTAÇÃO EM %:
 
@@ -13218,10 +13822,11 @@ String createJsonString1()
 
   // ========================================================================================================
   // VARIAVEIS DE INDICAÇÃO DA PRECIPTAÇÃO EM mm: 1 milímetro de chuva significa um litro de água acumulado em um metro quadrado.
-  // Quando se diz que teve uma chuva de 200 milímetros, em 24h, significa que 200 litros d’água caíram num metro quadrado.
+  // Quando a gente diz que teve uma chuva de 200 milímetros, em 24h, significa que 200 litros d’água caíram num metro quadrado.
 
   volatile int pluvPulsos = contaPulso1;
-  float volatile c10 = pluvPulsos * 0.25;  // Mede a quantidade de chuva em milimitros!
+  float c10 = pluvPulsos * 0.25;  // Mede a quantidade de chuva em milimitros!
+
 
   // ========================================================================================================
   // CÁLCULO PARA EXIBIR A VARIÁVEL LUMINOSFIDADE EM LUX:
@@ -13236,7 +13841,7 @@ String createJsonString1()
   // ========================================================================================================
   // CRIAÇÃO DA STRING DAS VARIAVEIS QUE SERÃO ENVIADAS PARA O UBIDOTS:
 
-  // *******IMPORTANTE É APENAS PERMITIDO QUE ENVIE 9 VARIAVEIS AO UBIDOTS PARA CADA DEVICE!!!!!*****************
+  // *******IMPORTANTE É APENAS PERMITIDO QUE ENVIE 9 VARIAVEIS AO UBIDOTS!!!!!*****************
 
   String data = "{";
 
@@ -13281,13 +13886,32 @@ String createJsonString1()
 
 
 
+unsigned long testLines_SD(uint16_t color) {
+  int           x1, y1, x2, y2,
+                w = tft.width(),
+                h = tft.height();
+
+  tft.fillRect(0, 0, 240, 320, BLACK);
+  yield();
+
+  x1    = 0;
+  y1    = h - 1;
+  y2    = 0;
+
+  for (x2 = 0; x2 < w; x2 += 6) tft.drawLine(x1, y1, x2, y2, color);
+  x2    = w - 1;
+  for (y2 = 0; y2 < h; y2 += 6) tft.drawLine(x1, y1, x2, y2, color);
+
+}
+
+
+
 // ========================================================================================================
 // FUNÇÃO PARA ENVIO DAS VARIAVEIS AO SERVIDOR DO THINGSPEAK:
 
 void iot_thingspeak() {
 
-
-  bool error_servert = false;
+  bool error_server_t = false;
   serialGSM.begin(9600);
   rtc.begin();
   t = rtc.getTime();
@@ -13307,21 +13931,21 @@ void iot_thingspeak() {
   // ========================================================================================================
   //INICIANDO SETUP MODULO GSM/GPRS SIM 800L:
 
+
   tft.setCursor(5, 40);
   tft.setTextColor(CYAN);
   tft.setTextSize(2);
   tft.print(F("Channel ID:"));
   tft.setTextColor(WHITE);
-  tft.print(F("999999"));
+  tft.print(F("1062830"));
 
-  sendATTCC("AT+GSMBUSY=1");
+  sendAT("AT+GSMBUSY=1");
   delay(1000);
 
   int sim = modemGSM.getSimStatus();
 
   tft.setCursor(5, 80);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Status SIM CARD:"));
   tft.setTextColor(WHITE);
   if (sim == 1) {
@@ -13330,18 +13954,18 @@ void iot_thingspeak() {
     tft.setTextColor(RED);
     tft.print(F("NOK"));
 
-    msg_counternok_t ++;
+    msg_counternok_t++;
+    msg_counternok_t_resete++;
+    
     delay(1000);
     tft.setCursor(5, 278);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("Enviadas:"));
     tft.setTextColor(WHITE);
     tft.print(msg_counterok_t);
 
     tft.setCursor(5, 298);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("Nao Enviadas:"));
     tft.setTextColor(WHITE);
     tft.print(msg_counternok_t);
@@ -13354,10 +13978,16 @@ void iot_thingspeak() {
     SD.begin(pino53);
     delay(500);
     myFile = SD.open("IoT2.txt", FILE_WRITE);
-    myFile.print(F("NANO SMART AGRO - Mensagem Não Enviada ao Sever THINGSPEAK, Channel: NANO SMART AGRO"));
+    myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 1062830"));
+    myFile.print(F(";"));
+    myFile.print(F(" Mensagens Enviadas: "));
+    myFile.print(msg_counterok_t);
     myFile.print(F(";"));
     myFile.print(F(" Mensagens Não Enviadas: "));
     myFile.print(msg_counternok_t);
+    myFile.print(F(";"));
+    myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+    myFile.print(msg_counternok_t_resete);
     myFile.print(F(";"));
     myFile.print(F(" SIM CARD NOK! "));
     myFile.print(F(";"));
@@ -13383,7 +14013,6 @@ void iot_thingspeak() {
   int ss = modemGSM.getSignalQuality();
   tft.setCursor(5, 100);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Sinal Quality:"));
 
   if ( ss >= 31) {
@@ -13408,12 +14037,10 @@ void iot_thingspeak() {
 
   tft.setCursor(5, 120);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Sinal GSM:"));
 
   tft.setCursor(125, 120);
   tft.setTextColor(WHITE);
-  tft.setTextSize(2);
 
   if ( ss >= 31) {
     tft.print(F("EM FALHA!"));
@@ -13432,11 +14059,11 @@ void iot_thingspeak() {
     tft.print(F("Fraco"));
   }
 
+  //client.setKeepAlive (60);
   delay(1000);
 
   tft.setCursor(5, 140);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("GPRS Connection:"));
   tft.setTextColor(WHITE);
 
@@ -13458,17 +14085,17 @@ void iot_thingspeak() {
       tft.print(F("NOK"));
 
       msg_counternok_t ++;
+      msg_counternok_t_resete++;
+      
       delay(1000);
       tft.setCursor(5, 278);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counterok_t);
 
       tft.setCursor(5, 298);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Nao Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counternok_t);
@@ -13481,10 +14108,16 @@ void iot_thingspeak() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT2.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO - Mensagem Não Enviada ao Sever THINGSPEAK, Channel: NANO SMART AGRO"));
+      myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 1062830"));
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Enviadas: "));
+      myFile.print(msg_counterok_t);
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Não Enviadas: "));
       myFile.print(msg_counternok_t);
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+      myFile.print(msg_counternok_t_resete);
       myFile.print(F(";"));
       myFile.print(F(" GPRS NOT CONNECT! "));
       myFile.print(F(";"));
@@ -13517,7 +14150,6 @@ void iot_thingspeak() {
   IPAddress local = modemGSM.localIP();
   tft.setCursor(5, 160);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("IP:"));
   tft.setTextColor(WHITE);
   tft.print(local);
@@ -13525,42 +14157,63 @@ void iot_thingspeak() {
   delay(1000);
   client.setServer(server_T, 1883);
 
-  tft.setCursor(5, 180);
-  tft.setTextColor(CYAN);
-  tft.setTextSize(2);
-  tft.print(F("ID:"));
-
   while (!!!client.connect("NSAGRO", mqttUserName, mqttPass)) {
     tft.setCursor(5, 180);
-    tft.setTextColor(CYAN);
-    tft.setTextSize(2);
+    tft.setTextColor(WHITE);
     tft.print(F("ID:"));
     tft.setTextColor(RED);
-    tft.setTextSize(2);
     tft.print(F("SEM CONEXAO!"));
 
     tft.setCursor(5, 200);
-    tft.setTextColor(CYAN);
-    tft.print(F("ERROR SERVER: "));
+    tft.setTextColor(WHITE);
+    tft.print(F("ERROR MQTT SERVER: "));
+    tft.setCursor(5, 220);
     tft.setTextColor(RED);
 
-    status_server1 = client.state();
-    tft.print(status_server1);
+    status_server_t = client.state();
+    
+    if(status_server_t == -4){
+      tft.print(F("CONNECTION_TIMEOUT"));
+    }
+    if(status_server_t == -3){
+      tft.print(F("CONNECTION_LOST"));
+    }
+    if(status_server_t == -2){
+      tft.print(F("CONNECTION_FAILED"));
+    }
+    if(status_server_t == -1){
+      tft.print(F("MQTT_DISCONNECTED"));
+    }
+    if(status_server_t == 1){
+      tft.print(F("BAD_PROTOCOL"));
+    }
+    if(status_server_t == 2){
+      tft.print(F("BAD_CLIENT_ID"));
+    }
+    if(status_server_t == 3){
+      tft.print(F("CONNECT_UNAVAILABLE"));
+    }
+    if(status_server_t == 4){
+      tft.print(F("CONNECT_BAD_CREDENTIALS"));
+    }
+    if(status_server_t == 5){
+      tft.print(F("CONNECT_UNAUTHORIZED"));
+    }
 
-    msg_counternok_t ++;
+    msg_counternok_t++;
+    msg_counternok_t_resete++;
+    
     delay(1000);
-    error_servert = true;
+    error_server_t = true;
 
     tft.setCursor(5, 278);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("Enviadas:"));
     tft.setTextColor(WHITE);
     tft.print(msg_counterok_t);
 
     tft.setCursor(5, 298);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("Nao Enviadas:"));
     tft.setTextColor(WHITE);
     tft.print(msg_counternok_t);
@@ -13569,17 +14222,19 @@ void iot_thingspeak() {
     //ENCERRANDO CONEXÃO COM O SERVER:
 
     client.disconnect();
-    delay(1000);
-
-    modemGSM.gprsDisconnect();  // caso a msg não for publicada, desconecta o GPRS para que haja um novo IP a ser identificado pelo Módulo SIM800L
     delay(5000);
+
+    
+
+    //    modemGSM.gprsDisconnect();  // caso a msg não for publicada, desconecta o GPRS para que haja um novo IP a ser identificado pelo Módulo SIM800L
+    //    delay(5000);
 
 
     break;
 
   }
 
-  if (error_servert == true) {
+  if (error_server_t == true) {
 
     int pino53 = 53;
     pinMode(pino53, OUTPUT);
@@ -13588,12 +14243,16 @@ void iot_thingspeak() {
     SD.begin(pino53);
     delay(500);
     myFile = SD.open("IoT2.txt", FILE_WRITE);
-    myFile.print(F("NANO SMART AGRO - Mensagem Não Enviada ao Sever THINGSPEAK, Channel: NANO SMART AGRO"));
+    myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 1062830"));
     myFile.print(F(";"));
-    myFile.print(F("Falha em Connectar no Client/Token"));
+    myFile.print(F(" Mensagens Enviadas: "));
+    myFile.print(msg_counterok_t);
     myFile.print(F(";"));
     myFile.print(F(" Mensagens Não Enviadas: "));
     myFile.print(msg_counternok_t);
+    myFile.print(F(";"));
+    myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+    myFile.print(msg_counternok_t_resete);
     myFile.print(F(";"));
     myFile.print(F(" DATA: "));
     myFile.print(t.date, DEC);
@@ -13622,22 +14281,20 @@ void iot_thingspeak() {
 
 
   } else {
+    
+    status_server_t = client.state();
 
-    int status_client1;
-    status_client1 = client.state();
-
-
-    if (status_client1 == 0) {
+    tft.setCursor(5, 180);
+    tft.setTextColor(CYAN);
+    tft.print(F("ID:"));
+    if (status_server_t == 0) {
       tft.setTextColor(WHITE);
       tft.setTextSize(2);
       tft.print(F("Conectado"));
     }
 
-
     // Create data string to send to ThingSpeak:
     String data = createJsonString2();
-
-
     int length = data.length();
     const char *msgBuffer;
     msgBuffer = data.c_str();
@@ -13649,7 +14306,8 @@ void iot_thingspeak() {
     tft.print(F("STRING:"));
     tft.setTextColor(WHITE);
     tft.setTextSize(1);
-    tft.print(msgBuffer);
+    //tft.print(msgBuffer);
+    tft.print(data);
     tft.drawRect(0, 255, 240, 1, YELLOW);
 
     // Create a topic string and publish data to ThingSpeak channel feed:
@@ -13662,26 +14320,23 @@ void iot_thingspeak() {
 
     if (status_publict1) {
 
+      msg_counterok_t ++;
+
       tft.setCursor(5, 258);
       tft.setTextColor(CYAN);
       tft.setTextSize(2);
       tft.print(F("Mensagem:"));
 
       tft.setTextColor(WHITE);
-      tft.setTextSize(2);
       tft.print(F("Publicada"));
-      msg_counterok_t ++;
-
       tft.setCursor(5, 278);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counterok_t);
 
       tft.setCursor(5, 298);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Nao Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counternok_t);
@@ -13690,7 +14345,10 @@ void iot_thingspeak() {
       //ENCERRANDO CONEXÃO COM O SERVER:
 
       client.disconnect();
-      delay(1000);
+      delay(5000);
+
+      // ========================================================================================================
+      //GRAVANDO OD DADOS NO SD CARD:
 
       int pino53 = 53;
       pinMode(pino53, OUTPUT);
@@ -13699,10 +14357,16 @@ void iot_thingspeak() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT2.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO - Mensagem Enviada ao Sever THINGSPEAK, Channel: NANO SMART AGRO"));
+      myFile.print(F("NANO SMART AGRO - Mensagem Enviada ao Sever THINGSPEAK, Channel: 1062830"));
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Enviadas: "));
       myFile.print(msg_counterok_t);
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Não Enviadas: "));
+      myFile.print(msg_counternok_t);
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+      myFile.print(msg_counternok_t_resete);
       myFile.print(F(";"));
       myFile.print(F(" DATA: "));
       myFile.print(t.date, DEC);
@@ -13726,7 +14390,7 @@ void iot_thingspeak() {
       delay(1000);
       myFile.close();
       delay(2000);
-    
+
       return;
 
     } else {
@@ -13737,19 +14401,21 @@ void iot_thingspeak() {
       tft.setTextSize(2);
       tft.print(F("Msg:"));
       tft.setTextColor(RED);
-      tft.setTextSize(2);
       tft.print(F("NAO Publicada!"));
-      msg_counternok_t ++;
-
-      // ========================================================================================================
-      //ENCERRANDO CONEXÃO COM O SERVER:
+      
+      msg_counternok_t++;
+      msg_counternok_t_resete++;
 
       client.disconnect();
-      delay(1000);
+      delay(2000);
+      modemGSM.restart();
+      delay(10000);
 
+      //modemGSM.gprsDisconnect();  // caso a msg não for publicada, desconecta o GPRS para que haja um novo IP a ser identificado pelo Módulo SIM800L
+      //delay(5000);
 
-      modemGSM.gprsDisconnect();  // caso a msg não for publicada, desconecta o GPRS para que haja um novo IP a ser identificado pelo Módulo SIM800L
-      delay(5000);
+      // ========================================================================================================
+      //GRAVANDO OD DADOS NO SD CARD:
 
       int pino53 = 53;
       pinMode(pino53, OUTPUT);
@@ -13758,12 +14424,16 @@ void iot_thingspeak() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT2.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO - Mensagem Não Enviada ao Sever THINGSPEAK, Channel: NANO SMART AGRO"));
+      myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 1062830"));
       myFile.print(F(";"));
-      myFile.print(F("Falha em Publicar no Topic"));
+      myFile.print(F(" Mensagens Enviadas: "));
+      myFile.print(msg_counterok_t);
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Não Enviadas: "));
       myFile.print(msg_counternok_t);
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+      myFile.print(msg_counternok_t_resete);
       myFile.print(F(";"));
       myFile.print(F(" DATA: "));
       myFile.print(t.date, DEC);
@@ -13797,20 +14467,15 @@ void iot_thingspeak() {
 
       tft.setCursor(5, 298);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Nao Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counternok_t);
 
-      delay(2000);
-
+      delay(3000);
 
       return;
     }
-
-
   }
-
 }
 
 
@@ -13920,10 +14585,10 @@ String createJsonString2()
 
   // ========================================================================================================
   // VARIAVEIS DE INDICAÇÃO DA PRECIPTAÇÃO EM mm: 1 milímetro de chuva significa um litro de água acumulado em um metro quadrado.
-  // Quando se diz que teve uma chuva de 200 milímetros, em 24h, significa que 200 litros d’água caíram num metro quadrado.
+  // Quando a gente diz que teve uma chuva de 200 milímetros, em 24h, significa que 200 litros d’água caíram num metro quadrado.
 
   volatile int pluvPulsos = contaPulso1;
-  float volatile c20 = pluvPulsos * 0.25;  // Mede a quantidade de chuva em milimitros!
+  float c20 = pluvPulsos * 0.25;  // Mede a quantidade de chuva em milimitros!
 
   // ========================================================================================================
   // CÁLCULO PARA EXIBIR A VARIÁVEL PRECIPTAÇÃO EM %:
@@ -14008,7 +14673,7 @@ String createJsonString2()
 void iot_thingspeak1() {
 
 
-  bool status_servert2 = false;
+  bool error_server_t1 = false;
   serialGSM.begin(9600);
   rtc.begin();
   t = rtc.getTime();
@@ -14034,16 +14699,15 @@ void iot_thingspeak1() {
   tft.setTextSize(2);
   tft.print(F("Channel ID:"));
   tft.setTextColor(WHITE);
-  tft.print(F("999999"));
+  tft.print(F("1347631"));
 
-  sendATTCC("AT+GSMBUSY=1");
+  sendAT("AT+GSMBUSY=1");
   delay(1000);
 
   int sim = modemGSM.getSimStatus();
 
   tft.setCursor(5, 80);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Status SIM CARD:"));
   tft.setTextColor(WHITE);
   if (sim == 1) {
@@ -14052,18 +14716,18 @@ void iot_thingspeak1() {
     tft.setTextColor(RED);
     tft.print(F("NOK"));
 
-    msg_counternok_t1 ++;
+    msg_counternok_t1++;
+    msg_counternok_t1_resete++;
+    
     delay(1000);
     tft.setCursor(5, 278);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("Enviadas:"));
     tft.setTextColor(WHITE);
     tft.print(msg_counterok_t1);
 
     tft.setCursor(5, 298);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("Nao Enviadas:"));
     tft.setTextColor(WHITE);
     tft.print(msg_counternok_t1);
@@ -14076,10 +14740,16 @@ void iot_thingspeak1() {
     SD.begin(pino53);
     delay(500);
     myFile = SD.open("IoT3.txt", FILE_WRITE);
-    myFile.print(F("NANO SMART AGRO1 - Mensagem Não Enviada ao Sever THINGSPEAK, Channel: NANO SMART AGRO1"));
+    myFile.print(F("NANO SMART AGRO1 - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 1347631"));
+    myFile.print(F(";"));
+    myFile.print(F(" Mensagens Enviadas: "));
+    myFile.print(msg_counterok_t1);
     myFile.print(F(";"));
     myFile.print(F(" Mensagens Não Enviadas: "));
     myFile.print(msg_counternok_t1);
+    myFile.print(F(";"));
+    myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+    myFile.print(msg_counternok_t1_resete);
     myFile.print(F(";"));
     myFile.print(F(" SIM CARD NOK! "));
     myFile.print(F(";"));
@@ -14105,7 +14775,6 @@ void iot_thingspeak1() {
   int ss = modemGSM.getSignalQuality();
   tft.setCursor(5, 100);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Sinal Quality:"));
 
   if ( ss >= 31) {
@@ -14130,12 +14799,10 @@ void iot_thingspeak1() {
 
   tft.setCursor(5, 120);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Sinal GSM:"));
 
   tft.setCursor(125, 120);
   tft.setTextColor(WHITE);
-  tft.setTextSize(2);
 
   if ( ss >= 31) {
     tft.print(F("EM FALHA!"));
@@ -14154,13 +14821,13 @@ void iot_thingspeak1() {
     tft.print(F("Fraco"));
   }
 
+  //client.setKeepAlive (60);
   delay(1000);
 
   bool res = modemGSM.isGprsConnected();
 
   tft.setCursor(5, 140);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("GPRS Connection:"));
   tft.setTextColor(WHITE);
 
@@ -14183,14 +14850,12 @@ void iot_thingspeak1() {
       delay(1000);
       tft.setCursor(5, 278);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counterok_t1);
 
       tft.setCursor(5, 298);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Nao Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counternok_t1);
@@ -14203,10 +14868,16 @@ void iot_thingspeak1() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT3.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO - Mensagem Não Enviada ao Sever THINGSPEAK, Channel: NANO SMART AGRO1"));
+      myFile.print(F("NANO SMART AGRO1 - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 1347631"));
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Enviadas: "));
+      myFile.print(msg_counterok_t1);
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Não Enviadas: "));
       myFile.print(msg_counternok_t1);
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+      myFile.print(msg_counternok_t1_resete);
       myFile.print(F(";"));
       myFile.print(F(" GPRS NOT CONNECT! "));
       myFile.print(F(";"));
@@ -14231,6 +14902,7 @@ void iot_thingspeak1() {
 
     }
 
+
   }
 
   delay(1000);
@@ -14238,7 +14910,6 @@ void iot_thingspeak1() {
   IPAddress local = modemGSM.localIP();
   tft.setCursor(5, 160);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("IP:"));
   tft.setTextColor(WHITE);
   tft.print(local);
@@ -14246,42 +14917,63 @@ void iot_thingspeak1() {
   delay(1000);
   client.setServer(server_T, 1883);
 
-  tft.setCursor(5, 180);
-  tft.setTextColor(CYAN);
-  tft.setTextSize(2);
-  tft.print(F("ID:"));
-
   while (!!!client.connect("NSAGRO1", mqttUserName, mqttPass)) {
     tft.setCursor(5, 180);
-    tft.setTextColor(CYAN);
-    tft.setTextSize(2);
+    tft.setTextColor(WHITE);
     tft.print(F("ID:"));
     tft.setTextColor(RED);
-    tft.setTextSize(2);
     tft.print(F("SEM CONEXAO!"));
 
     tft.setCursor(5, 200);
-    tft.setTextColor(CYAN);
-    tft.print(F("ERROR SERVER: "));
+    tft.setTextColor(WHITE);
+    tft.print(F("ERROR MQTT SERVER: "));
+    tft.setCursor(5, 220);
     tft.setTextColor(RED);
 
-    status_servert2 = client.state();
-    tft.print(status_servert2);
+    status_server_t1 = client.state();
+    
+    if(status_server_t1 == -4){
+      tft.print(F("CONNECTION_TIMEOUT"));
+    }
+    if(status_server_t1 == -3){
+      tft.print(F("CONNECTION_LOST"));
+    }
+    if(status_server_t1 == -2){
+      tft.print(F("CONNECTION_FAILED"));
+    }
+    if(status_server_t1 == -1){
+      tft.print(F("MQTT_DISCONNECTED"));
+    }
+    if(status_server_t1 == 1){
+      tft.print(F("BAD_PROTOCOL"));
+    }
+    if(status_server_t1 == 2){
+      tft.print(F("BAD_CLIENT_ID"));
+    }
+    if(status_server_t1 == 3){
+      tft.print(F("CONNECT_UNAVAILABLE"));
+    }
+    if(status_server_t1 == 4){
+      tft.print(F("CONNECT_BAD_CREDENTIALS"));
+    }
+    if(status_server_t1 == 5){
+      tft.print(F("CONNECT_UNAUTHORIZED"));
+    }
 
-    msg_counternok_t1 ++;
+    msg_counternok_t1++;
+    msg_counternok_t1_resete++;
+    
     delay(1000);
-    status_servert2 = true;
+    error_server_t1 = true;
 
     tft.setCursor(5, 278);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("Enviadas:"));
     tft.setTextColor(WHITE);
     tft.print(msg_counterok_t1);
 
     tft.setCursor(5, 298);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("Nao Enviadas:"));
     tft.setTextColor(WHITE);
     tft.print(msg_counternok_t1);
@@ -14290,17 +14982,17 @@ void iot_thingspeak1() {
     //ENCERRANDO CONEXÃO COM O SERVER:
 
     client.disconnect();
-    delay(1000);
-
-
-    modemGSM.gprsDisconnect();  // caso a msg não for publicada, desconecta o GPRS para que haja um novo IP a ser identificado pelo Módulo SIM800L
     delay(5000);
+
+
+    //modemGSM.gprsDisconnect();  // caso a msg não for publicada, desconecta o GPRS para que haja um novo IP a ser identificado pelo Módulo SIM800L
+    //delay(5000);
 
     break;
 
   }
 
-  if (status_servert2 == true) {
+  if (error_server_t1 == true) {
 
     int pino53 = 53;
     pinMode(pino53, OUTPUT);
@@ -14309,12 +15001,16 @@ void iot_thingspeak1() {
     SD.begin(pino53);
     delay(500);
     myFile = SD.open("IoT3.txt", FILE_WRITE);
-    myFile.print(F("NANO SMART AGRO1 - Mensagem Não Enviada ao Sever THINGSPEAK, Channel: NANO SMART AGRO1"));
+    myFile.print(F("NANO SMART AGRO1 - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 1347631"));
     myFile.print(F(";"));
-    myFile.print(F("Falha em Connectar no Client/Token"));
+    myFile.print(F(" Mensagens Enviadas: "));
+    myFile.print(msg_counterok_t1);
     myFile.print(F(";"));
     myFile.print(F(" Mensagens Não Enviadas: "));
     myFile.print(msg_counternok_t1);
+    myFile.print(F(";"));
+    myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+    myFile.print(msg_counternok_t1_resete);
     myFile.print(F(";"));
     myFile.print(F(" DATA: "));
     myFile.print(t.date, DEC);
@@ -14327,7 +15023,7 @@ void iot_thingspeak1() {
     myFile.print(rtc.getTimeStr());
     myFile.print(F(";"));
     myFile.print(F(" CLIENT ERROR: "));
-    myFile.print(status_servert2);
+    myFile.print(status_server_t1);
     myFile.print(F(";"));
     myFile.print(F(" GSM SINAL: "));
     myFile.print(ss);
@@ -14344,11 +15040,12 @@ void iot_thingspeak1() {
 
   } else {
 
-    int status_client2;
-    status_client2 = client.state();
-
-
-    if (status_client2 == 0) {
+    status_server_t1 = client.state();
+    
+    tft.setCursor(5, 180);
+    tft.setTextColor(CYAN);
+    tft.print(F("ID:"));
+    if (status_server_t1 == 0) {
       tft.setTextColor(WHITE);
       tft.setTextSize(2);
       tft.print(F("Conectado"));
@@ -14369,7 +15066,8 @@ void iot_thingspeak1() {
     tft.print(F("STRING:"));
     tft.setTextColor(WHITE);
     tft.setTextSize(1);
-    tft.print(msgBuffer);
+    //tft.print(msgBuffer);
+    tft.print(data);
     tft.drawRect(0, 255, 240, 1, YELLOW);
 
     // Create a topic string and publish data to ThingSpeak channel feed:
@@ -14382,26 +15080,23 @@ void iot_thingspeak1() {
 
     if (status_publict2) {
 
+      msg_counterok_t1++;
+      
       tft.setCursor(5, 258);
       tft.setTextColor(CYAN);
       tft.setTextSize(2);
       tft.print(F("Mensagem:"));
 
       tft.setTextColor(WHITE);
-      tft.setTextSize(2);
       tft.print(F("Publicada"));
-      msg_counterok_t1 ++;
-
       tft.setCursor(5, 278);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counterok_t1);
 
       tft.setCursor(5, 298);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Nao Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counternok_t1);
@@ -14410,7 +15105,10 @@ void iot_thingspeak1() {
       //ENCERRANDO CONEXÃO COM O SERVER:
 
       client.disconnect();
-      delay(1000);
+      delay(5000);
+
+      // ========================================================================================================
+      //GRAVANDO OD DADOS NO SD CARD:
 
       int pino53 = 53;
       pinMode(pino53, OUTPUT);
@@ -14419,10 +15117,16 @@ void iot_thingspeak1() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT3.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO1 - Mensagem Enviada ao Sever THINGSPEAK, Channel: NANO SMART AGRO1"));
+      myFile.print(F("NANO SMART AGRO1 - Mensagem Enviada ao Sever THINGSPEAK, CHANNEL: 1347631"));
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Enviadas: "));
       myFile.print(msg_counterok_t1);
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Não Enviadas: "));
+      myFile.print(msg_counternok_t1);
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+      myFile.print(msg_counternok_t1_resete);
       myFile.print(F(";"));
       myFile.print(F(" DATA: "));
       myFile.print(t.date, DEC);
@@ -14457,16 +15161,21 @@ void iot_thingspeak1() {
       tft.setTextSize(2);
       tft.print(F("Msg:"));
       tft.setTextColor(RED);
-      tft.setTextSize(2);
       tft.print(F("NAO Publicada!"));
-      msg_counternok_t1 ++;
+      
+      msg_counternok_t1++;
+      msg_counternok_t1_resete++;
 
       client.disconnect();
-      delay(1000);
+      delay(2000);
+      modemGSM.restart();
+      delay(10000);
 
+      //modemGSM.gprsDisconnect();  // caso a msg não for publicada, desconecta o GPRS para que haja um novo IP a ser identificado pelo Módulo SIM800L
+      //delay(5000);
 
-      modemGSM.gprsDisconnect();  // caso a msg não for publicada, desconecta o GPRS para que haja um novo IP a ser identificado pelo Módulo SIM800L
-      delay(5000);
+      // ========================================================================================================
+      //GRAVANDO OD DADOS NO SD CARD:
 
       int pino53 = 53;
       pinMode(pino53, OUTPUT);
@@ -14475,12 +15184,16 @@ void iot_thingspeak1() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT3.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO1 - Mensagem Não Enviada ao Sever THINGSPEAK, Channel: NANO SMART AGRO1"));
+      myFile.print(F("NANO SMART AGRO1 - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 1347631"));
       myFile.print(F(";"));
-      myFile.print(F("Falha em Publicar no Topic"));
+      myFile.print(F(" Mensagens Enviadas: "));
+      myFile.print(msg_counterok_t1);
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Não Enviadas: "));
       myFile.print(msg_counternok_t1);
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+      myFile.print(msg_counternok_t1_resete);
       myFile.print(F(";"));
       myFile.print(F(" DATA: "));
       myFile.print(t.date, DEC);
@@ -14514,21 +15227,14 @@ void iot_thingspeak1() {
 
       tft.setCursor(5, 298);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Nao Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counternok_t1);
-
-      // ========================================================================================================
-      //ENCERRANDO CONEXÃO COM O SERVER:
-
-      delay(2000);
+      delay(3000);
 
       return;
     }
-
   }
-
 }
 
 
@@ -14593,6 +15299,10 @@ String createJsonString3()
   // CÁLCULO PARA EXIBIR A VARIÁVEL VAZÃO:
 
   float v30 = Litros;
+  if (v30 <= 2.00){
+    v30 = 0.00;
+  }
+  
 
   // ========================================================================================================
   // CÁLCULO PARA EXIBIR A VARIÁVEL LUMINOSFIDADE EM LUX:
@@ -14605,9 +15315,15 @@ String createJsonString3()
   float uv30 = UV_index;
 
   // ========================================================================================================
+  // CÁLCULO PARA EXIBIR A VARIÁVEL DE GRAVAÇÃO DO SD CARD:
+
+  float sd_card_ok = msg_sdcard_ok;
+  float sd_card_nok = msg_sdcard_nok;
+
+  // ========================================================================================================
   // CRIAÇÃO DA STRING DAS VARIAVEIS QUE SERÃO ENVIADAS PARA O SERVER IOT THINGSPEAK:
 
-  String data = String("field1=") + String(n30, 2) + "&field2=" + String(vol_res30, 1) + "&field3=" + String(v30, 1) + "&field4=" + String(uv30, 0) + "&field5=" + String(l30, 1) + "&field6=" + String(t30, 1) + "&field7=" + String(msg_sdcard_ok, 0) + "&field8=" + String(msg_sdcard_nok, 0);
+  String data = String("field1=") + String(n30, 2) + "&field2=" + String(vol_res30, 1) + "&field3=" + String(v30, 1) + "&field4=" + String(uv30, 0) + "&field5=" + String(l30, 1) + "&field6=" + String(t30, 1) + "&field7=" + String(sd_card_ok, 0) + "&field8=" + String(sd_card_nok, 0);
 
   return data;
 }
@@ -14623,8 +15339,7 @@ String createJsonString3()
 
 void iot_thingspeak2() {
 
-
-  bool status_servert3 = false;
+  bool error_server_t2 = false;
   serialGSM.begin(9600);
   rtc.begin();
   t = rtc.getTime();
@@ -14644,7 +15359,6 @@ void iot_thingspeak2() {
   // ========================================================================================================
   //INICIANDO SETUP MODULO GSM/GPRS SIM 800L:
 
-
   tft.setCursor(5, 40);
   tft.setTextColor(CYAN);
   tft.setTextSize(2);
@@ -14652,14 +15366,13 @@ void iot_thingspeak2() {
   tft.setTextColor(WHITE);
   tft.print(F("1451371"));
 
-  sendATTCC("AT+GSMBUSY=1");
+  sendAT("AT+GSMBUSY=1");
   delay(1000);
 
   int sim3 = modemGSM.getSimStatus();
 
   tft.setCursor(5, 80);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Status SIM CARD:"));
   tft.setTextColor(WHITE);
   if (sim3 == 1) {
@@ -14672,14 +15385,12 @@ void iot_thingspeak2() {
     delay(1000);
     tft.setCursor(5, 278);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("Enviadas:"));
     tft.setTextColor(WHITE);
     tft.print(msg_counterok_t2);
 
     tft.setCursor(5, 298);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("Nao Enviadas:"));
     tft.setTextColor(WHITE);
     tft.print(msg_counternok_t2);
@@ -14692,10 +15403,16 @@ void iot_thingspeak2() {
     SD.begin(pino53);
     delay(500);
     myFile = SD.open("IoT4.txt", FILE_WRITE);
-    myFile.print(F("NANO SMART AGRO1 - Mensagem Não Enviada ao Sever THINGSPEAK, Channel: IoT - Vinhedo (PIEDADE-SP)"));
+    myFile.print(F("NANO SMART AGRO2 - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 1451371"));
+    myFile.print(F(";"));
+    myFile.print(F(" Mensagens Enviadas: "));
+    myFile.print(msg_counterok_t1);
     myFile.print(F(";"));
     myFile.print(F(" Mensagens Não Enviadas: "));
-    myFile.print(msg_counternok_t2);
+    myFile.print(msg_counternok_t1);
+    myFile.print(F(";"));
+    myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+    myFile.print(msg_counternok_t1_resete);
     myFile.print(F(";"));
     myFile.print(F(" SIM CARD NOK! "));
     myFile.print(F(";"));
@@ -14721,7 +15438,6 @@ void iot_thingspeak2() {
   int ss = modemGSM.getSignalQuality();
   tft.setCursor(5, 100);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Sinal Quality:"));
 
   if ( ss >= 31) {
@@ -14746,12 +15462,10 @@ void iot_thingspeak2() {
 
   tft.setCursor(5, 120);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Sinal GSM:"));
 
   tft.setCursor(125, 120);
   tft.setTextColor(WHITE);
-  tft.setTextSize(2);
 
   if ( ss >= 31) {
     tft.print(F("EM FALHA!"));
@@ -14770,13 +15484,13 @@ void iot_thingspeak2() {
     tft.print(F("Fraco"));
   }
 
+  //client.setKeepAlive (60);
   delay(1000);
 
   bool res3 = modemGSM.isGprsConnected();
 
   tft.setCursor(5, 140);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("GPRS Connection:"));
   tft.setTextColor(WHITE);
 
@@ -14795,18 +15509,18 @@ void iot_thingspeak2() {
       tft.setTextColor(RED);
       tft.print(F("NOK"));
 
-      msg_counternok_t2 ++;
+      msg_counternok_t2++;
+      msg_counternok_t2_resete++;
+      
       delay(1000);
       tft.setCursor(5, 278);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counterok_t2);
 
       tft.setCursor(5, 298);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Nao Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counternok_t2);
@@ -14819,10 +15533,16 @@ void iot_thingspeak2() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT4.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO - Mensagem Não Enviada ao Sever THINGSPEAK, Channel: IoT - Vinhedo (PIEDADE-SP)"));
+      myFile.print(F("NANO SMART AGRO2 - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 1451371"));
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Enviadas: "));
+      myFile.print(msg_counterok_t1);
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Não Enviadas: "));
-      myFile.print(msg_counternok_t2);
+      myFile.print(msg_counternok_t1);
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+      myFile.print(msg_counternok_t1_resete);
       myFile.print(F(";"));
       myFile.print(F(" GPRS NOT CONNECT! "));
       myFile.print(F(";"));
@@ -14855,7 +15575,6 @@ void iot_thingspeak2() {
   IPAddress local = modemGSM.localIP();
   tft.setCursor(5, 160);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("IP:"));
   tft.setTextColor(WHITE);
   tft.print(local);
@@ -14863,31 +15582,54 @@ void iot_thingspeak2() {
   delay(1000);
   client.setServer(server_T, 1883);
 
-  tft.setCursor(5, 180);
-  tft.setTextColor(CYAN);
-  tft.setTextSize(2);
-  tft.print(F("ID:"));
-
   while (!!!client.connect("NSAGRO2", mqttUserName, mqttPass)) {
     tft.setCursor(5, 180);
-    tft.setTextColor(CYAN);
-    tft.setTextSize(2);
+    tft.setTextColor(WHITE);
     tft.print(F("ID:"));
     tft.setTextColor(RED);
-    tft.setTextSize(2);
     tft.print(F("SEM CONEXAO!"));
 
     tft.setCursor(5, 200);
-    tft.setTextColor(CYAN);
-    tft.print(F("ERROR SERVER: "));
+    tft.setTextColor(WHITE);
+    tft.print(F("ERROR MQTT SERVER: "));
+    tft.setCursor(5, 220);
     tft.setTextColor(RED);
 
-    status_servert3 = client.state();
-    tft.print(status_servert3);
+    status_server_t2 = client.state();
+    
+    if(status_server_t2 == -4){
+      tft.print(F("CONNECTION_TIMEOUT"));
+    }
+    if(status_server_t2 == -3){
+      tft.print(F("CONNECTION_LOST"));
+    }
+    if(status_server_t2 == -2){
+      tft.print(F("CONNECTION_FAILED"));
+    }
+    if(status_server_t2 == -1){
+      tft.print(F("MQTT_DISCONNECTED"));
+    }
+    if(status_server_t2 == 1){
+      tft.print(F("BAD_PROTOCOL"));
+    }
+    if(status_server_t2 == 2){
+      tft.print(F("BAD_CLIENT_ID"));
+    }
+    if(status_server_t2 == 3){
+      tft.print(F("CONNECT_UNAVAILABLE"));
+    }
+    if(status_server_t2 == 4){
+      tft.print(F("CONNECT_BAD_CREDENTIALS"));
+    }
+    if(status_server_t2 == 5){
+      tft.print(F("CONNECT_UNAUTHORIZED"));
+    }
 
-    msg_counternok_t2 ++;
+    msg_counternok_t2++;
+    msg_counternok_t2_resete++;
+    
     delay(1000);
-    status_servert3 = true;
+    error_server_t2 = true;
 
     tft.setCursor(5, 278);
     tft.setTextColor(CYAN);
@@ -14898,7 +15640,6 @@ void iot_thingspeak2() {
 
     tft.setCursor(5, 298);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("Nao Enviadas:"));
     tft.setTextColor(WHITE);
     tft.print(msg_counternok_t2);
@@ -14907,17 +15648,16 @@ void iot_thingspeak2() {
     //ENCERRANDO CONEXÃO COM O SERVER:
 
     client.disconnect();
-    delay(1000);
-
-
-    modemGSM.gprsDisconnect();  // caso a msg não for publicada, desconecta o GPRS para que haja um novo IP a ser identificado pelo Módulo SIM800L
     delay(5000);
+
+    //modemGSM.gprsDisconnect();  // caso a msg não for publicada, desconecta o GPRS para que haja um novo IP a ser identificado pelo Módulo SIM800L
+    //delay(5000);
 
     break;
 
   }
 
-  if (status_servert3 == true) {
+  if (error_server_t2 == true) {
 
     int pino53 = 53;
     pinMode(pino53, OUTPUT);
@@ -14926,12 +15666,16 @@ void iot_thingspeak2() {
     SD.begin(pino53);
     delay(500);
     myFile = SD.open("IoT4.txt", FILE_WRITE);
-    myFile.print(F("NANO SMART AGRO1 - Mensagem Não Enviada ao Sever THINGSPEAK, Channel: IoT - Vinhedo (PIEDADE-SP)"));
+    myFile.print(F("NANO SMART AGRO2 - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 1451371"));
     myFile.print(F(";"));
-    myFile.print(F("Falha em Connectar no Client/Token"));
+    myFile.print(F(" Mensagens Enviadas: "));
+    myFile.print(msg_counterok_t1);
     myFile.print(F(";"));
     myFile.print(F(" Mensagens Não Enviadas: "));
-    myFile.print(msg_counternok_t2);
+    myFile.print(msg_counternok_t1);
+    myFile.print(F(";"));
+    myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+    myFile.print(msg_counternok_t1_resete);
     myFile.print(F(";"));
     myFile.print(F(" DATA: "));
     myFile.print(t.date, DEC);
@@ -14944,7 +15688,7 @@ void iot_thingspeak2() {
     myFile.print(rtc.getTimeStr());
     myFile.print(F(";"));
     myFile.print(F(" CLIENT ERROR: "));
-    myFile.print(status_servert3);
+    myFile.print(status_server_t2);
     myFile.print(F(";"));
     myFile.print(F(" GSM SINAL: "));
     myFile.print(ss);
@@ -14961,21 +15705,21 @@ void iot_thingspeak2() {
 
   } else {
 
-    int status_client3;
-    status_client3 = client.state();
 
+    tft.setCursor(5, 180);
+    tft.setTextColor(CYAN);
+    tft.print(F("ID:"));
 
-    if (status_client3 == 0) {
+    status_server_t2 = client.state();
+    
+    if (status_server_t2 == 0) {
       tft.setTextColor(WHITE);
       tft.setTextSize(2);
       tft.print(F("Conectado"));
     }
-
-
+    
     // Create data string to send to ThingSpeak:
     String data = createJsonString4();
-
-
     int length = data.length();
     const char *msgBuffer;
     msgBuffer = data.c_str();
@@ -14987,7 +15731,8 @@ void iot_thingspeak2() {
     tft.print(F("STRING:"));
     tft.setTextColor(WHITE);
     tft.setTextSize(1);
-    tft.print(msgBuffer);
+    //tft.print(msgBuffer);
+    tft.print(data);
     tft.drawRect(0, 255, 240, 1, YELLOW);
 
     // Create a topic string and publish data to ThingSpeak channel feed:
@@ -15006,20 +15751,17 @@ void iot_thingspeak2() {
       tft.print(F("Mensagem:"));
 
       tft.setTextColor(WHITE);
-      tft.setTextSize(2);
       tft.print(F("Publicada"));
       msg_counterok_t2 ++;
 
       tft.setCursor(5, 278);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counterok_t2);
 
       tft.setCursor(5, 298);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Nao Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counternok_t2);
@@ -15028,9 +15770,10 @@ void iot_thingspeak2() {
       //ENCERRANDO CONEXÃO COM O SERVER:
 
       client.disconnect();
-      delay(1000);
-      //modemGSM.gprsDisconnect();
-      //delay(1000);
+      delay(5000);
+
+      // ========================================================================================================
+      //GRAVANDO OD DADOS NO SD CARD:
 
       int pino53 = 53;
       pinMode(pino53, OUTPUT);
@@ -15039,10 +15782,16 @@ void iot_thingspeak2() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT4.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO1 - Mensagem Enviada ao Sever THINGSPEAK, Channel: IoT - Vinhedo (PIEDADE-SP)"));
+      myFile.print(F("NANO SMART AGRO2 - Mensagem Enviada ao Sever THINGSPEAK, CHANNEL: 1451371"));
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Enviadas: "));
-      myFile.print(msg_counterok_t2);
+      myFile.print(msg_counterok_t1);
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Não Enviadas: "));
+      myFile.print(msg_counternok_t1);
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+      myFile.print(msg_counternok_t1_resete);
       myFile.print(F(";"));
       myFile.print(F(" DATA: "));
       myFile.print(t.date, DEC);
@@ -15066,7 +15815,7 @@ void iot_thingspeak2() {
       delay(1000);
       myFile.close();
       delay(2000);
-
+      
       return;
 
     } else {
@@ -15077,16 +15826,21 @@ void iot_thingspeak2() {
       tft.setTextSize(2);
       tft.print(F("Msg:"));
       tft.setTextColor(RED);
-      tft.setTextSize(2);
       tft.print(F("NAO Publicada!"));
+
       msg_counternok_t2 ++;
+      msg_counternok_t2_resete++;
 
       client.disconnect();
-      delay(1000);
+      delay(2000);
+      modemGSM.restart();
+      delay(10000);
 
+      //modemGSM.gprsDisconnect();  // caso a msg não for publicada, desconecta o GPRS para que haja um novo IP a ser identificado pelo Módulo SIM800L
+      //delay(5000);
 
-      modemGSM.gprsDisconnect();  // caso a msg não for publicada, desconecta o GPRS para que haja um novo IP a ser identificado pelo Módulo SIM800L
-      delay(5000);
+      // ========================================================================================================
+      //GRAVANDO OD DADOS NO SD CARD:
 
       int pino53 = 53;
       pinMode(pino53, OUTPUT);
@@ -15095,12 +15849,16 @@ void iot_thingspeak2() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT4.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO1 - Mensagem Não Enviada ao Sever THINGSPEAK, Channel: IoT - Vinhedo (PIEDADE-SP)"));
+      myFile.print(F("NANO SMART AGRO2 - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 1451371"));
       myFile.print(F(";"));
-      myFile.print(F("Falha em Publicar no Topic"));
+      myFile.print(F(" Mensagens Enviadas: "));
+      myFile.print(msg_counterok_t1);
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Não Enviadas: "));
-      myFile.print(msg_counternok_t2);
+      myFile.print(msg_counternok_t1);
+      myFile.print(F(";"));
+      myFile.print(F(" Mensagens Não Enviadas no Dia: "));
+      myFile.print(msg_counternok_t1_resete);
       myFile.print(F(";"));
       myFile.print(F(" DATA: "));
       myFile.print(t.date, DEC);
@@ -15119,7 +15877,7 @@ void iot_thingspeak2() {
       myFile.print(ss);
       myFile.print(F(";"));
       myFile.print(F(" IP: "));
-      myFile.print(local);
+      myFile.print(ultimoGSM);
       myFile.println();
       delay(1000);
       myFile.close();
@@ -15134,22 +15892,17 @@ void iot_thingspeak2() {
 
       tft.setCursor(5, 298);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Nao Enviadas:"));
       tft.setTextColor(WHITE);
       tft.print(msg_counternok_t2);
-
-      // ========================================================================================================
-      //ENCERRANDO CONEXÃO COM O SERVER:
-
-      delay(2000);
+      delay(3000);
 
       return;
     }
-
   }
-
 }
+
+
 
 
 
@@ -15320,13 +16073,15 @@ String createJsonString4()
   // CÁLCULO PARA EXIBIR A VARIÁVEL VAZÃO:
 
   float v40 = Litros;
-
+  if (v40 <= 2.00){
+    v40 = 0.00;
+  }
   // ========================================================================================================
   // VARIAVEIS DE INDICAÇÃO DA PRECIPTAÇÃO EM mm: 1 milímetro de chuva significa um litro de água acumulado em um metro quadrado.
   // Quando a gente diz que teve uma chuva de 200 milímetros, em 24h, significa que 200 litros d’água caíram num metro quadrado.
 
   volatile int pluvPulsos40 = contaPulso1;
-  float volatile c40 = pluvPulsos40 * 0.25;  // Mede a quantidade de chuva em milimitros!
+  float c40 = pluvPulsos40 * 0.25;  // Mede a quantidade de chuva em milimitros!
 
   // ========================================================================================================
   // CRIAÇÃO DA STRING DAS VARIAVEIS QUE SERÃO ENVIADAS PARA O SERVER IOT THINGSPEAK:
@@ -15335,9 +16090,6 @@ String createJsonString4()
 
   return data;
 }
-
-// ========================================================================================================
-// FUNÇÃO PARA TESTE DO DISPLAY TFT, ELA DESENHA LINHAS NA TELA:
 
 unsigned long testLines_SD(uint16_t color) {
   int           x1, y1, x2, y2,
