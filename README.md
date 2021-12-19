@@ -96,7 +96,46 @@ A aplicação de todas essas tecnologias, para ser realmente benéfica ao proces
 
 ## - Telas do Display do Protótipo
 
+### Telas do Menu Touch:
+
+![Gráfico](Telas/11.jfif)
+
+![Gráfico](Telas/10.jfif)
+
+### Tela da Variável Umidade Ambiente:
+
 ![Gráfico](Telas/1.jfif)
 
+### Tela da Variável Temperatura Ambiente:
 
+![Gráfico](Telas/2.jfif)
 
+### Tela da Variável Volume dos Reservatórios:
+
+![Gráfico](Telas/6.jfif)
+
+### Tela da Variável Vazão de Saída:
+
+![Gráfico](Telas/7.jfif)
+
+### Tela Salva Dados no SD Card:
+
+![Gráfico](Telas/4.jfif)
+
+### Tela de Diagnóstico:
+
+![Gráfico](Telas/3.jfif)
+
+### Telas de Relatórios de Envio aos Servers:
+
+![Gráfico](Telas/8.jfif)
+
+![Gráfico](Telas/9.jfif)
+
+### Telas de Envio aos Servers:
+
+![Gráfico](Telas/12.jfif)
+
+### Telas de Envio de SMS:
+
+![Gráfico](Telas/5.jfif)
