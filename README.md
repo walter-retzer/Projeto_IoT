@@ -94,5 +94,9 @@ A aplicação de todas essas tecnologias, para ser realmente benéfica ao proces
 <https://digitalagro.com.br/2020/06/01/iot-na-agricultura-mais-precisao-e-controle-das-lavouras/>
 
 
+## - Telas do Display do Protótipo
+
+![Gráfico](Telas/1.jfif)
+
 
 
