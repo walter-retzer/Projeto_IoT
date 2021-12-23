@@ -1,28 +1,51 @@
 
 /********************************************************************
   AUTOR: WALTER DAWID RETZER
-
+  
   PROJETO: NANO SMART AGRO PARA AGRICULTURA DE PRECISÃO
-
-  VERSÃO: 4.01.29
-  DATA: 18/12/2021
-  HORÁRIO:20H25MIN
+  
+  VERSÃO: 4.01.34
+  DATA: 23/12/2021
+  HORÁRIO:18H55MIN
   ARQUIVO: PROJETO_IoT
-
+  
 *********************************************************************
 
   COMENTÁRIOS COM AS ALTERAÇÕES PARA REGISTRO DE CONTROLE DAS VERSÕES:
+  
+  VERSÃO:
 
-  VERSÃO: 
- 
-  4.01.29:        ALTERADO A BIBLIOTECA PUBSUBCLIENT TIME MQTT_SOCKET_TIMEOUT DE 15 PARA 60 SEGUNDOS PARA MELHORAR O TEMPO DE CONEXÃO COM O SERVER UBIDOTS.
+  4.01.34:        ALTERADO FUNÇÃO PARA CONSULTA SALDO DO CHIP NA VIVO, DEVIDO A MUDANÇA DE NÚMERO PARA ENVIAR SMS  DE CONSULTA SALDO DA OPERADORA VIVO.
+  
+
+  4.01.33:        ALTERADO A BIBLIOTECA PUBSUBCLIENT TIME MQTT_SOCKET_TIMEOUT DE 15 PARA 60 SEGUNDOS PARA MELHORAR O TEMPO DE CONEXÃO COM O SERVER UBIDOTS.
                   ALTERADO A BIBLIOTECA PUBSUBCLIENT TIME MQTT_SOCKET_TIMEOUT DE 15 PARA 60 SEGUNDOS PARA MELHORAR O TEMPO DE CONEXÃO COM O SERVER UBIDOTS.
                   ALTERADO A BIBLIOTECA SOFTWARE SERIAL RX BUFFER DE 64 PARA 512 PARA MELHORAR A RECEPÇÃO DAS MSGS SMS E NÃO HAVER "CORTES NO TEXTO DAS MSGS".
-                  CORRIGIDO A EXIBIÇÃO NO DISPLAY DO CLIENT.STATE QUANDO HOUVER ERRO DE CONEXÃO AOS SERVER IOT.
-                  ALTERADO FUNÇÃO PARA CONSULTA SALDO DO CHIP NA VIVO, DEVIDO A MUDANÇA DE NÚMERO PARA ENVIAR SMS  DE CONSULTA SALDO DA OPERADORA VIVO.
-                  
-  4.01.28:        INCLUÍDO FUNÇÃO ENVIASMS8 PARA VERIFICAR SALDO DO CHIP DO CELULAR DO MÓDULO SIM 800L.
+                  CORRIGIDO A EXIBIÇÃO NO DISPLAY DO CLIENT.STATE QUANDO HOUVER ERRO DE CONEXÃO AOS SERVER IOT.                 
 
+  
+  4.01.32:        INCLUÍDO NA LÓGICA A EXIBIÇÃO DO CLIENT.STATE DOS SERVIDORES.
+                  RETIRADO FUNÇÃO LÊGSM() PARA LER O STATUS DO SERVERS IoT.
+                  IMPLEMENTADO OUTRA FUNÇÃO LEGSM1() PARA TESTAR O RECEBIMENTO DE SMS.
+                  IMPLEMENTADO A LÓGICA PARA EXIBIR O MENU DO DISPLAY PARA SELECIONAR QUAL DESTINATÁRIO SERÁ ENVIADO UMA MENSAGEM SMS
+            
+ 
+  4.01.31:        ALTERADO LÓGICA PARA EXIBIR O MENU DO DISPLAY PARA SELECIONAR QUAL DESTINATÁRIO SERÁ ENVIADO UMA MENSAGEM SMS.
+                  FALTA TESTAR:
+                  **RECALIBRAR OS SENSORES DE UMIDADE DO SOLO;
+
+  
+  4.01.30:        ALTERADO LÓGICA PARA EXIBIR O ÚLTIMO COMANDO DA VARIÁVEL ÚLTIMO GSM, QUANDO FOR ENVIADO APENAS MENSAGEM SMS.
+                  INCLUÍDO NA LÓGICA DE FUNCIONAMENTO, A LEITURA DA SERIAL GSM PARA TENTAR INPRIMIR O VALOR DE RETORNO DO SERVERS IoT. 
+                  REVISADO FUNÇÃO LEGSM(), INSERIDO ELA POR PRIMEIRO NA EXECUÇÃO DO LOOP DO PROGRAMA PRINCIPAL.
+
+  
+  4.01.29:        ALTERADO LÓGICA PARA CÁLCULO DO PLUVIÔMETRO, INSERIDO VARIÁVEL READ_PULSOS ANTIGO PARA MANTER QUANTIDADE DE PULSOS QUANDO HOUVER "FALSOS PULSOS" NA MEDIÇÃO.
+                  INCLUÍDO VARIÁVEIS PARA O ENVIO DA QUANTIDADE DE NÚMERO DE GRAVAÇÃO DO SD CARD NO CANAL DO THINGSPEAK NS*****.
+                  ALTERADO EXIBIÇÃO DA TELA INICIAL DO PROTÓTIPO, INCLUIDO A MESMA TELA INICIAL, NO MENU DO TOUCH SCREEN DA EXIBIÇÃO DE DATA HORA.
+
+
+  
 *********************************************************************
   CONFIGURAÇÃO DOS BORNES DA PLACA DE ALIMENTAÇÃO EXTERNA DOS SENSORES:
 
@@ -205,8 +228,6 @@ unsigned long aux_display_menu1;
 
 int cont1;
 
-unsigned long testLines_SD(uint16_t color);
-
 // ========================================================================================================
 // DEFINIÇÃO DAS CORES NO DISPLAY TFT:
 
@@ -240,11 +261,16 @@ unsigned long testLines_SD(uint16_t color);
 #define BLUE2RED 3
 #define GREEN2RED 4
 #define RED2GREEN 5
-#define ORANGE2RED 6
+
+// cores para testar:
+#define YELLOW2YELLOW 6
+#define ORANGE2ORANGE 7
+#define OLIVE2OLIVE 8
+#define ORANGE2RED 9
 
 #define SCALE0      0x528A      // inward pointing triangle scale segment  - color close to black 
 #define SCALE1      0x3151      // outward pointing triangle scale segment - color deep blue 
-#define TEXT_COLOR  0xFFFF
+//#define TEXT_COLOR  0xFFFF
 
 int d = 0;                      // Variable used for the sinewave test waveform
 
@@ -319,39 +345,7 @@ float volume_Min;
 float volume_Max;
 
 // ========================================================================================================
-// CREDENCIAIS DE ACESSO AO SERVER THINGSPEAK:
-
-const char* server_T = "mqtt.thingspeak.com";
-char mqttUserName[] = "*****************Demo";  // Use any name.
-char mqttPass[] = "****************";           // Change to your MQTT API Key from Account > MyProfile.
-
-//DEVICE: 01
-void iot_thingspeak();
-unsigned int msg_counterok_t;
-unsigned int msg_counternok_t;
-String createJsonString2();
-long channelID = 9999999;                       // Change to your channel ID.
-char writeAPIKey[] = "****************";        // Change to your channel write API key.
-
-//DEVICE: 02
-void iot_thingspeak1();
-unsigned int msg_counterok_t1;
-unsigned int msg_counternok_t1;
-String createJsonString3();
-long channelID1 = 9999999;                       // Change to your channel ID.
-char writeAPIKey1[] = "****************";        // Change to your channel write API key.
-
-//DEVICE: IoT - Vinhedo (PIEDADE-SP) CANAL PÚBLICO:
-void iot_thingspeak2();
-unsigned int msg_counterok_t2;
-unsigned int msg_counternok_t2;
-String createJsonString4();
-long channelID2 = 9999999;                       // Change to your channel ID.
-char writeAPIKey2[] = "****************";        // Change to your channel write API key.
-
-
-// ========================================================================================================
-// Credenciais do SERVER UBIDOTS Device01
+// Credenciais do SERVER UBIDOTS
 
 char server[] = "things.ubidots.com";
 char token[] = "BBFF-******************************";   // Valor do API Credentials do Default token
@@ -361,14 +355,13 @@ const char topic[] = "/v1.6/devices/*********";         // * (Nome do Device 01)
 // FUNÇÃO PARA ENVIO DE DADOS AO SERVER UBIDOTS:
 void iot_ubidots();
 String createJsonString();
-int status_server1;
 int status_server;
 
 unsigned int msg_counterok;
 unsigned int msg_counternok;
 
 // ========================================================================================================
-// CREDENCIAIS DE ACESSO AO SERVER DA UBIDOTS Device02
+// CREDENCIAIS DE ACESSO AO SERVER DA UBIDOTS
 
 char server1[] = "things.ubidots.com";
 char token1[] = "BBFF-******************************";   // Valor do API Credentials do Default token.
@@ -378,9 +371,45 @@ const char topic1[] = "/v1.6/devices/*********";         // * (Nome do Device 02
 // FUNÇÃO PARA ENVIO DE DADOS AO SERVER UBIDOTS:
 void iot_ubidots1();
 String createJsonString1();
+int status_server1;
 
 unsigned int msg_counterok1;
 unsigned int msg_counternok1;
+
+
+// ========================================================================================================
+// CREDENCIAIS DE ACESSO AO SERVER DA MATHLAB - THINGSPEAK
+
+const char* server_T = "mqtt.thingspeak.com";
+char mqttUserName[] = "*****************Demo";  // Use any name.
+char mqttPass[] = "****************";           // Change to your MQTT API Key from Account > MyProfile.
+
+//DEVICE: 01
+void iot_thingspeak();
+int status_server_t;
+unsigned int msg_counterok_t;
+unsigned int msg_counternok_t;
+String createJsonString2();
+long channelID = 9999999;                       // Change to your channel ID.
+char writeAPIKey[] = "****************";        // Change to your channel write API key.
+
+//DEVICE: 02
+void iot_thingspeak1();
+int status_server_t1;
+unsigned int msg_counterok_t1;
+unsigned int msg_counternok_t1;
+String createJsonString3();
+long channelID1 = 8888888;                       // Change to your channel ID.
+char writeAPIKey1[] = "****************";        // Change to your channel write API key.
+
+//DEVICE: IoT - Vinhedo (PIEDADE-SP) CANAL PÚBLICO:
+void iot_thingspeak2();
+int status_server_t2;
+unsigned int msg_counterok_t2;
+unsigned int msg_counternok_t2;
+String createJsonString4();
+long channelID2 = 7777777;                       // Change to your channel ID.
+char writeAPIKey2[] = "****************";        // Change to your channel write API key.
 
 //========================================================================================================
 // Contagem de vezes que houver falha no envio das mensagens aos Servidores IoT:
@@ -391,7 +420,6 @@ unsigned int msg_counternok_t_resete; // msg não enviada ThingSpeak 0
 unsigned int msg_counternok_t1_resete; // msg não enviada ThingSpeak 1
 unsigned int msg_counternok_t2_resete; // msg não enviada ThingSpeak 2
 unsigned int configuraGSM_nok_resete; // GSM nok
-
 
 //========================================================================================================
 //DEFINIÇÃO DOS PINOS DE COMUNICAÇÃO COM O MODULO GSM SIM800L
@@ -408,34 +436,28 @@ TinyGsmClient gsmClient(modemGSM);
 PubSubClient client(server, 1883, gsmClient);
 
 //========================================================================================================
-// FUNÇÃO PARA ENVIO DE DADOS PELA SERIAL:
-
-SoftwareSerial gprsSerial(TX_PIN, RX_PIN); // PINOS DE RX E TX DO ARDUINO
-
-//========================================================================================================
 // FUNÇÕES PARA ESCREVER COMANDOS E LER RESPOSTAS DO MODULO SIM800L VIA SERIAL:
 
 String sendATSMS(String command);
-String sendATTCC(String command);
-String sendATT(String command);
 String sendAT(String command);
+String sendAT1(String command);
 
 // ==============================================================================
 // COMUNICAÇÃO GSM COM O MÓDULO SIM8000L PARA ENVIO DE SMS!!:
 
-#define senhaGsm  "********"  // senha para o SMS de valor das variaveis!
-#define senhaGsm1 "********"  // senha para o SMS de diagnostico
-#define senhaGsm2 "********"  // senha para o SMS para resete do Arduino 
-#define senhaGsm3 "********"  // senha para o SMS de envio da quantidade gravação sd card
-#define senhaGsm4 "********"  // senha para o SMS para resete do pluviômetro 
-#define senhaGsm5 "********"  // senha para o SMS para resete do Totalizador de vazão
+#define senhaGsm  "****************"  // senha para o SMS de valor das variaveis!
+#define senhaGsm1 "****************"  // senha para o SMS de diagnostico
+#define senhaGsm2 "****************"  // senha para o SMS para resete do Arduino 
+#define senhaGsm3 "****************"  // senha para o SMS de envio da quantidade gravação sd card
+#define senhaGsm4 "****************"  // senha para o SMS para resete do pluviômetro 
+#define senhaGsm5 "****************"  // senha para o SMS para resete do Totalizador de vazão
 
+void leGSM();
 bool temSMS = false;
 String telefoneSMS;
 String dataHoraSMS;
 String mensagemSMS;
 String comandoGSM = "";
-String c_GSM = "";
 String ultimoGSM = "";
 
 void setup_gsm_gprs();
@@ -445,20 +467,18 @@ unsigned int configuraGSM_ok;
 unsigned int configuraGSM_nok;
 unsigned int modo_sms_ativado;
 
-void leGSM();
 void enviaSMS(String telefoneSMS, String mensagem);    // envia SMS com dadso das variaveis.
 void enviaSMS1(String telefoneSMS, String mensagem);   // envia SMS com dados dos diagnósticos.
 void enviaSMS2(String telefoneSMS, String mensagem);   // envia SMS da Solicitacao de Resete.
 void enviaSMS3(String telefoneSMS, String mensagem);   // envia SMS com dados dos diagnósticos do SD Card.
 void enviaSMS4(String telefoneSMS, String mensagem);   // envia SMS da Solicitacao de Resete do Pluviômetro.
 void enviaSMS5(String telefoneSMS, String mensagem);   // envia SMS da Solicitacao de Resete do Totalizador de Vazão.
-void enviaSMS6(String telefoneSMS, String mensagem);   // envia SMS de Alerta de Chuva 
-void enviaSMS7(String telefoneSMS, String mensagem);   // envia SMS de Alerta de Precipitação maior que 1.00mm2 para o celular: +5515**********
+void enviaSMS6(String telefoneSMS, String mensagem);   // envia SMS de Alerta de Chuva celular: +5515999999999!! 
+void enviaSMS7(String telefoneSMS, String mensagem);   // envia SMS de Alerta de Precipitação maior que 1.00mm2 para o celular: +55159999999!
 void enviaSMS8(String telefoneSMS, String mensagem);   // envia SMS para a Vivo para consultar Saldo!
 
-unsigned int msg_counter4;     // Contagem de mensagens SMS foram enviadas
-unsigned int msg_sms_rec;  // Contagem de mensagens SMS foram recebidas
 unsigned int msg_sms_env;     // Contagem de mensagens SMS foram enviadas
+unsigned int msg_sms_rec;      // Contagem de mensagens SMS foram recebidas
 String str1;
 
 // ========================================================================================================
@@ -523,7 +543,7 @@ unsigned long intervalo18 = 180000;
 unsigned long intervalo19 = 190000;
 unsigned long intervalo20 = 200000;
 
-unsigned long intervalo30 = 900000;   
+unsigned long intervalo30 = 900000;  
 
 
 // ========================================================================================================
@@ -569,19 +589,17 @@ void lcdpluv();
 void pulso_chuva ();
 volatile unsigned int contaPulso1;         //Variável para a quantidade de pulsos
 volatile unsigned int Read_Pulso1;         //Variável para a quantidade de pulsos
-volatile unsigned int contaPulsopluvhora;  //Variável para a quantidade de pulsos
-
-const byte Pino1 = 18;      //Pino 19 - interrupção 3 do Arduino Mega!
-float pluviometro;          //Variável para armazenar o valor do pluviometro em função dos pulsos gerados.
-float pluviometro_hora;     //Variável para exibir a chuva por hora.
-
-byte sms_pluviometro;
+volatile unsigned int Read_Pulso1Antigo;   //Variável para a quantidade de pulsos anterior
+float pluviometro;               //Variável para armazenar o valor do pluviometro em função dos pulsos gerados.
+float pluviometro_acum;          //Variável para armazenar o valor do pluviometro acumulado em função dos pulsos gerados.
+const byte Pino1 = 18;           //Pino 19 - interrupção 3 do Arduino Mega!
+byte sms_pluviometro;            //Variável auxiliar para enviar SMS quando houver precipitação maior que 1.00mm
 
 #define VCC_PLUV 37  // PINO DE ALIMENTAÇÃO VCC AUXILIAR DO PLUVIOMETRO
 #define GND_PLUV 36  // PINO DE ALIMENTAÇÃO GND AUXILIAR DO PLUVIOMETRO
 
 // ==============================================================================
-// SENSOR DE VAZÃO:
+//SENSOR DE VAZÃO:
 
 #define VCC_VAZAO 39  // PINO DE ALIMENTAÇÃO VCC AUXILIAR DO PLUVIOMETRO
 #define GND_VAZAO 38  // PINO DE ALIMENTAÇÃO GND AUXILIAR DO PLUVIOMETRO
@@ -628,8 +646,8 @@ unsigned int pulsos_vazao_seg;
 void umid_soloP1();
 
 float umidadeP1;
-float minimoP1 = 270.50;  //328.50
-float maximoP1 = 535.50;   //758.50
+float minimoP1 = 8.00;   
+float maximoP1 = 1010.50;  
 float sensorP1;
 
 float umidP1_analog;
@@ -648,8 +666,8 @@ float umSminP1;
 void umid_soloP2();
 
 float umidadeP2;
-float minimoP2 = 297.50;
-float maximoP2 = 615.50;
+float minimoP2 = 7.00;  
+float maximoP2 = 1011.50;  
 float sensorP2;
 
 float umidP2_analog;
@@ -665,16 +683,14 @@ float umSminP2;
 
 void lcd_preciptacao();
 float chuva_analog;
-float minimo2 = 495.50;
-float maximo2 = 1000.50;
+float minimo2 = 230.50;
+float maximo2 = 941.50;
 float preciptacao1;
 float preciptacao;
 float valor5 = 0;
 
 float cpmin;
 float cpmax;
-
-byte ChuvaD;
 
 // ========================================================================================================
 // MÓDULO BMP 280:
@@ -720,11 +736,6 @@ float t1_int;
 float h1_int;
 float t1_int_Max;
 float t1_int_Min;
-
-//void lcd_sens_term();
-//float sens_term;
-//float sens_term_Max;
-//float sens_term_Min;
 
 // SENSOR DHT22 EXTERNO - DHT1_PIN A14
 double dewPoint(double celsius, double humidity);
@@ -824,7 +835,7 @@ unsigned long TempoAtuallLED;
 #define BUZZER_GND 27
 
 volatile boolean estado_buzzer = false;
-boolean aux_estado_buzzer = false;
+volatile boolean aux_estado_buzzer = false;
 //=======================================================================================================//
 
 
@@ -847,7 +858,7 @@ boolean aux_estado_buzzer = false;
 void setup() {
 
   //========================================================================================================
-  //INICIALIZANDO SETUPS DOS SENSORES E SERIAL:
+  //iNICIALIZANDO SETUPS DOS SENSORES E SERIAL:
 
   //Serial.begin(9600);
   serialGSM.begin(9600);
@@ -947,7 +958,7 @@ void setup() {
       t.mon = 7;
       t.date = 21;
 
-      rtc.setDOW(SUNDAY);        // Set Day-of-Week to SUNDAY
+      rtc.setDOW(SUNDAY);     // Set Day-of-Week to SUNDAY
       rtc.setTime(14,03,00);     // Set the time to 12:00:00 (24hr format)
       rtc.setDate(28,02,2021);   // Set the date to January 1st, 2014
   */
@@ -974,7 +985,7 @@ void setup() {
   //========================================================================================================
   // Contagem de mensagens SMS enviadas:
 
-  msg_counter4 = 0;
+  msg_sms_env = 0;
 
   //========================================================================================================
   // Contagem de mensagens SMS foram recebidas:
@@ -1379,6 +1390,12 @@ void setup() {
   //========================================================================================================
   // VARIAVEIS DE INDICAÇÃO MÁXIMA E MÍNIMA DO DEW POINT DO SENSOR ULTRASSONICO:
 
+  //c_aux = (((R1_caixa)*(R1_caixa)) + ((R2_caixa)*(R2_caixa)) + ((R1_caixa)*(R2_caixa)));
+  //delay(2000);
+
+  //distance = ultrasonic.read();
+  //nivel = altura_caixa - distance;
+
   volume_reservatorio = (((nivel * pi) / 3) * c_aux);
   volume_reservatorio = volume_reservatorio / 1000;
   volume_reservatorio = volume_reservatorio * 2;
@@ -1398,7 +1415,6 @@ void setup() {
 
   //========================================================================================================
   // VARIAVEIS DE INDICAÇÃO MÁXIMA E MÍNIMA DO SENSOR UV:
-  
   valor_sensorUV = analogRead(pino_sensorUV);
 
   //Calcula tensao em milivolts
@@ -1474,7 +1490,7 @@ void setup() {
   // VALORES INICIAIS DA VAZÃO:
 
   contaPulso_vazao = 0;     //Variável para a quantidade de pulsos++; //Incrementa a variável de pulsos
-  contaPulsotot = 0;        //Variável para a quantidade de pulsos++; //Incrementa a variável de pulsos
+  contaPulsotot = 0; //Variável para a quantidade de pulsos++; //Incrementa a variável de pulsos
   vazao = 0.00;
   Litros = 0.00;
 
@@ -1482,10 +1498,10 @@ void setup() {
   // VALORES INICIAIS DO PLUVIOMETRO:
 
   Read_Pulso1 = 0;
+  Read_Pulso1Antigo = 0;
   contaPulso1 = 0;
-  pluviometro = 0.00 ;
-  contaPulsopluvhora = 0;      //Variável para a quantidade de pulsos
-  pluviometro_hora = 0.00;     //Variável para exibir a chuva por hora.
+  pluviometro = 0.00;
+  pluviometro_acum = 0.00;
 
   //========================================================================================================
   // VARIÁVEL AUXILIAR DO MENU DO DISPLAY TOUCH SCREEN QUANDO ELE É PRESSIONADO:
@@ -1501,60 +1517,23 @@ void setup() {
   tft.fillScreen(BLACK);
 
   //========================================================================================================
-  // INICIANDO DISPLAY TFT 2.4":
-
-  testLines_SD(WHITE);
-  delay(1000);
-
-  tft.fillRoundRect(20, 40, 200, 210, 15, RED);
-  tft.drawRoundRect(20, 40, 200, 210, 15, WHITE);
-
-  delay(1500);
-
-  tft.setCursor(48, 56);
-  tft.setTextColor(WHITE);
-  tft.setTextSize(6);
-  tft.print(F("NANO"));
-
-  delay(1500);
-
-  tft.setCursor(32, 120);
-  tft.setTextColor(WHITE);
-  tft.setTextSize(6);
-  tft.print(F("SMART"));
-
-  delay(1500);
-
-  tft.setCursor(48, 184);
-  tft.setTextColor(WHITE);
-  tft.setTextSize(6);
-  tft.print(F("AGRO"));
-
-  delay(1500);
-
-  tft.fillRoundRect(10, 270, 220, 40, 5, RED);
-  tft.drawRoundRect(10, 270, 220, 40, 5, WHITE);
-
-  delay(1500);
-
-  tft.setCursor(37, 275);
-  tft.setTextColor(WHITE);
-  tft.setTextSize(2);
-  tft.print(F("WD RETZER S.A."));
-
-  delay(1500);
-
-  tft.setCursor(25, 292);
-  tft.setTextColor(WHITE);
-  tft.setTextSize(2);
-  tft.print(F("DATALLOGER V4.05"));
-
-  delay(2000);
-  tft.fillRect(0, 0, 240, 320, BLACK);
+  // ATIVANDO O LED DA PLACA DOS SENSORES:
 
   digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
   digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-  delay(200);
+
+  //========================================================================================================
+  // INICIANDO O TESTE DE LINHAS DO DISPLAY TFT 2.4":
+
+  testLines_SD(WHITE);
+  delay(1500);
+
+  //========================================================================================================
+  // INICIANDO O MENU DO NSAGRO:
+  
+  data_hora();
+  tft.fillRect(0, 0, 240, 320, BLACK);
+  delay(1000);
 
   //=========================INICIALIZANDO OS SETUPS DOS SENSORES E MÓDULOS================================//
   /*********************************************************************************************************/
@@ -1562,11 +1541,6 @@ void setup() {
 
   //========================================================================================================
   // INICIO DOS SETUPS DOS SENSORES:
-
-  tft.fillRect(0, 0, 240, 320, BLACK);
-  data_hora();
-  tft.fillRect(0, 0, 240, 320, BLACK);
-  delay(1000);
 
   tft.fillRect(0, 0, 240, 320, BLACK);
   teste_I2C();
@@ -1611,7 +1585,6 @@ void setup() {
   delay(1000);
 
   tft.setCursor(0, 35);
-  tft.setTextColor(WHITE);
   delay(500);
   SD.begin(pino53);
   delay(500);
@@ -1632,162 +1605,162 @@ void setup() {
 
   anterior30 = millis();              // (t_send) tempo para sincronizar o "time" de envio a cada 15 minutos a partir desse momento!
 
-  digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
   digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
   digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
   digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
   digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
   digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
   digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
 
   iot_ubidots();                     // server iot ubidots
   delay(1000);
   tft.fillRect(0, 0, 240, 320, BLACK);
 
-  digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
   digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
   digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
   digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
   digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
   digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
   digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
 
   iot_ubidots1();                    // server iot ubidots
   delay(2000);
   tft.fillRect(0, 0, 240, 320, BLACK);
 
-  digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
   digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
   digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
   digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
   digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
   digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
   digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
 
   iot_thingspeak();
   delay(1000);
   tft.fillRect(0, 0, 240, 320, BLACK);
 
-  digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
   digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
   digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
   digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
   digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
   digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
   digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
 
   iot_thingspeak1();
   delay(1000);
   tft.fillRect(0, 0, 240, 320, BLACK);
 
-  digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
   digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
   digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
   digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
   digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
   digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
   digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
 
   iot_thingspeak2();
   delay(1000);
   tft.fillRect(0, 0, 240, 320, BLACK);
 
-  digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
   digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
   digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
   digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
   digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
   digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
   delay(200);
 
-  digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
+  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
   digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
 
   d2();
@@ -1812,22 +1785,18 @@ void setup() {
   delay(1500);
 
   tft.setCursor(48, 56);
-  tft.setTextColor(WHITE);
+  tft.setTextColor(WHITE, RED);
   tft.setTextSize(6);
   tft.print(F("NANO"));
 
   delay(1500);
 
   tft.setCursor(32, 120);
-  tft.setTextColor(WHITE);
-  tft.setTextSize(6);
   tft.print(F("SMART"));
 
   delay(1500);
 
   tft.setCursor(48, 184);
-  tft.setTextColor(WHITE);
-  tft.setTextSize(6);
   tft.print(F("AGRO"));
 
   delay(1500);
@@ -1840,7 +1809,6 @@ void setup() {
   tft.print(F("INICIANDO LEITURAS"));
 
   delay(1000);
-  
 
   //==============================INTERRUPÇÕES CONFIGURAÇÃO DOS PINOS======================================//
   /*********************************************************************************************************/
@@ -1865,7 +1833,7 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(Pino), pulse, RISING);
 
   contaPulso_vazao = 0;     //Variável para a quantidade de pulsos++; //Incrementa a variável de pulsos
-  contaPulsotot = 0;  		//Variável para a quantidade de pulsos++; //Incrementa a variável de pulsos
+  contaPulsotot = 0;  //Variável para a quantidade de pulsos++; //Incrementa a variável de pulsos
   vazao = 0.00;
   Litros = 0.00;
   Litros_anterior = Litros;
@@ -1879,9 +1847,7 @@ void setup() {
   Read_Pulso1 = 0;
   contaPulso1 = 0;
   pluviometro = 0.00 ;
-
-  contaPulsopluvhora = 0;      //Variável para a quantidade de pulsos
-  pluviometro_hora = 0.00;     //Variável para exibir a chuva por hora.
+  pluviometro_acum = 0.00;
 
   //========================================================================================================
   // VARIAVEIS PARA A FUNÇÃO MILLIS PARA QUE NÃO HAJA DELAY E O ENVIO DE SMS FUNCIONE MELHOR!!!
@@ -1979,6 +1945,645 @@ void setup() {
 
 void loop() {
 
+  // ========================================================================================================
+  // CHECANDO RECEBIMENTO DE MENSAGENS VIA SMS:
+
+  leGSM();
+
+  while (temSMS) {
+
+    detachInterrupt(digitalPinToInterrupt(Pino));   // Desabilita somente a interrupção da leitura do sensor de vazão / pino 19 corresponde a interrupção 2
+    detachInterrupt(digitalPinToInterrupt(Pino1));  // Desabilita somente a interrupção da leitura do sensor pluviômetro / pino 18 corresponde a interrupção 1
+
+    digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
+    delay(250);
+    digitalWrite(BUZZER_VCC, false);        // Reseta o BUZZER
+    delay(250);
+    digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
+    delay(250);
+    digitalWrite(BUZZER_VCC, false);        // Reseta o BUZZER
+    delay(250);
+    digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
+    delay(250);
+    digitalWrite(BUZZER_VCC, false);        // Reseta o BUZZER
+
+    tft.fillRect(0, 0, 240, 320, BLACK);
+    tft.fillRoundRect(0, 0, 240, 95, 15, RED);
+    tft.drawRoundRect(0, 0, 240, 95, 15, WHITE);
+
+    tft.setCursor(23, 10);
+    tft.setTextColor(WHITE);
+    tft.setTextSize(3);
+    tft.print(F("VERIFICANDO"));
+
+    tft.setCursor(52, 37);
+    tft.print(F("CAIXA DE"));
+
+    tft.setCursor(14, 64);
+    tft.print(F("MENSAGEM SMS"));
+
+    tft.fillRoundRect(10, 110, 220, 30, 15, YELLOW);
+    tft.drawRoundRect(10, 110, 220, 30, 15, RED);
+    tft.setCursor(30, 114);
+    tft.setTextColor(RED);
+    tft.print(F("CHEGOU SMS!"));
+
+    // ========================================================================================================
+    // CONTA QUANTAS MENSAGENS SMS FOI RECEBIDO:
+
+    msg_sms_rec++;
+
+    // ========================================================================================================
+    // CHECANDO RECEBIMENTO DE MENSAGENS VIA SMS É IGUAL AS SENHAS CADASTRADAS:
+
+    // ========================================================================================================
+    // SE AS SENHAS FOREM DIFERENTES, EXECUTA ABAIXO:
+
+    mensagemSMS.trim();
+
+    // TESTA SE AS MSGS FOREEM DIFERENTES DAS SENHAS PRÉ-CONFIGURADAS:
+    if (  (  (mensagemSMS.equals(senhaGsm) ) || (mensagemSMS.equals(senhaGsm1) ) || (mensagemSMS.equals(senhaGsm2) ) || (mensagemSMS.equals(senhaGsm3) ) || (mensagemSMS.equals(senhaGsm4) ) || (mensagemSMS.equals(senhaGsm5) ) ) != 1   ) {
+
+      tft.setCursor(10, 158);
+      tft.setTextColor(CYAN);
+      tft.setTextSize(2);
+      tft.print(F("Cel:"));
+      tft.setTextColor(WHITE);
+      tft.print(telefoneSMS);
+
+      tft.setCursor(10, 178);
+      tft.setTextColor(CYAN);
+      tft.setTextSize(1);
+      tft.print(F("Mensagem: "));
+
+      tft.setTextColor(WHITE);
+      tft.print(mensagemSMS);
+      delay(2000);
+
+      tft.setTextSize(2);
+      tft.fillRect(0, 280, 240, 38, RED);
+      tft.setCursor(5, 282);
+      tft.setTextColor(WHITE);
+      tft.print(F(" Senha Nao Correta "));
+      tft.setCursor(25, 300);
+      tft.println(F("SMS Nao Enviado!"));
+
+      int pino53 = 53;
+      pinMode(pino53, OUTPUT);
+
+      delay(500);
+      SD.begin(pino53);
+      delay(500);
+
+      myFile = SD.open("SMS.txt", FILE_WRITE);
+      myFile.print(F("NANO SMART AGRO - Mensagem SMS Recebida"));
+      myFile.print(F(";"));
+      myFile.print(F(" Cel:"));
+      myFile.print(telefoneSMS);
+      myFile.print(F(";"));
+      myFile.print(F(" Msg: "));
+      myFile.print(mensagemSMS);
+      myFile.print(F(";"));
+      myFile.print(F(" DATA: "));
+      myFile.print(t.date, DEC);
+      myFile.print(F("/"));
+      myFile.print(t.mon, DEC);
+      myFile.print(F("/"));
+      myFile.print(t.year, DEC);
+      myFile.print(F(";"));
+      myFile.print(F(" HORARIO: "));
+      myFile.print(rtc.getTimeStr());
+      myFile.print(F(";"));
+      myFile.println();
+      myFile.println();
+      delay(1000);
+      myFile.close();
+      delay(1000);
+
+      SD.end();
+
+      // ========================================================================================================
+      // SE UMA DAS SENHAS FOREM IGUAIS, EXECUTA ABAIXO:
+
+    } else {
+
+      tft.setCursor(10, 158);
+      tft.setTextColor(CYAN);
+      tft.setTextSize(2);
+      tft.print(F("Data:"));
+      tft.setTextColor(WHITE);
+      String dataSMS = dataHoraSMS;
+      dataSMS.remove(8, 12);
+      tft.print(dataSMS);
+
+      tft.setCursor(10, 178);
+      tft.setTextColor(CYAN);
+      tft.print(F("Hora:"));
+      tft.setTextColor(WHITE);
+      String horaSMS = dataHoraSMS;
+      horaSMS.remove(0, 9);
+      horaSMS.remove(8, 3);
+      tft.print(horaSMS);
+
+      tft.setCursor(10, 198);
+      tft.setTextColor(CYAN);
+      tft.print(F("Mensagem:"));
+      tft.setTextColor(WHITE);
+      tft.print(mensagemSMS);
+
+      tft.setCursor(10, 218);
+      tft.setTextColor(CYAN);
+      tft.print(F("Remetente:"));
+
+      if (telefoneSMS == "+551599999999") {
+
+        tft.setTextColor(WHITE);
+        tft.print(F("Walter R."));
+        tft.setCursor(10, 238);
+        tft.setTextColor(CYAN);
+        tft.print(F("Cel:"));
+        tft.setTextColor(WHITE);
+        tft.print(telefoneSMS);
+
+      } else {
+
+        tft.setTextColor(WHITE);
+        tft.print(F(" Unknown "));
+        tft.setCursor(10, 238);
+        tft.setTextColor(CYAN);
+        tft.print(F("Cel:"));
+        tft.setTextColor(WHITE);
+        tft.print(telefoneSMS);
+
+      }
+
+      tft.setTextColor(CYAN);
+      tft.setCursor(10, 258);
+      tft.print(F("SMS:"));
+      tft.setTextColor(WHITE);
+      delay(1000);
+      tft.setCursor(57, 258);
+      tft.print("Senha OK!");
+
+      // senhaGsm = "***************"  senha para enviar o SMS com os valores das variaveis!
+      mensagemSMS.trim();
+
+      if ( mensagemSMS == senhaGsm ) {
+
+        enviaSMS(telefoneSMS, "IoT NANO SMART AGRO \nSMS Recebido e Senha OK!");          // envia SMS com os valores dos sensores;
+
+        delay(1500);
+        leGSM();
+        delay(1500);
+  
+        tft.setTextColor(CYAN, BLACK);
+        tft.setCursor(10, 278);
+        tft.print(F("GSM:"));
+        tft.setTextColor(WHITE, BLACK);
+        delay(1000);
+        ultimoGSM.trim();            // Estrutura: >+CMGS: XXX OK
+        tft.print(ultimoGSM);    
+        
+        tft.fillRect(0, 295, 240, 45, RED);
+        tft.setTextColor(WHITE, RED);
+        tft.setCursor(25, 300);
+        tft.print(F("     Enviando     "));
+        delay(1000);
+        tft.setCursor(25, 300);
+        tft.print(F("SMS de Resposta!"));
+        delay(1000);
+        tft.setCursor(25, 300);
+        tft.print(F("  SMS ENVIADO!  "));
+        delay(1000);
+
+        msg_sms_env++;
+        
+        int pino53 = 53;
+        pinMode(pino53, OUTPUT);
+
+        delay(500);
+        SD.begin(pino53);
+        delay(500);
+
+        myFile = SD.open("SMS.txt", FILE_WRITE);
+        myFile.print(F("NANO SMART AGRO - Mensagem SMS Enviada"));
+        myFile.print(F(";"));
+        myFile.print(F(" Senha Recebida: NSAGROV1"));
+        myFile.print(F(";"));
+        myFile.print(F(" Solicitacao de Valores das Variaveis"));
+        myFile.print(F(";"));
+        myFile.print(F(" Cel:"));
+        myFile.print(telefoneSMS);
+        myFile.print(F(";"));
+        myFile.print(F(" SMS Enviados: "));
+        myFile.print(msg_sms_env);
+        myFile.print(F(";"));
+        myFile.print(F(" DATA: "));
+        myFile.print(t.date, DEC);
+        myFile.print(F("/"));
+        myFile.print(t.mon, DEC);
+        myFile.print(F("/"));
+        myFile.print(t.year, DEC);
+        myFile.print(F(";"));
+        myFile.print(F(" HORARIO: "));
+        myFile.print(rtc.getTimeStr());
+        myFile.print(F(";"));
+        myFile.println();
+        myFile.println();
+        delay(1000);
+        myFile.close();
+        delay(1000);
+
+        SD.end();
+      } // FECHA IF DE CHECAGEM DO RECEBIMENTO DE MENSAGENS VIA SMS É IGUAL A NSAGROV1
+
+
+      // senhaGsm1 = "**********"  senha para enviar o SMS com o Diagnóstico!
+      if ( mensagemSMS == senhaGsm1 ) {
+        
+        enviaSMS1(telefoneSMS, "IoT NANO SMART AGRO \nSMS Recebido e Senha OK!");          // envia SMS com os valores dos sensores;
+
+        delay(1500);
+        leGSM();
+        delay(1500);
+  
+        tft.setTextColor(CYAN, BLACK);
+        tft.setCursor(10, 278);
+        tft.print(F("GSM:"));
+        tft.setTextColor(WHITE, BLACK);
+        delay(1000);
+        ultimoGSM.trim();            // Estrutura: >+CMGS: XXX OK
+        tft.print(ultimoGSM);    
+        
+        tft.fillRect(0, 295, 240, 45, RED);
+        tft.setTextColor(WHITE, RED);
+        tft.setCursor(25, 300);
+        tft.print(F("     Enviando     "));
+        delay(1000);
+        tft.setCursor(25, 300);
+        tft.print(F("SMS de Resposta!"));
+        delay(1000);
+        tft.setCursor(25, 300);
+        tft.print(F("  SMS ENVIADO!  "));
+        delay(1000);
+
+        msg_sms_env++;
+
+        int pino53 = 53;
+        pinMode(pino53, OUTPUT);
+
+        delay(500);
+        SD.begin(pino53);
+        delay(500);
+
+        myFile = SD.open("SMS.txt", FILE_WRITE);
+        myFile.print(F("NANO SMART AGRO - Mensagem SMS Enviada"));
+        myFile.print(F(";"));
+        myFile.print(F(" Senha Recebida: NSAGROD1"));
+        myFile.print(F(";"));
+        myFile.print(F(" Solicitacao de Envio de Diagnostico"));
+        myFile.print(F(";"));
+        myFile.print(F(" Cel:"));
+        myFile.print(telefoneSMS);
+        myFile.print(F(";"));
+        myFile.print(F(" SMS Enviados: "));
+        myFile.print(msg_sms_env);
+        myFile.print(F(";"));
+        myFile.print(F(" DATA: "));
+        myFile.print(t.date, DEC);
+        myFile.print(F("/"));
+        myFile.print(t.mon, DEC);
+        myFile.print(F("/"));
+        myFile.print(t.year, DEC);
+        myFile.print(F(";"));
+        myFile.print(F(" HORARIO: "));
+        myFile.print(rtc.getTimeStr());
+        myFile.print(F(";"));
+        myFile.println();
+        myFile.println();
+        delay(1000);
+        myFile.close();
+        delay(1000);
+
+        SD.end();
+      } // FECHA IF DE CHECAGEM DO RECEBIMENTO DE MENSAGENS VIA SMS É IGUAL A NSAGROD1
+
+
+      // senhaGsm2 = "***********"  senha para solicitação de RESETE do Arduino!
+      if ( mensagemSMS == senhaGsm2 ) {
+        
+        enviaSMS2(telefoneSMS, "IoT NANO SMART AGRO \nSMS Recebido e Senha OK!");          // envia SMS com os valores dos sensores;
+
+                delay(1500);
+        leGSM();
+        delay(1500);
+  
+        tft.setTextColor(CYAN, BLACK);
+        tft.setCursor(10, 278);
+        tft.print(F("GSM:"));
+        tft.setTextColor(WHITE, BLACK);
+        delay(1000);
+        ultimoGSM.trim();            // Estrutura: >+CMGS: XXX OK
+        tft.print(ultimoGSM);    
+        
+        tft.fillRect(0, 295, 240, 45, RED);
+        tft.setTextColor(WHITE, RED);
+        tft.setCursor(25, 300);
+        tft.print(F("     Enviando     "));
+        delay(1000);
+        tft.setCursor(25, 300);
+        tft.print(F("SMS de Resposta!"));
+        delay(1000);
+        tft.setCursor(25, 300);
+        tft.print(F("  SMS ENVIADO!  "));
+        delay(1000);
+
+        msg_sms_env++;
+
+        int pino53 = 53;
+        pinMode(pino53, OUTPUT);
+
+        delay(500);
+        SD.begin(pino53);
+        delay(500);
+
+        myFile = SD.open("SMS.txt", FILE_WRITE);
+        myFile.print(F("NANO SMART AGRO - Mensagem SMS Enviada"));
+        myFile.print(F(";"));
+        myFile.print(F(" Senha Recebida: NSAGROR1"));
+        myFile.print(F(";"));
+        myFile.print(F(" Solicitacao de RESETE do Arduino"));
+        myFile.print(F(";"));
+        myFile.print(F(" Cel:"));
+        myFile.print(telefoneSMS);
+        myFile.print(F(";"));
+        myFile.print(F(" SMS Enviados: "));
+        myFile.print(msg_sms_env);
+        myFile.print(F(";"));
+        myFile.print(F(" DATA: "));
+        myFile.print(t.date, DEC);
+        myFile.print(F("/"));
+        myFile.print(t.mon, DEC);
+        myFile.print(F("/"));
+        myFile.print(t.year, DEC);
+        myFile.print(F(";"));
+        myFile.print(F(" HORARIO: "));
+        myFile.print(rtc.getTimeStr());
+        myFile.print(F(";"));
+        myFile.println();
+        myFile.println();
+        delay(1000);
+        myFile.close();
+        delay(1000);
+
+        SD.end();
+
+        modemGSM.restart();
+        delay(1000);
+        funcReset();
+
+      }// FECHA IF DE CHECAGEM DO RECEBIMENTO DE MENSAGENS VIA SMS É IGUAL A NSAGROR1
+
+
+      // senhaGsm3 = "**********"  senha para envio de SMS do Relatório de Gravação do SD CARD!
+      if ( mensagemSMS == senhaGsm3 ) {
+        
+        enviaSMS3(telefoneSMS, "IoT NANO SMART AGRO \nSMS Recebido e Senha OK!");          // envia SMS com os valores dos sensores;
+
+        delay(1500);
+        leGSM();
+        delay(1500);
+  
+        tft.setTextColor(CYAN, BLACK);
+        tft.setCursor(10, 278);
+        tft.print(F("GSM:"));
+        tft.setTextColor(WHITE, BLACK);
+        delay(1000);
+        ultimoGSM.trim();            // Estrutura: >+CMGS: XXX OK
+        tft.print(ultimoGSM);    
+        
+        tft.fillRect(0, 295, 240, 45, RED);
+        tft.setTextColor(WHITE, RED);
+        tft.setCursor(25, 300);
+        tft.print(F("     Enviando     "));
+        delay(1000);
+        tft.setCursor(25, 300);
+        tft.print(F("SMS de Resposta!"));
+        delay(1000);
+        tft.setCursor(25, 300);
+        tft.print(F("  SMS ENVIADO!  "));
+        delay(1000);
+
+        msg_sms_env++;
+
+        int pino53 = 53;
+        pinMode(pino53, OUTPUT);
+
+        delay(500);
+        SD.begin(pino53);
+        delay(500);
+
+        myFile = SD.open("SMS.txt", FILE_WRITE);
+        myFile.print(F("NANO SMART AGRO - Mensagem SMS Enviada"));
+        myFile.print(F(";"));
+        myFile.print(F(" Senha Recebida: NSAGROC1"));
+        myFile.print(F(";"));
+        myFile.print(F(" Solicitacao de Envio do Relatorio de Gravacao no SD Card"));
+        myFile.print(F(";"));
+        myFile.print(F(" Cel:"));
+        myFile.print(telefoneSMS);
+        myFile.print(F(";"));
+        myFile.print(F(" SMS Enviados: "));
+        myFile.print(msg_sms_env);
+        myFile.print(F(";"));
+        myFile.print(F(" DATA: "));
+        myFile.print(t.date, DEC);
+        myFile.print(F("/"));
+        myFile.print(t.mon, DEC);
+        myFile.print(F("/"));
+        myFile.print(t.year, DEC);
+        myFile.print(F(";"));
+        myFile.print(F(" HORARIO: "));
+        myFile.print(rtc.getTimeStr());
+        myFile.print(F(";"));
+        myFile.println();
+        myFile.println();
+        delay(1000);
+        myFile.close();
+        delay(1000);
+
+        SD.end();
+
+      } // FECHA IF DE CHECAGEM DO RECEBIMENTO DE MENSAGENS VIA SMS É IGUAL A NSAGROR1
+
+
+      // senhaGsm4 = "*************"  senha para resete do Pluviômetro!
+      if ( mensagemSMS == senhaGsm4 ) {
+
+        enviaSMS4(telefoneSMS, "IoT NANO SMART AGRO \nSMS Recebido e Senha OK!");          // envia SMS com os valores dos sensores;
+
+        delay(1500);
+        leGSM();
+        delay(1500);
+  
+        tft.setTextColor(CYAN, BLACK);
+        tft.setCursor(10, 278);
+        tft.print(F("GSM:"));
+        tft.setTextColor(WHITE, BLACK);
+        delay(1000);
+        ultimoGSM.trim();            // Estrutura: >+CMGS: XXX OK
+        tft.print(ultimoGSM);    
+        
+        tft.fillRect(0, 295, 240, 45, RED);
+        tft.setTextColor(WHITE, RED);
+        tft.setCursor(25, 300);
+        tft.print(F("     Enviando     "));
+        delay(1000);
+        tft.setCursor(25, 300);
+        tft.print(F("SMS de Resposta!"));
+        delay(1000);
+        tft.setCursor(25, 300);
+        tft.print(F("  SMS ENVIADO!  "));
+        delay(1000);
+
+        msg_sms_env++;
+
+        Read_Pulso1 = 0;
+        Read_Pulso1Antigo = 0;
+        contaPulso1 = 0;             // RESETA PULSOS DO PLUVIÔMETRO
+        pluviometro = 0;
+        pluviometro_acum = 0;
+        sms_pluviometro = true;
+
+        int pino53 = 53;
+        pinMode(pino53, OUTPUT);
+
+        delay(500);
+        SD.begin(pino53);
+        delay(500);
+
+        myFile = SD.open("SMS.txt", FILE_WRITE);
+        myFile.print(F("NANO SMART AGRO - Mensagem SMS Enviada"));
+        myFile.print(F(";"));
+        myFile.print(F(" Senha Recebida: NSAGROP1"));
+        myFile.print(F(";"));
+        myFile.print(F(" Solicitacao de Resete do Pluviometro!"));
+        myFile.print(F(";"));
+        myFile.print(F(" Cel:"));
+        myFile.print(telefoneSMS);
+        myFile.print(F(";"));
+        myFile.print(F(" SMS Enviados: "));
+        myFile.print(msg_sms_env);
+        myFile.print(F(";"));
+        myFile.print(F(" DATA: "));
+        myFile.print(t.date, DEC);
+        myFile.print(F("/"));
+        myFile.print(t.mon, DEC);
+        myFile.print(F("/"));
+        myFile.print(t.year, DEC);
+        myFile.print(F(";"));
+        myFile.print(F(" HORARIO: "));
+        myFile.print(rtc.getTimeStr());
+        myFile.print(F(";"));
+        myFile.println();
+        myFile.println();
+        
+        delay(1000);
+        myFile.close();
+        delay(1000);
+
+        SD.end();
+
+      } // FECHA IF DE CHECAGEM DO RECEBIMENTO DE MENSAGENS VIA SMS É IGUAL A NSAGROP1
+
+
+      // senhaGsm5 = "**************"  senha para resete do Totalizador de Vazão
+      if ( mensagemSMS == senhaGsm5 ) {
+       
+        enviaSMS5(telefoneSMS, "IoT NANO SMART AGRO \nSMS Recebido e Senha OK!");          // envia SMS com os valores dos sensores;
+
+        delay(1500);
+        leGSM();
+        delay(1500);
+  
+        tft.setTextColor(CYAN, BLACK);
+        tft.setCursor(10, 278);
+        tft.print(F("GSM:"));
+        tft.setTextColor(WHITE, BLACK);
+        delay(1000);
+        ultimoGSM.trim();            // Estrutura: >+CMGS: XXX OK
+        tft.print(ultimoGSM);    
+        
+        tft.fillRect(0, 295, 240, 45, RED);
+        tft.setTextColor(WHITE, RED);
+        tft.setCursor(25, 300);
+        tft.print(F("     Enviando     "));
+        delay(1000);
+        tft.setCursor(25, 300);
+        tft.print(F("SMS de Resposta!"));
+        delay(1000);
+        tft.setCursor(25, 300);
+        tft.print(F("  SMS ENVIADO!  "));
+        delay(1000);
+
+        msg_sms_env++;
+
+        // Resetando Variáveis do Totalizador de Vazão:
+        MiliLitros = 0.00;
+        Litros = 0.00;
+        contaPulsotot = 0;
+
+
+        int pino53 = 53;
+        pinMode(pino53, OUTPUT);
+
+        delay(500);
+        SD.begin(pino53);
+        delay(500);
+
+        myFile = SD.open("SMS.txt", FILE_WRITE);
+        myFile.print(F("NANO SMART AGRO - Mensagem SMS Enviada"));
+        myFile.print(F(";"));
+        myFile.print(F(" Senha Recebida: NSAGROT1"));
+        myFile.print(F(";"));
+        myFile.print(F(" Solicitacao de Resete do Totalizador de Vazao"));
+        myFile.print(F(";"));
+        myFile.print(F(" Cel:"));
+        myFile.print(telefoneSMS);
+        myFile.print(F(";"));
+        myFile.print(F(" SMS Enviados: "));
+        myFile.print(msg_sms_env);
+        myFile.print(F(";"));
+        myFile.print(F(" DATA: "));
+        myFile.print(t.date, DEC);
+        myFile.print(F("/"));
+        myFile.print(t.mon, DEC);
+        myFile.print(F("/"));
+        myFile.print(t.year, DEC);
+        myFile.print(F(";"));
+        myFile.print(F(" HORARIO: "));
+        myFile.print(rtc.getTimeStr());
+        myFile.print(F(";"));
+        myFile.println();
+        myFile.println();
+        
+        delay(1000);
+        myFile.close();
+        delay(1000);
+
+        SD.end();
+
+      } // FECHA IF DE CHECAGEM DO RECEBIMENTO DE MENSAGENS VIA SMS É IGUAL A NSAGROT1
+
+
+    } // FECHA IF/ELSE DO TESTE SE A MENSAGEM SMS É IGUAL A UMA DAS SEBHAS CADASTRADAS
+
+    temSMS = false;
+
+    attachInterrupt(digitalPinToInterrupt(Pino), pulse, RISING);          //HABILITA NOVAMENTE A INTERRUPÇÃO PARA CÁLCULO DA VAZÃO
+    attachInterrupt(digitalPinToInterrupt(Pino1), pulso_chuva, RISING);  //HABILITA NOVAMENTE A INTERRUPÇÃO PARA CÁLCULO DO PLUVIÔMETRO.
+
+  } // FECHA WHILE QUANDO TEM A OPÇÃO TEM SMS RECEBIDO
   //========================================================================================================
   // FUNÇÃO DE VERICAÇÃO SE TOUCH SCREEN FOI TOCADO:
 
@@ -2021,7 +2626,7 @@ void loop() {
     tft.fillRoundRect(5, 192, 230, 30, 5, RED);
     tft.drawRoundRect(5, 192, 230, 30, 5, WHITE);
     tft.setCursor(15, 200);
-    tft.println(F("NSAGRO V:4.01.34 "));
+    tft.println(F(" NSAGRO V:4.01.34"));
 
     tft.setCursor(0, 260);
     tft.print(F(" Selecione a opcao:"));
@@ -2039,7 +2644,7 @@ void loop() {
     tft.fillRoundRect(60, 290, 30, 30, 5, RED);
     tft.drawRoundRect(60, 290, 30, 30, 5, WHITE);
     tft.setTextColor(WHITE);
-    tft.setTextSize(2);
+    //tft.setTextSize(2);
     tft.setCursor(69, 298);
     tft.println(F("2"));
 
@@ -2047,7 +2652,7 @@ void loop() {
     tft.fillRoundRect(105, 290, 30, 30, 5, RED);
     tft.drawRoundRect(105, 290, 30, 30, 5, WHITE);
     tft.setTextColor(WHITE);
-    tft.setTextSize(2);
+    //tft.setTextSize(2);
     tft.setCursor(114, 298);
     tft.println(F("3"));
 
@@ -2055,7 +2660,7 @@ void loop() {
     tft.fillRoundRect(150, 290, 30, 30, 5, RED);
     tft.drawRoundRect(150, 290, 30, 30, 5, WHITE);
     tft.setTextColor(WHITE);
-    tft.setTextSize(2);
+    //tft.setTextSize(2);
     tft.setCursor(159, 298);
     tft.println(F("4"));
 
@@ -2063,7 +2668,7 @@ void loop() {
     tft.fillRoundRect(195, 290, 30, 30, 5, RED);
     tft.drawRoundRect(195, 290, 30, 30, 5, WHITE);
     tft.setTextColor(WHITE);
-    tft.setTextSize(2);
+    //tft.setTextSize(2);
     tft.setCursor(204, 298);
     tft.println(F("5"));
 
@@ -2106,7 +2711,7 @@ void loop() {
           tft.fillRoundRect(15, 290, 30, 30, 5, RED);
           tft.drawRoundRect(15, 290, 30, 30, 5, YELLOW);
           tft.setTextColor(BLACK);
-          tft.setTextSize(2);
+          //tft.setTextSize(2);
           tft.setCursor(25, 298);
           tft.println(F("X"));
           delay(2000);
@@ -2222,7 +2827,6 @@ void loop() {
           tft.fillRoundRect(60, 290, 30, 30, 5, RED);
           tft.drawRoundRect(60, 290, 30, 30, 5, YELLOW);
           tft.setTextColor(BLACK);
-          tft.setTextSize(2);
           tft.setCursor(70, 298);
           tft.println(F("X"));
           delay(2000);
@@ -2231,7 +2835,6 @@ void loop() {
           tft.fillRect(0, 0, 240, 30, RED);
           tft.setCursor(5, 7);
           tft.setTextColor(WHITE);
-          tft.setTextSize(2);
           tft.println(F("ARQUIVOS NO SD CARD"));
 
           delay(1000);
@@ -2261,9 +2864,6 @@ void loop() {
         //========================================================================================================
         // EXIBE O MENU SELECIONADO QUANDO OCORRER O TOQUE NO BOTÃO 03:
 
-        //========================================================================================================
-        // EXIBE O MENU SELECIONADO QUANDO OCORRER O TOQUE NO BOTÃO 03:
-
         // BOTÃO 3 - ENVIO DE MENSAGEM SMS DE TESTE:
         if (tp.x > 484  && tp.x < 574  && tp.y > 175 && tp.y < 260) {
 
@@ -2274,7 +2874,6 @@ void loop() {
           tft.fillRoundRect(105, 290, 30, 30, 5, RED);
           tft.drawRoundRect(105, 290, 30, 30, 5, YELLOW);
           tft.setTextColor(BLACK);
-          //tft.setTextSize(2);
           tft.setCursor(115, 298);
           tft.println(F("X"));
           delay(2000);
@@ -2300,15 +2899,13 @@ void loop() {
           tft.println(F("2-ENVIO SMS TESTE"));
           tft.setCursor(0, 120);
           tft.println(F("3-CONFIRMA SALDO SMS"));
-//          tft.setCursor(0, 140);
-//          tft.println(F("9-DATA E HORA"));
           tft.setCursor(0, 160);
           tft.println(F("5-RETORNA"));
 
           tft.fillRoundRect(5, 192, 230, 30, 5, RED);
           tft.drawRoundRect(5, 192, 230, 30, 5, WHITE);
           tft.setCursor(15, 200);
-          tft.println(F(" NSAGRO V:4.01.29 "));
+          tft.println(F(" NSAGRO V:4.01.34 "));
 
           tft.setCursor(0, 260);
           tft.print(F(" Selecione a opcao:"));
@@ -2326,7 +2923,6 @@ void loop() {
           tft.fillRoundRect(60, 290, 30, 30, 5, RED);
           tft.drawRoundRect(60, 290, 30, 30, 5, WHITE);
           tft.setTextColor(WHITE);
-          //tft.setTextSize(2);
           tft.setCursor(69, 298);
           tft.println(F("2"));
       
@@ -2334,23 +2930,13 @@ void loop() {
           tft.fillRoundRect(105, 290, 30, 30, 5, RED);
           tft.drawRoundRect(105, 290, 30, 30, 5, WHITE);
           tft.setTextColor(WHITE);
-          //tft.setTextSize(2);
           tft.setCursor(114, 298);
           tft.println(F("3"));
-//      
-//          // DESENHANDO OS BOTÕES DE APLICAÇÃO:
-//          tft.fillRoundRect(150, 290, 30, 30, 5, RED);
-//          tft.drawRoundRect(150, 290, 30, 30, 5, WHITE);
-//          tft.setTextColor(WHITE);
-//          //tft.setTextSize(2);
-//          tft.setCursor(159, 298);
-//          tft.println(F("4"));
       
           // DESENHANDO OS BOTÕES DE APLICAÇÃO:
           tft.fillRoundRect(195, 290, 30, 30, 5, RED);
           tft.drawRoundRect(195, 290, 30, 30, 5, WHITE);
           tft.setTextColor(WHITE);
-          //tft.setTextSize(2);
           tft.setCursor(204, 298);
           tft.println(F("5"));
 
@@ -2476,7 +3062,7 @@ void loop() {
               tft.print(F("ENVIAR SMS!"));
     
               //========================================================================================================
-              // Enviando SMS para a VIVO:
+              // Enviando SMS para a Operadora VIVO:
     
               tft.setCursor(10, 158);
               tft.setTextColor(CYAN);
@@ -2661,7 +3247,7 @@ void loop() {
               tft.print(F("ENVIAR SMS!"));
     
               //========================================================================================================
-              // Enviando SMS para o celular +5515...........!
+              // Enviando SMS para o celular +5515999999999!
     
               tft.setCursor(10, 158);
               tft.setTextColor(CYAN);
@@ -2672,12 +3258,12 @@ void loop() {
     
               tft.setCursor(10, 178);
               tft.setTextColor(CYAN);
+              //tft.setTextSize(2);
               tft.print(F("Cel:"));
               tft.setTextColor(WHITE);
-              tft.print(F("+5515999999999"));
+              tft.print(F("+55159999999"));
     
               tft.setCursor(10, 198);
-              tft.setTextColor(CYAN);
               tft.print(F("Mensagem: "));
               tft.setTextColor(WHITE);
               tft.print(F("Envio de Mensagem SMS Teste!"));
@@ -2704,7 +3290,7 @@ void loop() {
               myFile.print(F(" Envio de mensagem SMS para teste"));
               myFile.print(F(";"));
               myFile.print(F(" Cel:"));
-              myFile.print("+5515999999999");
+              myFile.print("+551599999999");
               myFile.print(F(";"));
               myFile.print(F(" SMS Enviados: "));
               myFile.print(msg_sms_env);
@@ -2776,7 +3362,7 @@ void loop() {
               intervalo19 = 190000;
               intervalo20 = 200000;
     
-              enviaSMS("+5515999999999", "IoT NANO SMART AGRO \n**AVISO IMPORTANTE**");          // enviaSMS(telefoneSMS, o resumo de funcionamento do protótipo!
+              enviaSMS("+55159999999", "IoT NANO SMART AGRO \n**AVISO IMPORTANTE**");          // enviaSMS(telefoneSMS, o resumo de funcionamento do protótipo!
     
               delay(1000);
               leGSM();
@@ -2850,7 +3436,7 @@ void loop() {
               tft.print(F("ENVIAR SMS!"));
     
               //========================================================================================================
-              // Enviando SMS para a VIVO!
+              // Enviando SMS para a Opertadora Vivo:
     
               tft.setCursor(10, 158);
               tft.setTextColor(CYAN);
@@ -2861,7 +3447,6 @@ void loop() {
     
               tft.setCursor(10, 178);
               tft.setTextColor(CYAN);
-              //tft.setTextSize(2);
               tft.print(F("Tel:"));
               tft.setTextColor(WHITE);
               tft.print(F(" 1058"));
@@ -3054,8 +3639,6 @@ void loop() {
 
         } // FECHA IF DO BOTÃO 03 DO MENU PRINCIPAL 
 
-        } // FECHA IF DO BOTÃO 3 SELECIONADO
-
         //========================================================================================================
         // EXIBE O MENU SELECIONADO QUANDO OCORRER O TOQUE NO BOTÃO 04:
 
@@ -3069,7 +3652,7 @@ void loop() {
           tft.fillRoundRect(150, 290, 30, 30, 5, RED);
           tft.drawRoundRect(150, 290, 30, 30, 5, YELLOW);
           tft.setTextColor(BLACK);
-          tft.setTextSize(2);
+          //tft.setTextSize(2);
           tft.setCursor(160, 298);
           tft.println(F("X"));
           delay(2000);
@@ -3141,7 +3724,7 @@ void loop() {
           tft.fillRoundRect(195, 290, 30, 30, 5, RED);
           tft.drawRoundRect(195, 290, 30, 30, 5, YELLOW);
           tft.setTextColor(BLACK);
-          tft.setTextSize(2);
+          //tft.setTextSize(2);
           tft.setCursor(204, 298);
           tft.println(F("X"));
           delay(2500);
@@ -3172,7 +3755,7 @@ void loop() {
           tft.fillRoundRect(5, 192, 230, 30, 5, RED);
           tft.drawRoundRect(5, 192, 230, 30, 5, WHITE);
           tft.setCursor(15, 200);
-          tft.println(F("NSAGRO V:4.01.34 "));
+          tft.println(F(" NSAGRO V:4.01.34 "));
 
           tft.setCursor(0, 260);
           tft.print(F(" Selecione a opcao:"));
@@ -3190,7 +3773,6 @@ void loop() {
           tft.fillRoundRect(60, 290, 30, 30, 5, RED);
           tft.drawRoundRect(60, 290, 30, 30, 5, WHITE);
           tft.setTextColor(WHITE);
-          tft.setTextSize(2);
           tft.setCursor(69, 298);
           tft.println(F("7"));
 
@@ -3198,7 +3780,6 @@ void loop() {
           tft.fillRoundRect(105, 290, 30, 30, 5, RED);
           tft.drawRoundRect(105, 290, 30, 30, 5, WHITE);
           tft.setTextColor(WHITE);
-          tft.setTextSize(2);
           tft.setCursor(114, 298);
           tft.println(F("8"));
 
@@ -3206,7 +3787,6 @@ void loop() {
           tft.fillRoundRect(150, 290, 30, 30, 5, RED);
           tft.drawRoundRect(150, 290, 30, 30, 5, WHITE);
           tft.setTextColor(WHITE);
-          tft.setTextSize(2);
           tft.setCursor(159, 298);
           tft.println(F("9"));
 
@@ -3215,7 +3795,6 @@ void loop() {
           tft.fillRoundRect(195, 290, 30, 30, 5, RED);
           tft.drawRoundRect(195, 290, 30, 30, 5, WHITE);
           tft.setTextColor(WHITE);
-          tft.setTextSize(2);
           tft.setCursor(198, 298);
           tft.println(F("10"));
 
@@ -3295,7 +3874,7 @@ void loop() {
               tft.fillRoundRect(15, 290, 30, 30, 5, RED);
               tft.drawRoundRect(15, 290, 30, 30, 5, YELLOW);
               tft.setTextColor(BLACK);
-              tft.setTextSize(2);
+              //tft.setTextSize(2);
               tft.setCursor(25, 298);
               tft.println(F("X"));
               delay(2500);
@@ -3308,13 +3887,14 @@ void loop() {
 
               contaPulso1 = 0;   // RESETA PULSOS DO PLUVIÔMETRO
               Read_Pulso1 = 0;   // RESETA PULSOS DO PLUVIÔMETRO
+              Read_Pulso1Antigo = 0;   // RESETA PULSOS DO PLUVIÔMETRO
+              pluviometro = 0;
+              pluviometro_acum = 0;
               sms_pluviometro = true;
-              contaPulsopluvhora = 0;      // RESETA PULSOS DO PLUVIÔMETRO_HORA
-
+  
               // ========================================================================================================
               // CÁLCULO DO VALOR GERADO PELO PLUVIÔMETRO:
 
-              pluviometro_hora =  contaPulsopluvhora * 0.25;     // Variável para exibir a quantidade de chuva que caiu na ultima hora;
               pluviometro = contaPulso1 * 0.25;                  // Variável para exibir a quantidade de chuva totalizada no dia;
 
               delay(2500);
@@ -3384,7 +3964,6 @@ void loop() {
               tft.fillRoundRect(60, 290, 30, 30, 5, RED);
               tft.drawRoundRect(60, 290, 30, 30, 5, YELLOW);
               tft.setTextColor(BLACK);
-              tft.setTextSize(2);
               tft.setCursor(70, 298);
               tft.println(F("X"));
               delay(2500);
@@ -3466,7 +4045,6 @@ void loop() {
               tft.fillRoundRect(105, 290, 30, 30, 5, RED);
               tft.drawRoundRect(105, 290, 30, 30, 5, YELLOW);
               tft.setTextColor(BLACK);
-              tft.setTextSize(2);
               tft.setCursor(115, 298);
               tft.println(F("X"));
               delay(2000);
@@ -3539,7 +4117,6 @@ void loop() {
               tft.fillRoundRect(150, 290, 30, 30, 5, RED);
               tft.drawRoundRect(150, 290, 30, 30, 5, YELLOW);
               tft.setTextColor(BLACK);
-              tft.setTextSize(2);
               tft.setCursor(160, 298);
               tft.println(F("X"));
               delay(2500);
@@ -3590,10 +4167,12 @@ void loop() {
               intervalo19 = 190000;
               intervalo20 = 200000;
 
+              //========================================================================================================
+              // INICIANDO O MENU DO NSAGRO:
+              
               data_hora();
               display_menu = false;
               cont1 = 0;
-
 
               return;
 
@@ -3611,180 +4190,127 @@ void loop() {
               tft.fillRoundRect(195, 290, 30, 30, 5, RED);
               tft.drawRoundRect(195, 290, 30, 30, 5, YELLOW);
               tft.setTextColor(BLACK);
-              tft.setTextSize(2);
               tft.setCursor(205, 298);
               tft.println(F("X"));
               delay(2500);
 
               anterior30 = millis();
 
-              digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
+              digitalWrite(LED_BUILTIN, false);   // Seta o LED DA PLACA ARDUINO
               digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
               delay(250);
 
-              digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
               digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
               delay(250);
 
-              digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
               digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
               delay(250);
 
-              digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
               digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
               delay(250);
 
-              digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
               digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
 
               tft.fillRect(0, 0, 240, 320, BLACK);
               iot_ubidots();                      // server iot ubidots
 
-              digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
               digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
               digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
               digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
               digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
               digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
               digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
 
 
               tft.fillRect(0, 0, 240, 320, BLACK);
               iot_ubidots1();                     // server iot ubidots
 
-              digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
               digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
               digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
               digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
               digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
               digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-
-              digitalWrite(LED_BUILTIN, true);   // Reseta o LED DA PLACA ARDUINO
               digitalWrite(LED, true);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(250);
-
-              digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-              digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(250);
-
-              digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-              delay(250);
-
-              digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-              digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(250);
-
-              digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
+              delay(200);
 
               tft.fillRect(0, 0, 240, 320, BLACK);
               iot_thingspeak();
 
-              digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
               digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
               digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
               digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
               digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
               digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
               digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
 
               tft.fillRect(0, 0, 240, 320, BLACK);
               iot_thingspeak1();
 
-              digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
               digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
               delay(200);
-
-              digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
+              
               digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
               digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
               digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
               digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
               digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
 
               tft.fillRect(0, 0, 240, 320, BLACK);
               iot_thingspeak2();
 
-              digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
               digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
+              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
+              delay(200);
+              
+              digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
+              delay(200);
+
               digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
               digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-              digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
               digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
 
               d2();
@@ -3794,27 +4320,21 @@ void loop() {
               tft.fillRect(0, 0, 240, 320, BLACK);
               configuraGSM();
 
-              digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
               digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
               digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
               digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
               digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
               digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
               delay(200);
 
-              digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
               digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
               delay(5000);
 
@@ -3879,7 +4399,6 @@ void loop() {
     } // FECHA WHILE DO TEMPO DE ESPERA DO MENU DISPLAY POR 10 SEGUNDOS SE NÃO HOUVER TOQUE NA TELA, IRÁ RETORNAR AO LOOP PRINCIPAL
   } // FECHA WHILE QUANDO HOUVE TOQUE NA TELA, EXIBUÇÃO DO MENU PRINCIPAL (DISPLAY_MENU == TRUE)
 
-  gprsSerial.end();
   serialGSM.begin(9600);
   //Serial.begin(9600);
 
@@ -3980,16 +4499,6 @@ void loop() {
   }
 
   //========================================================================================================
-  // Contagem de vezes que houver falha no envio das mensagens aos Servidores IoT:
-
-  msg_counternok_resete = msg_counternok; //msg não enviada Ubidots 0
-  msg_counternok1_resete = msg_counternok1; //msg não enviada Ubidots 1
-  msg_counternok_t_resete = msg_counternok_t; // msg não enviada ThingSpeak 0
-  msg_counternok_t1_resete = msg_counternok_t1; // msg não enviada ThingSpeak 1
-  msg_counternok_t2_resete = msg_counternok_t2; // msg não enviada ThingSpeak 2
-  configuraGSM_nok_resete = configuraGSM_nok; // msg não OK de gonfiguração GSM
-
-  //========================================================================================================
   // Contadores de Falha no Envio dos Dados aos Server IOT:  Solicita RESETE do Arduino
 
   if ( (configuraGSM_nok_resete >= 25) || (msg_counternok_t_resete >= 25) || (msg_counternok_t1_resete >= 25) || (msg_counternok_t2_resete >= 25) || (msg_counternok_resete >= 25) || (msg_counternok1_resete >= 25)) {
@@ -4002,25 +4511,18 @@ void loop() {
     tft.print(F("VERIFICANDO"));
 
     tft.setCursor(52, 37);
-    tft.setTextColor(WHITE);
-    tft.setTextSize(3);
     tft.print(F("ENVIO DE"));
 
     tft.setCursor(14, 64);
-    tft.setTextColor(WHITE);
-    tft.setTextSize(3);
     tft.print(F("MENSAGEM SMS"));
 
     tft.fillRoundRect(10, 110, 220, 30, 15, YELLOW);
     tft.drawRoundRect(10, 110, 220, 30, 15, RED);
     tft.setCursor(30, 114);
     tft.setTextColor(RED);
-    tft.setTextSize(3);
     tft.print(F("ENVIAR SMS!"));
-	
-	
-	// Envia SMS alertando quando houver Falhas para Envio aos Servers IoT maior que 25 vezes
-    enviaSMS2("+5515***********", "IoT NANO SMART AGRO \nSMS Confirmacao de Falha nos Servers IoT!!");          // enviaSMS(telefoneSMS, o resumo de funcionamento do protótipo!
+
+    enviaSMS2("+5515999999999", "IoT NANO SMART AGRO \nSMS Confirmacao de Falha nos Servers IoT!!");          // enviaSMS(telefoneSMS, o resumo de funcionamento do protótipo!
 
     delay(3000);
     tft.fillRect(0, 280, 240, 38, RED);
@@ -4031,7 +4533,7 @@ void loop() {
     tft.setCursor(25, 300);
     tft.print(F("  SMS Enviado!  "));
 
-    msg_counter4++;
+    msg_sms_env++;
 
     int pino53 = 53;
     pinMode(pino53, OUTPUT);
@@ -4048,10 +4550,10 @@ void loop() {
     myFile.print(F(" Solicitação de RESETE do Arduino"));
     myFile.print(F(";"));
     myFile.print(F(" Cel:"));
-    myFile.print("+5515**********");
+    myFile.print("+5515999999999");
     myFile.print(F(";"));
     myFile.print(F(" SMS Enviados: "));
-    myFile.print(msg_counter4);
+    myFile.print(msg_sms_env);
     myFile.print(F(";"));
     myFile.print(F(" DATA: "));
     myFile.print(t.date, DEC);
@@ -4063,6 +4565,7 @@ void loop() {
     myFile.print(F(" HORARIO: "));
     myFile.print(rtc.getTimeStr());
     myFile.print(F(";"));
+    myFile.println();
     myFile.println();
     delay(1000);
     myFile.close();
@@ -4085,6 +4588,44 @@ void loop() {
     estadoLED = !estadoLED;                 // Inverte o Estado do LED
     digitalWrite(LED_BUILTIN, estadoLED);   // Seta o LED DA PLACA ARDUINO
     digitalWrite(LED, estadoLED);           // Seta o LED DA PLACA DOS SENSORES
+  }
+
+  //========================================================================================================
+  // CÁLCULO PARA EXIBIR A VARIÁVEL PRECIPTAÇÃO DE ORVALHO EM %:
+
+  for (int i = 0; i <= 100; i++) {
+    chuva_analog = analogRead(chuvaPIN);
+    valor5 = valor5 + chuva_analog;
+  }
+
+  preciptacao1 = valor5 / 100;
+
+  preciptacao = ((preciptacao1 - minimo2) / (maximo2 - minimo2)) * 100;
+  preciptacao = (preciptacao - 100) * -1;
+  valor5 = 0;
+  preciptacao1 = 0;
+
+  if (preciptacao < cpmin) {
+    cpmin = preciptacao;
+  }
+  if (preciptacao > cpmax) {
+    cpmax = preciptacao;
+  }
+
+  // ========================================================================================================
+  // CÁLCULO DO VALOR GERADO PELO PLUVIÔMETRO:
+
+  if (preciptacao >= 5.00) {
+
+    pluviometro = contaPulso1 * 0.25;                  // Variável para exibir a quantidade de chuva totalizada no dia;
+    Read_Pulso1Antigo = Read_Pulso1;                   // Variável para guardar o valor do pulso anterior.
+    pluviometro_acum += pluviometro;
+    
+  } else {
+    
+    Read_Pulso1 = Read_Pulso1Antigo;        // caso haja pulsos, mas o senssor de chuva não marcar acima de 5%, o pulso será o mesmo do anterior.
+    contaPulso1 = Read_Pulso1;              // Variável para a quantidade de pulsos a cada "tombo do medidor"
+    
   }
 
   //========================================================================================================
@@ -4555,76 +5096,76 @@ void loop() {
 
     anterior30 = millis();
 
-    digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
     digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
     delay(250);
 
-    digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
     digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
     delay(250);
 
-    digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
     digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
     delay(250);
 
-    digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
     digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
     delay(250);
 
-    digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
     digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
 
     tft.fillRect(0, 0, 240, 320, BLACK);
-    iot_ubidots();        // server iot ubidots
 
-    digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
+    iot_thingspeak();
+    
     digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
     delay(200);
 
-    digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
     digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
     delay(200);
 
-    digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
     digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
     delay(200);
 
-    digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
     digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
     delay(200);
 
-    digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
     digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
     delay(200);
-
-    digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
+    
     digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
 
+
+    // ========================================================================================================
+    // CÁLCULO DO VALOR GERADO PELO PLUVIÔMETRO:
+  
+    if (preciptacao >= 5.00) {
+
+      pluviometro = contaPulso1 * 0.25;                  // Variável para exibir a quantidade de chuva totalizada no dia;
+      Read_Pulso1Antigo = Read_Pulso1;                   // Variável para guardar o valor do pulso anterior.
+      pluviometro_acum += pluviometro;                   // Variável para mostrar o valor do pluviômetro acumulado;
+      
+    } else {
+      
+      Read_Pulso1 = Read_Pulso1Antigo;        // caso haja pulsos, mas o senssor de chuva não marcar acima de 5%, o pulso será o mesmo do anterior.
+      contaPulso1 = Read_Pulso1;              // Variável para a quantidade de pulsos a cada "tombo do medidor"
+
+    }
 
     tft.fillRect(0, 0, 240, 320, BLACK);
-    iot_ubidots1();        // server iot ubidots
+    iot_ubidots(); 
 
-    digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
     digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
     delay(200);
-
-    digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
+    
     digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
     delay(200);
 
-    digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
     digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
     delay(200);
 
-    digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
     digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
     delay(200);
 
-    digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
     digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
     delay(200);
 
-    digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
     digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
 
 
@@ -4646,7 +5187,6 @@ void loop() {
       msg_counternok_t2_resete = 0; // msg não enviada ThingSpeak 2
       configuraGSM_nok_resete = 0; // GSM não Ok(resete)
       configuraGSM_nok = 0; // GSM não ok (SMS envio)
-      configuraGSM_ok = 0; // GSM ok (SMS
 
       //========================================================================================================
 
@@ -4669,7 +5209,6 @@ void loop() {
       pMin = 1000.00;
       sms_prev_chuva = true;
 
-
       altMax = -1500, 00;
       altMin = 1500, 00;
 
@@ -4690,113 +5229,121 @@ void loop() {
 
     } // FECHA IF - VARIAVEIS DE INDICAÇÃO MÁXIMA E MÍNIMA DOS SENSORES SERÃO RESETADOS ENTRE 00H00MIN A 00H03MIN
 
+    // ========================================================================================================
+    // CÁLCULO DO VALOR GERADO PELO PLUVIÔMETRO:
+  
+    if (preciptacao >= 5.00) {
 
-    tft.fillRect(0, 0, 240, 320, BLACK);
-    iot_thingspeak();
+      pluviometro = contaPulso1 * 0.25;                  // Variável para exibir a quantidade de chuva totalizada no dia;
+      Read_Pulso1Antigo = Read_Pulso1;                   // Variável para guardar o valor do pulso anterior.
+      pluviometro_acum += pluviometro;                   // Variável para mostrar o valor do pluviômetro acumulado;
+      
+    } else {
+      
+      Read_Pulso1 = Read_Pulso1Antigo;        // caso haja pulsos, mas o senssor de chuva não marcar acima de 5%, o pulso será o mesmo do anterior.
+      contaPulso1 = Read_Pulso1;              // Variável para a quantidade de pulsos a cada "tombo do medidor"
 
-    digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
+    }
 
     tft.fillRect(0, 0, 240, 320, BLACK);
     iot_thingspeak1();
 
-    digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
     digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
     delay(200);
 
-    digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
     digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
     delay(200);
 
-    digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
     digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
     delay(200);
 
-    digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
     digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
     delay(200);
-
-    digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
+    
     digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
     delay(200);
 
-    digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
     digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
 
     tft.fillRect(0, 0, 240, 320, BLACK);
+    iot_ubidots1();
+
+    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
+    delay(200);
+
+    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
+    delay(200);
+
+    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
+    delay(200);
+
+    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
+    delay(200);
+    
+    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
+    delay(200);
+
+    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
+
+    // ========================================================================================================
+    // CÁLCULO DO VALOR GERADO PELO PLUVIÔMETRO:
+  
+    if (preciptacao >= 5.00) {
+
+      pluviometro = contaPulso1 * 0.25;                  // Variável para exibir a quantidade de chuva totalizada no dia;
+      Read_Pulso1Antigo = Read_Pulso1;                   // Variável para guardar o valor do pulso anterior.
+      pluviometro_acum += pluviometro;                   // Variável para mostrar o valor do pluviômetro acumulado;
+      
+    } else {
+      
+      Read_Pulso1 = Read_Pulso1Antigo;    // caso haja pulsos, mas o senssor de chuva não marcar acima de 5%, o pulso será o mesmo do anterior.
+      contaPulso1 = Read_Pulso1;          // Variável para a quantidade de pulsos a cada "tombo do medidor"
+      
+    }
+  
+    tft.fillRect(0, 0, 240, 320, BLACK);
+    
     iot_thingspeak2();
 
-    digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
     digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
     delay(200);
 
-    digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
     digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
     delay(200);
 
-    digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-    digitalWrite(LED, false);           // REseta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
     digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
     delay(200);
 
-    digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
+    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
+    delay(200);
+    
+    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
+    delay(200);
+
     digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
 
     d2();
 
     d3();
-
+    
     tft.fillRect(0, 0, 240, 320, BLACK);
     configuraGSM();
 
-    digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
     digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
     delay(200);
 
-    digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
     digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
     delay(200);
 
-    digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
     digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
     delay(200);
 
-    digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
     digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
     delay(200);
-
-    digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
+    
     digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
     delay(200);
 
-    digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
     digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
     delay(5000);
 
@@ -4804,351 +5351,28 @@ void loop() {
     //========================================================================================================
     // Verifica se a Pressão Atmosférica indica possibilidade de chuva:
 
-    if ( ((pMax - pMin >= 5.50) || (pMin <= 918.00)) && (sms_prev_chuva == true)) {
-
-      tft.fillRect(0, 0, 240, 320, BLACK);
-
-      digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
-      delay(250);
-      digitalWrite(BUZZER_VCC, false);        // Seta o BUZZER
-      delay(250);
-      digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
-      delay(250);
-      digitalWrite(BUZZER_VCC, false);        // Seta o BUZZER
-      delay(250);
-      digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
-      delay(250);
-      digitalWrite(BUZZER_VCC, false);        // Seta o BUZZER
-
-      tft.fillRoundRect(0, 0, 240, 95, 15, RED);
-      tft.drawRoundRect(0, 0, 240, 95, 15, WHITE);
-      tft.setCursor(23, 10);
-      tft.setTextColor(WHITE);
-      tft.setTextSize(3);
-      tft.print(F("VERIFICANDO"));
-
-      tft.setCursor(52, 37);
-      tft.setTextColor(WHITE);
-      tft.setTextSize(3);
-      tft.print(F("ENVIO DE"));
-
-      tft.setCursor(14, 64);
-      tft.setTextColor(WHITE);
-      tft.setTextSize(3);
-      tft.print(F("MENSAGEM SMS"));
-
-      tft.fillRoundRect(10, 110, 220, 30, 15, YELLOW);
-      tft.drawRoundRect(10, 110, 220, 30, 15, RED);
-      tft.setCursor(30, 114);
-      tft.setTextColor(RED);
-      tft.setTextSize(3);
-      tft.print(F("ENVIAR SMS!"));
+    if ( ((pMax - pMin >= 4.50) || (pMin <= 918.00)) && (sms_prev_chuva == true)) {
 
       // ========================================================================================================
-      // Enviando SMS para o celular +5515************!
-
-      tft.setCursor(10, 158);
-      tft.setTextColor(CYAN);
-      tft.setTextSize(2);
-      tft.print(F("SMS para:"));
-      tft.setTextColor(WHITE);
-      tft.print(F("Walter R."));
-
-      tft.setCursor(10, 178);
-      tft.setTextColor(CYAN);
-      tft.setTextSize(2);
-      tft.print(F("Cel:"));
-      tft.setTextColor(WHITE);
-      tft.print(F("+5515***********"));
-
-      tft.setCursor(10, 198);
-      tft.setTextColor(CYAN);
-      tft.setTextSize(2);
-      tft.print(F("Mensagem: "));
-      tft.setTextSize(2);
-      tft.setTextColor(WHITE);
-      tft.print(F("Aviso de Possibilidade de Chuva!"));
-
-      delay(3000);
-
-      enviaSMS6("+5515*******", "IoT NANO SMART AGRO \n**AVISO IMPORTANTE**");          // enviaSMS(telefoneSMS, o resumo de funcionamento do protótipo!
-
-      delay(3000);
-      tft.fillRect(0, 280, 240, 38, RED);
-      tft.setCursor(5, 282);
-      tft.setTextColor(WHITE);
-      tft.setTextSize(2);
-      tft.print(F(" Previsao de Chuva!"));
-      tft.setCursor(25, 300);
-      tft.print(F("  SMS Enviado!  "));
-
-      msg_counter4++;
-
-      delay(3000);
-
-      int pino53 = 53;
-      pinMode(pino53, OUTPUT);
-
-      delay(500);
-      SD.begin(pino53);
-      delay(500);
-
-      myFile = SD.open("SMS.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO - Mensagem SMS Enviada"));
-      myFile.print(F(";"));
-      myFile.print(F(" Possibilidade de chuva detectada!"));
-      myFile.print(F(";"));
-      myFile.print(F(" Envio de aviso de chuva por SMS"));
-      myFile.print(F(";"));
-      myFile.print(F(" Cel:"));
-      myFile.print("+5515**********");
-      myFile.print(F(";"));
-      myFile.print(F(" SMS Enviados: "));
-      myFile.print(msg_counter4);
-      myFile.print(F(";"));
-      myFile.print(F(" DATA: "));
-      myFile.print(t.date, DEC);
-      myFile.print(F("/"));
-      myFile.print(t.mon, DEC);
-      myFile.print(F("/"));
-      myFile.print(t.year, DEC);
-      myFile.print(F(";"));
-      myFile.print(F(" HORARIO: "));
-      myFile.print(rtc.getTimeStr());
-      myFile.print(F(";"));
-      myFile.println();
-      delay(1000);
-      myFile.close();
-      delay(1000);
-
-      SD.end();
+      // Enviando SMS para o celular +551599999999
+      
+      enviaSMS6("+551599999999", "IoT NANO SMART AGRO \n**AVISO IMPORTANTE**");          // enviaSMS(telefoneSMS, o resumo de funcionamento do protótipo!
 
       // ========================================================================================================
-      // Enviando SMS para o celular +5515********
+      // Enviando SMS para o celular +55159XXXXXXXXXX
+      
+      enviaSMS6("+551599XXXXXXX", "IoT NANO SMART AGRO \n**AVISO IMPORTANTE**");          // enviaSMS(telefoneSMS, o resumo de funcionamento do protótipo!
 
-      tft.fillRect(0, 0, 240, 320, BLACK);
+      // ========================================================================================================
+      // Enviando SMS para o celular +55159YYYYYYYYY
 
-      digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
-      delay(250);
-      digitalWrite(BUZZER_VCC, false);         // Reseta o BUZZER
-      delay(250);
-      digitalWrite(BUZZER_VCC, true);        // Seta o BUZZER
-      delay(250);
-      digitalWrite(BUZZER_VCC, false);        // Reseta o BUZZER
-      delay(250);
-      digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
-      delay(250);
-      digitalWrite(BUZZER_VCC, false);        // Reseta o BUZZER
-
-      tft.fillRoundRect(0, 0, 240, 95, 15, RED);
-      tft.drawRoundRect(0, 0, 240, 95, 15, WHITE);
-      tft.setCursor(23, 10);
-      tft.setTextColor(WHITE);
-      tft.setTextSize(3);
-      tft.print(F("VERIFICANDO"));
-      tft.setCursor(52, 37);
-      tft.setTextColor(WHITE);
-      tft.setTextSize(3);
-      tft.print(F("ENVIO DE"));
-      tft.setCursor(14, 64);
-      tft.setTextColor(WHITE);
-      tft.setTextSize(3);
-      tft.print(F("MENSAGEM SMS"));
-
-      tft.fillRoundRect(10, 110, 220, 30, 15, YELLOW);
-      tft.drawRoundRect(10, 110, 220, 30, 15, RED);
-      tft.setCursor(30, 114);
-      tft.setTextColor(RED);
-      tft.setTextSize(3);
-      tft.print(F("ENVIAR SMS!"));
-
-      tft.setCursor(10, 158);
-      tft.setTextColor(CYAN);
-      tft.setTextSize(2);
-      tft.print(F("SMS para:"));
-      tft.setTextColor(WHITE);
-      tft.print(F("SUZANA"));
-      tft.setCursor(10, 178);
-      tft.setTextColor(CYAN);
-      tft.setTextSize(2);
-      tft.print(F("Cel:"));
-      tft.setTextColor(WHITE);
-      tft.print(F("+55159********"));
-
-      tft.setCursor(10, 198);
-      tft.setTextColor(CYAN);
-      tft.setTextSize(2);
-      tft.print(F("Mensagem: "));
-      tft.setTextSize(2);
-      tft.setTextColor(WHITE);
-      tft.print(F("Aviso de Possibilidade de Chuva!"));
-
-      delay(3000);
-
-      enviaSMS6("+55159**********", "IoT NANO SMART AGRO \n**AVISO IMPORTANTE**");          // enviaSMS(telefoneSMS, o resumo de funcionamento do protótipo!
-
-      delay(3000);
-      tft.fillRect(0, 280, 240, 38, RED);
-      tft.setCursor(5, 282);
-      tft.setTextColor(WHITE);
-      tft.setTextSize(2);
-      tft.print(F(" Previsao de Chuva!"));
-      tft.setCursor(25, 300);
-      tft.print(F("  SMS Enviado!  "));
-
-      msg_counter4++;
-
-      delay(3000);
-
-      delay(500);
-      SD.begin(pino53);
-      delay(500);
-
-      myFile = SD.open("SMS.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO - Mensagem SMS Enviada"));
-      myFile.print(F(";"));
-      myFile.print(F(" Possibilidade de chuva detectada!"));
-      myFile.print(F(";"));
-      myFile.print(F(" Envio de aviso de chuva por SMS"));
-      myFile.print(F(";"));
-      myFile.print(F(" Cel:"));
-      myFile.print("+55159*************");
-      myFile.print(F(";"));
-      myFile.print(F(" SMS Enviados: "));
-      myFile.print(msg_counter4);
-      myFile.print(F(";"));
-      myFile.print(F(" DATA: "));
-      myFile.print(t.date, DEC);
-      myFile.print(F("/"));
-      myFile.print(t.mon, DEC);
-      myFile.print(F("/"));
-      myFile.print(t.year, DEC);
-      myFile.print(F(";"));
-      myFile.print(F(" HORARIO: "));
-      myFile.print(rtc.getTimeStr());
-      myFile.print(F(";"));
-      myFile.println();
-      delay(1000);
-      myFile.close();
-      delay(1000);
-
-      SD.end();
-
-
-
+      enviaSMS6("+55159YYYYYYYYY", "IoT NANO SMART AGRO \n**AVISO IMPORTANTE**");          // enviaSMS(telefoneSMS, o resumo de funcionamento do protótipo!
+      
       //========================================================================================================
-      // Enviando SMS para o celular +551599999999999
+      // Enviando SMS para o celular +55159ZZZZZZZZ
+      
+      enviaSMS6("+55159ZZZZZZZZ", "IoT NANO SMART AGRO \n**AVISO IMPORTANTE**");          // enviaSMS(telefoneSMS, o resumo de funcionamento do protótipo!
 
-      tft.fillRect(0, 0, 240, 320, BLACK);
-
-      digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
-      delay(250);
-      digitalWrite(BUZZER_VCC, false);        // Reseta o BUZZER
-      delay(250);
-      digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
-      delay(250);
-      digitalWrite(BUZZER_VCC, false);        // Reseta o BUZZER
-      delay(250);
-      digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
-      delay(250);
-      digitalWrite(BUZZER_VCC, false);        // Reseta o BUZZER
-
-      tft.fillRoundRect(0, 0, 240, 95, 15, RED);
-      tft.drawRoundRect(0, 0, 240, 95, 15, WHITE);
-      tft.setCursor(23, 10);
-      tft.setTextColor(WHITE);
-      tft.setTextSize(3);
-      tft.print(F("VERIFICANDO"));
-
-      tft.setCursor(52, 37);
-      tft.setTextColor(WHITE);
-      tft.setTextSize(3);
-      tft.print(F("ENVIO DE"));
-
-      tft.setCursor(14, 64);
-      tft.setTextColor(WHITE);
-      tft.setTextSize(3);
-      tft.print(F("MENSAGEM SMS"));
-
-      tft.fillRoundRect(10, 110, 220, 30, 15, YELLOW);
-      tft.drawRoundRect(10, 110, 220, 30, 15, RED);
-      tft.setCursor(30, 114);
-      tft.setTextColor(RED);
-      tft.setTextSize(3);
-      tft.print(F("ENVIAR SMS!"));
-
-      tft.setCursor(10, 158);
-      tft.setTextColor(CYAN);
-      tft.setTextSize(2);
-      tft.print(F("SMS para:"));
-      tft.setTextColor(WHITE);
-      tft.print(F("Sra. Traude"));
-
-      tft.setCursor(10, 178);
-      tft.setTextColor(CYAN);
-      tft.setTextSize(2);
-      tft.print(F("Cel:"));
-      tft.setTextColor(WHITE);
-      tft.print(F("+55159999999999"));
-
-      tft.setCursor(10, 198);
-      tft.setTextColor(CYAN);
-      tft.setTextSize(2);
-      tft.print(F("Mensagem: "));
-      tft.setTextSize(2);
-      tft.setTextColor(WHITE);
-      tft.print(F("Aviso de Possibilidade de Chuva!"));
-
-      delay(3000);
-
-      enviaSMS6("+55159999999999", "IoT NANO SMART AGRO \n**AVISO IMPORTANTE**");          // enviaSMS(telefoneSMS, o resumo de funcionamento do protótipo!
-
-      delay(3000);
-      tft.fillRect(0, 280, 240, 38, RED);
-      tft.setCursor(5, 282);
-      tft.setTextColor(WHITE);
-      tft.setTextSize(2);
-      tft.print(F(" Previsao de Chuva!"));
-      tft.setCursor(25, 300);
-      tft.print(F("  SMS Enviado!  "));
-
-      msg_counter4++;
-
-      delay(3000);
-
-      delay(500);
-      SD.begin(pino53);
-      delay(500);
-
-      myFile = SD.open("SMS.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO - Mensagem SMS Enviada"));
-      myFile.print(F(";"));
-      myFile.print(F(" Possibilidade de chuva detectada!"));
-      myFile.print(F(";"));
-      myFile.print(F(" Envio de aviso de chuva por SMS"));
-      myFile.print(F(";"));
-      myFile.print(F(" Cel:"));
-      myFile.print("+551599999999");
-      myFile.print(F(";"));
-      myFile.print(F(" SMS Enviados: "));
-      myFile.print(msg_counter4);
-      myFile.print(F(";"));
-      myFile.print(F(" DATA: "));
-      myFile.print(t.date, DEC);
-      myFile.print(F("/"));
-      myFile.print(t.mon, DEC);
-      myFile.print(F("/"));
-      myFile.print(t.year, DEC);
-      myFile.print(F(";"));
-      myFile.print(F(" HORARIO: "));
-      myFile.print(rtc.getTimeStr());
-      myFile.print(F(";"));
-      myFile.println();
-      delay(1000);
-      myFile.close();
-      delay(1000);
-
-      SD.end();
       sms_prev_chuva = false;
     } // FECHA IF - Verifica se a Pressão Atmosférica indica possibilidade de chuva:
 
@@ -5177,23 +5401,17 @@ void loop() {
       tft.setTextColor(WHITE);
       tft.setTextSize(3);
       tft.print(F("VERIFICANDO"));
-
       tft.setCursor(52, 37);
-      tft.setTextColor(WHITE);
-      tft.setTextSize(3);
       tft.print(F("ENVIO DE"));
-
       tft.setCursor(14, 64);
-      tft.setTextColor(WHITE);
-      tft.setTextSize(3);
       tft.print(F("MENSAGEM SMS"));
 
       tft.fillRoundRect(10, 110, 220, 30, 15, YELLOW);
       tft.drawRoundRect(10, 110, 220, 30, 15, RED);
       tft.setCursor(30, 114);
       tft.setTextColor(RED);
-      tft.setTextSize(3);
       tft.print(F("ENVIAR SMS!"));
+      
       tft.setCursor(10, 158);
       tft.setTextColor(CYAN);
       tft.setTextSize(2);
@@ -5203,33 +5421,29 @@ void loop() {
 
       tft.setCursor(10, 178);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Cel:"));
       tft.setTextColor(WHITE);
-      tft.print(F("+55159*******"));
+      tft.print(F("+551599999999"));
 
       tft.setCursor(10, 198);
       tft.setTextColor(CYAN);
-      tft.setTextSize(2);
       tft.print(F("Mensagem: "));
-      tft.setTextSize(2);
       tft.setTextColor(WHITE);
       tft.print(F("Registro de Preciptacao maior que 1.00mm!!"));
 
       delay(3000);
 
-      enviaSMS7("+5515999******", "IoT NANO SMART AGRO \n**AVISO IMPORTANTE**");          // enviaSMS(telefoneSMS, o resumo de funcionamento do protótipo!
+      enviaSMS7("+55159999999", "IoT NANO SMART AGRO \n**AVISO IMPORTANTE**");          // enviaSMS(telefoneSMS, o resumo de funcionamento do protótipo!
 
       delay(3000);
       tft.fillRect(0, 280, 240, 38, RED);
       tft.setCursor(5, 282);
       tft.setTextColor(WHITE);
-      tft.setTextSize(2);
       tft.print(F("Houve Preciptacao!!"));
       tft.setCursor(25, 300);
       tft.print(F("  SMS Enviado!  "));
 
-      msg_counter4++;
+      msg_sms_env++;
 
       delay(3000);
 
@@ -5248,10 +5462,10 @@ void loop() {
       myFile.print(F(" Envio do valor do Pluviometro por SMS"));
       myFile.print(F(";"));
       myFile.print(F(" Cel:"));
-      myFile.print("+551599***********");
+      myFile.print("+5515999999999");
       myFile.print(F(";"));
       myFile.print(F(" SMS Enviados: "));
-      myFile.print(msg_counter4);
+      myFile.print(msg_sms_env);
       myFile.print(F(";"));
       myFile.print(F(" DATA: "));
       myFile.print(t.date, DEC);
@@ -5263,6 +5477,7 @@ void loop() {
       myFile.print(F(" HORARIO: "));
       myFile.print(rtc.getTimeStr());
       myFile.print(F(";"));
+      myFile.println();
       myFile.println();
       delay(1000);
       myFile.close();
@@ -5325,11 +5540,11 @@ void loop() {
   }// FECHA IF DE TESTE DE TEMPO PARA ENVIO AOS SERVER IOT A CADA 15 MINUTOS.
 
   //========================================================================================================
-  //TEMPO DE GRAVAÇÃO SINCRONA DOS DADOS NO SERVER IOT: (A CADA 15 MINUTOS 60*15 = 900seg -> 900.000 milsegundos );
+  //TEMPO DE GRAVAÇÃO SINCRONA DOS DADOS NO SERVER IOT: (A CADA 15 MINUTOS);
 
   atual30 = millis();
-  intervalo30 = 900000;   
-  t_send = (900 - ((atual30 - anterior30) / 1000)); //Variável que exibe em segundos o tempo do próximo envio.
+  intervalo30 = 900000;  
+  t_send = (900 - ((atual30 - anterior30) / 1000)); 
 
   //========================================================================================================
   // CÁLCULO PARA MEDIÇÃO DE VAZÃO: SENSOR DE VAZÃO SIMOKIT 1L = 27 PULSOS // K-FACTOR = 0.45
@@ -5397,9 +5612,8 @@ void loop() {
     msg_counternok_t_resete = 0; // msg não enviada ThingSpeak 0
     msg_counternok_t1_resete = 0; // msg não enviada ThingSpeak 1
     msg_counternok_t2_resete = 0; // msg não enviada ThingSpeak 2
-    configuraGSM_nok_resete = 0; // GSM não ok (Config GSM falha)
+    configuraGSM_nok_resete = 0;
     configuraGSM_nok = 0; // GSM não ok (SMS envio)
-    configuraGSM_ok = 0; // GSM ok (envio SMS)
 
     //========================================================================================================
 
@@ -5435,17 +5649,12 @@ void loop() {
     t1_int_Max = -100.00;
     t1_int_Min = 100.00;
 
-  } // FECHA IF - VARIAVEIS DE INDICAÇÃO MÁXIMA E MÍNIMA DOS SENSORES SERÃO RESETADOS ENTRE 00H00MIN A 00H03MIN
-
-  //========================================================================================================
-  // VARIAVEIS DE INDICAÇÃO MÁXIMA E MÍNIMA DOS SENSORES SERÃO RESETADOS ENTRE 12H00MIN A 12H03MIN:
-
-  if ((t2.hour == 12 && t2.min == 30) || (t2.hour == 12 && t2.min == 31) || (t2.hour == 12 && t2.min == 32) || (t2.hour == 12 && t2.min == 33)) {
     cpmin = 100.00;
     cpmax = -100.00;
     dewPointMax = -100.00;
     dewPointMin = 100.00;
-  }
+
+  } // FECHA IF - VARIAVEIS DE INDICAÇÃO MÁXIMA E MÍNIMA DOS SENSORES SERÃO RESETADOS ENTRE 00H00MIN A 00H03MIN
 
   //========================================================================================================
   // RESETA PULSOS DO PLUVIÔMETRO NO HORÁRIO DE 23H59MIN
@@ -5453,596 +5662,13 @@ void loop() {
   if ((t2.hour == 23 && t2.min == 59)) {
     contaPulso1 = 0;   // RESETA PULSOS DO PLUVIÔMETRO NO HORÁRIO DE 23H59MIN
     Read_Pulso1 = 0;   // RESETA PULSOS DO PLUVIÔMETRO NO HORÁRIO DE 23H59MIN
+    Read_Pulso1Antigo = 0;   // RESETA PULSOS DO PLUVIÔMETRO NO HORÁRIO DE 23H59MIN
+    pluviometro = 0;
     sms_pluviometro = true;
   }
 
-  //========================================================================================================
-  // VARIAVEIS DE INDICAÇÃO DA QUANTIDADE DE CHUVA NA ULTIMA HORA:
 
-  if (t2.min == 59) {
-    contaPulsopluvhora = 0;      // RESETA PULSOS DO PLUVIÔMETRO_HORA QUANDO O HORÁRIO É IGUAL A 59MIN (RESETE A CADA HORA)
-  }
-
-  // ========================================================================================================
-  // CÁLCULO DO VALOR GERADO PELO PLUVIÔMETRO:
-
-  //pluviometro_hora =  contaPulsopluvhora * 0.25;     // Variável para exibir a quantidade de chuva que caiu na ultima hora;
-  //pluviometro = contaPulso1 * 0.25;                  // Variável para exibir a quantidade de chuva totalizada no dia;
-
-  // ========================================================================================================
-  // CÁLCULO DO VALOR GERADO PELO PLUVIÔMETRO:
-
-  if (preciptacao >= 6.00) {
-    pluviometro_hora =  contaPulsopluvhora * 0.25;     // Variável para exibir a quantidade de chuva que caiu na ultima hora;
-    pluviometro = contaPulso1 * 0.25;                  // Variável para exibir a quantidade de chuva totalizada no dia;
-  } else {
-    contaPulso1 = 0;
-    contaPulsopluvhora = 0;
-  }
-
-  // ========================================================================================================
-  // CHACANDO RECEBIMENTO DE MENSAGENS VIA SMS:
-
-  leGSM();
-
-  while (temSMS) {
-
-    detachInterrupt(digitalPinToInterrupt(Pino));   // Desabilita somente a interrupção da leitura do sensor de vazão / pino 19 corresponde a interrupção 2
-    detachInterrupt(digitalPinToInterrupt(Pino1));  // Desabilita somente a interrupção da leitura do sensor pluviômetro / pino 18 corresponde a interrupção 1
-
-    digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
-    delay(250);
-    digitalWrite(BUZZER_VCC, false);        // Reseta o BUZZER
-    delay(250);
-    digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
-    delay(250);
-    digitalWrite(BUZZER_VCC, false);        // Reseta o BUZZER
-    delay(250);
-    digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
-    delay(250);
-    digitalWrite(BUZZER_VCC, false);        // Reseta o BUZZER
-
-    tft.fillRect(0, 0, 240, 320, BLACK);
-    tft.fillRoundRect(0, 0, 240, 95, 15, RED);
-    tft.drawRoundRect(0, 0, 240, 95, 15, WHITE);
-
-    tft.setCursor(23, 10);
-    tft.setTextColor(WHITE);
-    tft.setTextSize(3);
-    tft.print(F("VERIFICANDO"));
-
-    tft.setCursor(52, 37);
-    tft.setTextColor(WHITE);
-    tft.setTextSize(3);
-    tft.print(F("CAIXA DE"));
-
-    tft.setCursor(14, 64);
-    tft.setTextColor(WHITE);
-    tft.setTextSize(3);
-    tft.print(F("MENSAGEM SMS"));
-
-    tft.fillRoundRect(10, 110, 220, 30, 15, YELLOW);
-    tft.drawRoundRect(10, 110, 220, 30, 15, RED);
-    tft.setCursor(30, 114);
-    tft.setTextColor(RED);
-    tft.setTextSize(3);
-    tft.print(F("CHEGOU SMS!"));
-
-    // ========================================================================================================
-    // CONTA QUANTAS MENSAGENS SMS FOI RECEBIDO:
-
-    msg_sms_rec++;
-
-    // ========================================================================================================
-    // CHECANDO RECEBIMENTO DE MENSAGENS VIA SMS É IGUAL AS SENHAS CADASTRADAS:
-
-    // ========================================================================================================
-    // SE AS SENHAS FOREM DIFERENTES, EXECUTA ABAIXO:
-
-    mensagemSMS.trim();
-    if (  (  (mensagemSMS.equals(senhaGsm) ) || (mensagemSMS.equals(senhaGsm1) ) || (mensagemSMS.equals(senhaGsm2) ) || (mensagemSMS.equals(senhaGsm3) ) || (mensagemSMS.equals(senhaGsm4) ) || (mensagemSMS.equals(senhaGsm5) ) ) != 1   ) {
-
-      tft.setCursor(10, 158);
-      tft.setTextColor(CYAN);
-      tft.setTextSize(2);
-      tft.print(F("Cel:"));
-      tft.setTextColor(WHITE);
-      tft.print(telefoneSMS);
-
-      tft.setCursor(10, 178);
-      tft.setTextColor(CYAN);
-      tft.setTextSize(2);
-      tft.print(F("Mensagem: "));
-      tft.setTextSize(2);
-      tft.setTextColor(WHITE);
-      tft.print(mensagemSMS);
-
-      delay(3000);
-
-      tft.fillRect(0, 280, 240, 38, RED);
-      tft.setCursor(5, 282);
-      tft.setTextColor(WHITE);
-      tft.setTextSize(2);
-      tft.print(F(" Senha Nao Correta "));
-      tft.setCursor(25, 300);
-      tft.println(F("SMS Nao Enviado!"));
-
-      int pino53 = 53;
-      pinMode(pino53, OUTPUT);
-
-      delay(500);
-      SD.begin(pino53);
-      delay(500);
-
-      myFile = SD.open("SMS.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO - Mensagem SMS Recebida"));
-      myFile.print(F(";"));
-      myFile.print(F(" Cel:"));
-      myFile.print(telefoneSMS);
-      myFile.print(F(";"));
-      myFile.print(F(" Msg:"));
-      myFile.print(mensagemSMS);
-      myFile.print(F(";"));
-      myFile.print(F(" DATA: "));
-      myFile.print(t.date, DEC);
-      myFile.print(F("/"));
-      myFile.print(t.mon, DEC);
-      myFile.print(F("/"));
-      myFile.print(t.year, DEC);
-      myFile.print(F(";"));
-      myFile.print(F(" HORARIO: "));
-      myFile.print(rtc.getTimeStr());
-      myFile.print(F(";"));
-      myFile.println();
-      delay(1000);
-      myFile.close();
-      delay(1000);
-
-      SD.end();
-
-      // ========================================================================================================
-      // SE UMA DAS SENHAS FOREM IGUAIS, EXECUTA ABAIXO:
-
-    } else {
-
-      tft.setCursor(10, 158);
-      tft.setTextColor(CYAN);
-      tft.setTextSize(2);
-      tft.print(F("Data:"));
-      tft.setTextColor(WHITE);
-      String dataSMS = dataHoraSMS;
-      dataSMS.remove(8, 12);
-      tft.print(dataSMS);
-
-      tft.setCursor(10, 178);
-      tft.setTextColor(CYAN);
-      tft.setTextSize(2);
-      tft.print(F("Hora:"));
-      tft.setTextColor(WHITE);
-      String horaSMS = dataHoraSMS;
-      horaSMS.remove(0, 9);
-      horaSMS.remove(8, 3);
-      tft.print(horaSMS);
-
-      tft.setCursor(10, 198);
-      tft.setTextColor(CYAN);
-      tft.setTextSize(2);
-      tft.print(F("Mensagem:"));
-      tft.setTextColor(WHITE);
-      tft.print(mensagemSMS);
-
-      tft.setCursor(10, 218);
-      tft.setTextColor(CYAN);
-      tft.setTextSize(2);
-      tft.print(F("Remetente:"));
-
-      if (telefoneSMS == "+55159**********") {
-
-        tft.setTextColor(WHITE);
-        tft.print(F("Walter R."));
-        tft.setCursor(10, 238);
-        tft.setTextColor(CYAN);
-        tft.setTextSize(2);
-        tft.print(F("Cel:"));
-        tft.setTextColor(WHITE);
-        tft.print(telefoneSMS);
-
-      } else {
-
-        tft.setTextColor(WHITE);
-        tft.print(F(" Unknown "));
-        tft.setCursor(10, 238);
-        tft.setTextColor(CYAN);
-        tft.setTextSize(2);
-        tft.print(F("Cel:"));
-        tft.setTextColor(WHITE);
-        tft.print(telefoneSMS);
-
-      }
-
-      tft.setTextColor(CYAN);
-      tft.setTextSize(2);
-      tft.setCursor(10, 258);
-      tft.print(F("SMS:"));
-      tft.setTextColor(WHITE);
-      tft.setTextSize(2);
-      delay(1000);
-
-      if (ultimoGSM.equals("-> Ok!")) {
-
-        tft.setCursor(57, 258);
-        tft.print(ultimoGSM);
-        delay(1000);
-
-      } else {
-
-        ultimoGSM.trim();            // Estrutura: >+CMGS: XXX OK
-        ultimoGSM.remove(0, 1);      // Estrutura: +CMGS: XXX OK
-        ultimoGSM.trim();
-        ultimoGSM.remove(10, 5);     // Estrutura: +CMGS: XXX
-        ultimoGSM.trim();
-        delay(1000);
-        tft.setCursor(57, 258);
-        tft.print(ultimoGSM);
-      }
-
-      tft.fillRect(0, 280, 240, 45, RED);
-      delay(3000);
-
-      // senhaGsm = "*******"  senha para enviar o SMS com os valores das variaveis!
-      mensagemSMS.trim();
-
-      if ( mensagemSMS == senhaGsm ) {
-
-        enviaSMS(telefoneSMS, "IoT NANO SMART AGRO \nSMS Recebido e Senha OK!");          // envia SMS com os valores dos sensores;
-
-        delay(3000);
-        tft.fillRect(0, 280, 240, 45, RED);
-        tft.setCursor(5, 282);
-        tft.setTextColor(WHITE);
-        tft.setTextSize(2);
-        tft.print(F("Senha OK e Enviando"));
-        tft.setCursor(25, 300);
-        tft.println(F("SMS de Resposta!"));
-
-        msg_counter4++;
-
-        int pino53 = 53;
-        pinMode(pino53, OUTPUT);
-
-        delay(500);
-        SD.begin(pino53);
-        delay(500);
-
-        myFile = SD.open("SMS.txt", FILE_WRITE);
-        myFile.print(F("NANO SMART AGRO - Mensagem SMS Enviada"));
-        myFile.print(F(";"));
-        myFile.print(F(" Senha Recebida: NSAGROV1"));
-        myFile.print(F(";"));
-        myFile.print(F(" Solicitacao de Valores das Variaveis"));
-        myFile.print(F(";"));
-        myFile.print(F(" Cel:"));
-        myFile.print(telefoneSMS);
-        myFile.print(F(";"));
-        myFile.print(F(" SMS Enviados: "));
-        myFile.print(msg_counter4);
-        myFile.print(F(";"));
-        myFile.print(F(" DATA: "));
-        myFile.print(t.date, DEC);
-        myFile.print(F("/"));
-        myFile.print(t.mon, DEC);
-        myFile.print(F("/"));
-        myFile.print(t.year, DEC);
-        myFile.print(F(";"));
-        myFile.print(F(" HORARIO: "));
-        myFile.print(rtc.getTimeStr());
-        myFile.print(F(";"));
-        myFile.println();
-        delay(1000);
-        myFile.close();
-        delay(1000);
-
-        SD.end();
-      } // FECHA IF DE CHECAGEM DO RECEBIMENTO DE MENSAGENS VIA SMS É IGUAL A NSAGROV1
-
-
-      // senhaGsm1 = "********"  senha para enviar o SMS com o Diagnóstico!
-      if ( mensagemSMS == senhaGsm1 ) {
-        enviaSMS1(telefoneSMS, "IoT NANO SMART AGRO \nSMS Recebido e Senha OK!");          // enviaSMS(telefoneSMS, o resumo de funcionamento do protótipo!
-
-        delay(3000);
-        tft.fillRect(0, 280, 240, 38, RED);
-        tft.setCursor(5, 282);
-        tft.setTextColor(WHITE);
-        tft.setTextSize(2);
-        tft.print(F("Senha OK e Enviando"));
-        tft.setCursor(25, 300);
-        tft.println(F("SMS de Resposta!"));
-
-        msg_counter4++;
-
-        int pino53 = 53;
-        pinMode(pino53, OUTPUT);
-
-        delay(500);
-        SD.begin(pino53);
-        delay(500);
-
-        myFile = SD.open("SMS.txt", FILE_WRITE);
-        myFile.print(F("NANO SMART AGRO - Mensagem SMS Enviada"));
-        myFile.print(F(";"));
-        myFile.print(F(" Senha Recebida: NSAGROD1"));
-        myFile.print(F(";"));
-        myFile.print(F(" Solicitacao de Envio de Diagnostico"));
-        myFile.print(F(";"));
-        myFile.print(F(" Cel:"));
-        myFile.print(telefoneSMS);
-        myFile.print(F(";"));
-        myFile.print(F(" SMS Enviados: "));
-        myFile.print(msg_counter4);
-        myFile.print(F(";"));
-        myFile.print(F(" DATA: "));
-        myFile.print(t.date, DEC);
-        myFile.print(F("/"));
-        myFile.print(t.mon, DEC);
-        myFile.print(F("/"));
-        myFile.print(t.year, DEC);
-        myFile.print(F(";"));
-        myFile.print(F(" HORARIO: "));
-        myFile.print(rtc.getTimeStr());
-        myFile.print(F(";"));
-        myFile.println();
-        delay(1000);
-        myFile.close();
-        delay(1000);
-
-        SD.end();
-      } // FECHA IF DE CHECAGEM DO RECEBIMENTO DE MENSAGENS VIA SMS É IGUAL A NSAGROD1
-
-
-      // senhaGsm2 = "*******"  senha para solicitação de RESETE do Arduino!
-      if ( mensagemSMS == senhaGsm2 ) {
-        enviaSMS2(telefoneSMS, "IoT NANO SMART AGRO \nSMS Recebido e Senha OK!");          // enviaSMS(telefoneSMS, o resumo de funcionamento do protótipo!
-
-        delay(3000);
-        tft.fillRect(0, 280, 240, 38, RED);
-        tft.setCursor(5, 282);
-        tft.setTextColor(WHITE);
-        tft.setTextSize(2);
-        tft.print(F("Senha OK e Enviando"));
-        tft.setCursor(25, 300);
-        tft.println(F("SMS de Resposta!"));
-
-        msg_counter4++;
-
-        int pino53 = 53;
-        pinMode(pino53, OUTPUT);
-
-        delay(500);
-        SD.begin(pino53);
-        delay(500);
-
-        myFile = SD.open("SMS.txt", FILE_WRITE);
-        myFile.print(F("NANO SMART AGRO - Mensagem SMS Enviada"));
-        myFile.print(F(";"));
-        myFile.print(F(" Senha Recebida: NSAGROR1"));
-        myFile.print(F(";"));
-        myFile.print(F(" Solicitacao de RESETE do Arduino"));
-        myFile.print(F(";"));
-        myFile.print(F(" Cel:"));
-        myFile.print(telefoneSMS);
-        myFile.print(F(";"));
-        myFile.print(F(" SMS Enviados: "));
-        myFile.print(msg_counter4);
-        myFile.print(F(";"));
-        myFile.print(F(" DATA: "));
-        myFile.print(t.date, DEC);
-        myFile.print(F("/"));
-        myFile.print(t.mon, DEC);
-        myFile.print(F("/"));
-        myFile.print(t.year, DEC);
-        myFile.print(F(";"));
-        myFile.print(F(" HORARIO: "));
-        myFile.print(rtc.getTimeStr());
-        myFile.print(F(";"));
-        myFile.println();
-        delay(1000);
-        myFile.close();
-        delay(1000);
-
-        SD.end();
-
-        modemGSM.restart();
-        delay(1000);
-        funcReset();
-
-      }// FECHA IF DE CHECAGEM DO RECEBIMENTO DE MENSAGENS VIA SMS É IGUAL A NSAGROR1
-
-
-      // senhaGsm3 = "*******"  senha para envio de SMS do Relatório de Gravação do SD CARD!
-      if ( mensagemSMS == senhaGsm3 ) {
-        enviaSMS3(telefoneSMS, "IoT NANO SMART AGRO \nSMS Recebido e Senha OK!");          // enviaSMS(telefoneSMS, o resumo de funcionamento do protótipo!
-
-        delay(3000);
-        tft.fillRect(0, 280, 240, 38, RED);
-        tft.setCursor(5, 282);
-        tft.setTextColor(WHITE);
-        tft.setTextSize(2);
-        tft.print(F("Senha OK e Enviando"));
-        tft.setCursor(25, 300);
-        tft.println(F("SMS de Resposta!"));
-
-        msg_counter4++;
-
-        int pino53 = 53;
-        pinMode(pino53, OUTPUT);
-
-        delay(500);
-        SD.begin(pino53);
-        delay(500);
-
-        myFile = SD.open("SMS.txt", FILE_WRITE);
-        myFile.print(F("NANO SMART AGRO - Mensagem SMS Enviada"));
-        myFile.print(F(";"));
-        myFile.print(F(" Senha Recebida: NSAGROC1"));
-        myFile.print(F(";"));
-        myFile.print(F(" Solicitacao de Envio do Relatorio de Gravacao no SD Card"));
-        myFile.print(F(";"));
-        myFile.print(F(" Cel:"));
-        myFile.print(telefoneSMS);
-        myFile.print(F(";"));
-        myFile.print(F(" SMS Enviados: "));
-        myFile.print(msg_counter4);
-        myFile.print(F(";"));
-        myFile.print(F(" DATA: "));
-        myFile.print(t.date, DEC);
-        myFile.print(F("/"));
-        myFile.print(t.mon, DEC);
-        myFile.print(F("/"));
-        myFile.print(t.year, DEC);
-        myFile.print(F(";"));
-        myFile.print(F(" HORARIO: "));
-        myFile.print(rtc.getTimeStr());
-        myFile.print(F(";"));
-        myFile.println();
-        delay(1000);
-        myFile.close();
-        delay(1000);
-
-        SD.end();
-
-      } // FECHA IF DE CHECAGEM DO RECEBIMENTO DE MENSAGENS VIA SMS É IGUAL A NSAGROR1
-
-
-      // senhaGsm4 = "******"  senha para resete do Pluviômetro!
-      if ( mensagemSMS == senhaGsm4 ) {
-
-        enviaSMS4(telefoneSMS, "IoT NANO SMART AGRO \nSMS Recebido e Senha OK!");          // enviaSMS(telefoneSMS, o resumo de funcionamento do protótipo!
-        delay(3000);
-        tft.fillRect(0, 280, 240, 38, RED);
-        tft.setCursor(5, 282);
-        tft.setTextColor(WHITE);
-        tft.setTextSize(2);
-        tft.print(F("Senha OK e Enviando"));
-        tft.setCursor(25, 300);
-        tft.println(F("SMS de Resposta!"));
-
-        msg_counter4++;
-
-        Read_Pulso1 = 0;
-        contaPulso1 = 0;             // RESETA PULSOS DO PLUVIÔMETRO
-        contaPulsopluvhora = 0;      // RESETA PULSOS DO PLUVIÔMETRO_HORA
-        sms_pluviometro = true;
-
-        int pino53 = 53;
-        pinMode(pino53, OUTPUT);
-
-        delay(500);
-        SD.begin(pino53);
-        delay(500);
-
-        myFile = SD.open("SMS.txt", FILE_WRITE);
-        myFile.print(F("NANO SMART AGRO - Mensagem SMS Enviada"));
-        myFile.print(F(";"));
-        myFile.print(F(" Senha Recebida: NSAGROP1"));
-        myFile.print(F(";"));
-        myFile.print(F(" Solicitacao de Resete do Pluviometro!"));
-        myFile.print(F(";"));
-        myFile.print(F(" Cel:"));
-        myFile.print(telefoneSMS);
-        myFile.print(F(";"));
-        myFile.print(F(" SMS Enviados: "));
-        myFile.print(msg_counter4);
-        myFile.print(F(";"));
-        myFile.print(F(" DATA: "));
-        myFile.print(t.date, DEC);
-        myFile.print(F("/"));
-        myFile.print(t.mon, DEC);
-        myFile.print(F("/"));
-        myFile.print(t.year, DEC);
-        myFile.print(F(";"));
-        myFile.print(F(" HORARIO: "));
-        myFile.print(rtc.getTimeStr());
-        myFile.print(F(";"));
-        myFile.println();
-        delay(1000);
-        myFile.close();
-        delay(1000);
-
-        SD.end();
-
-      } // FECHA IF DE CHECAGEM DO RECEBIMENTO DE MENSAGENS VIA SMS É IGUAL A NSAGROP1
-
-
-      // senhaGsm5 = "********"  senha para resete do Totalizador de Vazão
-      if ( mensagemSMS == senhaGsm5 ) {
-        enviaSMS5(telefoneSMS, "IoT NANO SMART AGRO \nSMS Recebido e Senha OK!");          // enviaSMS(telefoneSMS, o resumo de funcionamento do protótipo!
-
-        delay(3000);
-        tft.fillRect(0, 280, 240, 38, RED);
-        tft.setCursor(5, 282);
-        tft.setTextColor(WHITE);
-        tft.setTextSize(2);
-        tft.print(F("Senha OK e Enviando"));
-        tft.setCursor(25, 300);
-        tft.println(F("SMS de Resposta!"));
-
-        msg_counter4++;
-
-        // Resetando Variáveis do Totalizador de Vazão:
-        MiliLitros = 0.00;
-        Litros = 0.00;
-        contaPulsotot = 0;
-
-
-        int pino53 = 53;
-        pinMode(pino53, OUTPUT);
-
-        delay(500);
-        SD.begin(pino53);
-        delay(500);
-
-        myFile = SD.open("SMS.txt", FILE_WRITE);
-        myFile.print(F("NANO SMART AGRO - Mensagem SMS Enviada"));
-        myFile.print(F(";"));
-        myFile.print(F(" Senha Recebida: NSAGROT1"));
-        myFile.print(F(";"));
-        myFile.print(F(" Solicitacao de Resete do Totalizador de Vazao"));
-        myFile.print(F(";"));
-        myFile.print(F(" Cel:"));
-        myFile.print(telefoneSMS);
-        myFile.print(F(";"));
-        myFile.print(F(" SMS Enviados: "));
-        myFile.print(msg_counter4);
-        myFile.print(F(";"));
-        myFile.print(F(" DATA: "));
-        myFile.print(t.date, DEC);
-        myFile.print(F("/"));
-        myFile.print(t.mon, DEC);
-        myFile.print(F("/"));
-        myFile.print(t.year, DEC);
-        myFile.print(F(";"));
-        myFile.print(F(" HORARIO: "));
-        myFile.print(rtc.getTimeStr());
-        myFile.print(F(";"));
-        myFile.println();
-        delay(1000);
-        myFile.close();
-        delay(1000);
-
-        SD.end();
-
-      } // FECHA IF DE CHECAGEM DO RECEBIMENTO DE MENSAGENS VIA SMS É IGUAL A NSAGROT1
-
-
-    } // FECHA IF/ELSE DO TESTE SE A MENSAGEM SMS É IGUAL A UMA DAS SEBHAS CADASTRADAS
-
-    temSMS = false;
-
-    attachInterrupt(digitalPinToInterrupt(Pino), pulse, RISING);          //HABILITA NOVAMENTE A INTERRUPÇÃO PARA CÁLCULO DA VAZÃO
-    attachInterrupt(digitalPinToInterrupt(Pino1), pulso_chuva, RISING);  //HABILITA NOVAMENTE A INTERRUPÇÃO PARA CÁLCULO DO PLUVIÔMETRO.
-
-  } // FECHA WHILE QUANDO TEM A OPÇÃO TEM SMS RECEBIDO
+  
 
 } // ENCERRA VOID LOOP PRINCIPAL
 
@@ -6091,10 +5717,13 @@ void pulso_chuva ()
   detachInterrupt(digitalPinToInterrupt(Pino));
 
   delayMicroseconds(1000000);           // 1seg para corrigir o debounce;
+  
   Read_Pulso1++;                        // lê os pulsos gerados, a cada "tombo do medidor" que equivale à 0,25mm de chuva, gera-se dois pulsos
-  contaPulso1 = Read_Pulso1 / 2;        // Variável para a quantidade de pulsos a cada "tombo do medidor"
-  contaPulsopluvhora = Read_Pulso1 / 2; // Variável para a quantidade de pulsos chuva da última hora para cada "tombo do medidor"
+  contaPulso1 = Read_Pulso1/2;            // Variável para a quantidade de pulsos a cada "tombo do medidor"
+  
   estado_buzzer = true;
+  contaPulso_vazao = 0;
+  contaPulsotot = 0;
 
   attachInterrupt(digitalPinToInterrupt(Pino1), pulso_chuva, RISING);
   attachInterrupt(digitalPinToInterrupt(Pino), pulse, RISING);
@@ -6131,10 +5760,7 @@ void teste_I2C() {
   tft.setTextColor(WHITE);
   tft.setTextSize(3);
   tft.print(F("SETUP"));
-
   tft.setCursor(22, 43);
-  tft.setTextColor(WHITE);
-  tft.setTextSize(3);
   tft.print(F("MODULOS I2C"));
 
   tft.setCursor(5, 90);
@@ -6310,14 +5936,12 @@ void teste_I2C() {
 
   tft.setCursor(5, 160);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Endereco I2C: "));
   tft.setTextColor(WHITE);
   tft.print(F("0x23"));
 
   tft.setCursor(5, 190);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Status:"));
 
   //23 57 68 77    35 87 104 119
@@ -6325,7 +5949,6 @@ void teste_I2C() {
   if (end[0] == 35 || end[1] == 35 || end[2] == 35 || end[3] == 35 ) {
     tft.setCursor(5, 190);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("Status: "));
     tft.setTextColor(WHITE);
     tft.print(F("Modulo OK!"));
@@ -6334,33 +5957,27 @@ void teste_I2C() {
     tft.fillRect(95, 182, 125, 30, YELLOW);
     tft.setCursor(100, 190);
     tft.setTextColor(RED);
-    tft.setTextSize(2);
     tft.print(F("Em Falha!!"));
   }
   delay(2000);
 
   tft.drawRect(0, 218, 240, 100, YELLOW);
   tft.setCursor(43, 230);
-  tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Modulo BMP280"));
 
   tft.setCursor(5, 260);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Endereco I2C: "));
   tft.setTextColor(WHITE);
   tft.print(F("0x77"));
 
   tft.setCursor(5, 290);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Status:"));
 
   if (end[0] == 119 || end[1] == 119 || end[2] == 119 || end[3] == 119) {
     tft.setCursor(5, 290);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("Status: "));
     tft.setTextColor(WHITE);
     tft.print(F("Modulo OK!"));
@@ -6369,7 +5986,6 @@ void teste_I2C() {
     tft.fillRect(95, 282, 125, 30, YELLOW);
     tft.setCursor(100, 290);
     tft.setTextColor(RED);
-    tft.setTextSize(2);
     tft.print(F("Em Falha!!"));
   }
 
@@ -6378,7 +5994,6 @@ void teste_I2C() {
   tft.fillRect(0, 86, 240, 320, BLACK);
   tft.setCursor(5, 90);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("MODULOS SCANNEADOS:"));
 
   delay(1000);
@@ -6386,25 +6001,21 @@ void teste_I2C() {
   tft.drawRect(0, 118, 240, 100, YELLOW);
   tft.setCursor(43, 130);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Modulo DS3231"));
 
   tft.setCursor(5, 160);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Endereco I2C: "));
   tft.setTextColor(WHITE);
   tft.print(F("0x57"));
 
   tft.setCursor(5, 190);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Status:"));
 
   if (end[0] == 87 || end[1] == 87 || end[2] == 87 || end[3] == 87) {
     tft.setCursor(5, 190);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("Status: "));
     tft.setTextColor(WHITE);
     tft.print(F("Modulo OK!"));
@@ -6413,7 +6024,6 @@ void teste_I2C() {
     tft.fillRect(95, 182, 125, 30, YELLOW);
     tft.setCursor(100, 190);
     tft.setTextColor(RED);
-    tft.setTextSize(2);
     tft.print(F("Em Falha!!"));
   }
   delay(2000);
@@ -6429,20 +6039,17 @@ void teste_I2C() {
 
   tft.setCursor(5, 260);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Endereco I2C: "));
   tft.setTextColor(WHITE);
   tft.print(F("0x68"));
 
   tft.setCursor(5, 290);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("Status:"));
 
   if ((end[0] == 104 || end[1] == 104 || end[2] == 104 || end[3] == 104 )) {
     tft.setCursor(5, 290);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("Status: "));
     tft.setTextColor(WHITE);
     tft.print(F("Modulo OK!"));
@@ -6451,7 +6058,6 @@ void teste_I2C() {
     tft.fillRect(95, 282, 125, 30, YELLOW);
     tft.setCursor(100, 290);
     tft.setTextColor(RED);
-    tft.setTextSize(2);
     tft.print(F("Em Falha!!"));
   }
 
@@ -6465,10 +6071,7 @@ void teste_I2C() {
   tft.setTextColor(WHITE);
   tft.setTextSize(3);
   tft.print(F("SETUP"));
-
   tft.setCursor(22, 43);
-  tft.setTextColor(WHITE);
-  tft.setTextSize(3);
   tft.print(F("MODULOS I2C"));
 
   tft.setCursor(13, 86);
@@ -6477,7 +6080,6 @@ void teste_I2C() {
   tft.print(F("BMP280 TEMPERATURA"));
   tft.setCursor(5, 105);
   tft.setTextColor(WHITE);
-  tft.setTextSize(2);
   tft.print(F("Valor Min: -40C"));
   tft.setCursor(5, 125);
   tft.print(F("Valor Max: +80C"));
@@ -6488,7 +6090,6 @@ void teste_I2C() {
 
   tft.setCursor(13, 167);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("BMP280 PRESSAO ATM"));
   tft.setTextColor(WHITE);
   tft.setCursor(5, 185);
@@ -6518,11 +6119,9 @@ void teste_I2C() {
 
   tft.setCursor(13, 285);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("BH1750 SENSOR LUX"));
   tft.setCursor(5, 305);
   tft.setTextColor(WHITE);
-  tft.setTextSize(2);
   tft.print(F("Luminosidade: "));
   lux = lightMeter.readLightLevel();
   tft.print(lux);
@@ -6544,6 +6143,61 @@ void data_hora() {
   rtc.begin();
   t = rtc.getTime();
 
+  tft.fillRect(0, 0, 240, 320, BLACK);
+  tft.fillRoundRect(20, 40, 200, 210, 15, RED);
+  tft.drawRoundRect(20, 40, 200, 210, 15, WHITE);
+
+  delay(1500);
+
+  tft.setCursor(48, 56);
+  tft.setTextColor(WHITE);
+  tft.setTextSize(6);
+  tft.print(F("NANO"));
+
+  delay(1500);
+
+  tft.setCursor(32, 120);
+  tft.print(F("SMART"));
+
+  delay(1500);
+
+  tft.setCursor(48, 184);
+  tft.print(F("AGRO"));
+
+  delay(1500);
+
+  tft.fillRoundRect(10, 270, 220, 40, 5, RED);
+  tft.drawRoundRect(10, 270, 220, 40, 5, WHITE);
+
+  delay(1500);
+
+  tft.setCursor(37, 275);
+  tft.setTextColor(WHITE, RED);
+  tft.setTextSize(2);
+  tft.print(F("WD RETZER S.A."));
+
+  delay(1500);
+
+  tft.setCursor(25, 292);
+  tft.print(F(" PROTOTIPO  IoT "));
+
+  delay(3000);
+
+  tft.setCursor(37, 275);
+  tft.setTextColor(WHITE, RED);
+  tft.print(F("AGRICULTURA DE"));
+  tft.setCursor(25, 292);
+  tft.print(F("    PRECISAO    "));
+
+  delay(3000);
+
+  tft.setCursor(37, 275);
+  tft.print(F("  DATALLOGER  "));
+  tft.setCursor(25, 292);
+  tft.print(F("VERSAO: V4.01.34"));
+
+  delay(3000);
+  tft.fillRect(0, 0, 240, 320, BLACK);
   tft.fillRect(10, 5, 220, 70, RED);
   tft.fillRect(15, 10, 210, 60, BLACK);
   tft.setTextColor(WHITE);
@@ -6578,9 +6232,6 @@ void data_hora() {
       // EXIBIÇÃO DA DATA:
 
       tft.setCursor(35, 180);
-      tft.setTextSize(3);
-      tft.setTextColor(WHITE, RED);
-
       char const divider = '/';
       tft.print(rtc.getDateStr(FORMAT_LONG, FORMAT_LITTLEENDIAN, divider));
       tft.print(F(" "));
@@ -6677,10 +6328,7 @@ void dht_setup() {
   tft.setTextColor(WHITE);
   tft.setTextSize(3);
   tft.print(F("SETUP"));
-
   tft.setCursor(14, 43);
-  tft.setTextColor(WHITE);
-  tft.setTextSize(3);
   tft.print(F("SENSOR DHT22"));
 
   tft.setCursor(25, 85);
@@ -6740,14 +6388,12 @@ void dht_setup() {
 
     tft.setCursor(5, 240);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("UMIDADE EXT.:"));
     tft.setTextColor(WHITE);
     tft.print(F("FALHA"));
 
     tft.setCursor(5, 260);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("DEW POINT:"));
     tft.setTextColor(WHITE);
     tft.print(F("FALHA"));
@@ -6761,7 +6407,6 @@ void dht_setup() {
     tft.drawRect(0, 208, 240, 110, YELLOW);
     tft.setCursor(5, 220);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("TEMP. EXTERNA:"));
     tft.setTextColor(WHITE);
     tft.print(t1, 0);
@@ -6812,7 +6457,6 @@ void dht_setup() {
 
     tft.setCursor(5, 280);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("TEMP. INTERNA:"));
     tft.setTextColor(WHITE);
     tft.print(F("FALHA"));
@@ -6834,7 +6478,6 @@ void dht_setup() {
 
     tft.setCursor(5, 280);
     tft.setTextColor(CYAN);
-    tft.setTextSize(2);
     tft.print(F("TEMP. INTERNA:"));
     tft.setTextColor(WHITE);
     tft.print(t1_int, 0);
@@ -6919,8 +6562,15 @@ int ringMeter(float value, int vmin, int vmax, int x, int y, int r, char *units,
         case 3: colour = rainbow(map(i, -angle, angle, 0, 127)); break;  // full spectrum blue to red
         case 4: colour = rainbow(map(i, -angle, angle, 70, 127)); break; // green to red (high temperature etc)
         case 5: colour = rainbow(map(i, -angle, angle, 127, 63)); break; // red to green (low battery etc)
-        //default: colour = BLUE; break;                                 // fixed color
-        default: colour = GREEN; break;                                  // fixed color
+
+        // cores do ring meter para serem testadas:
+        case 6: colour = YELLOW; break;                                  // fixed colour
+        case 7: colour = ORANGE; break;                                  // fixed colour
+        case 8: colour = OLIVE; break;                                   // fixed colour
+        case 9: colour = rainbow(map(i, -angle, angle, 100, 127)); break;// orange to red (uv index)
+
+        default: colour = GREEN; break;                                   // fixed color
+
       }
       tft.fillTriangle(x0, y0, x1, y1, x2, y2, colour);
       tft.fillTriangle(x1, y1, x2, y2, x3, y3, colour);
@@ -6932,15 +6582,24 @@ int ringMeter(float value, int vmin, int vmax, int x, int y, int r, char *units,
     }
   }
 
-  char buf [10];   // convert value to a string
+  char buf [10];                                                              // convert value to a string
   byte len = 3;
   if (value > 999) {
     len = 4;
     dtostrf (value, len, 0, buf);
   } else {
     dtostrf (value, len, 1, buf);
+    //buf[len] = ' '; buf[len] = 0;                                               // add blanking space and terminator, helps to centre text too!
   }
 
+  /*
+       if(units == "NSA-LI-001"){
+         byte len = 2;
+         buf[len] = 0;
+         dtostrf (value, len, 2, buf);
+       }  */
+
+  //|| units == "NSA-LI-001"
   if (units == "NSA-QI-001") {
     byte len = 2;
     buf[len] = 0;
@@ -8124,8 +7783,8 @@ void umid_soloP1() {
   tft.setCursor(220, 35);
   tft.print(F("1"));
 
-  int xpos = 40, ypos = 66, gap = 100, radius = 80;                              // position of upper ring and proportion
-  ringMeter (umidadeP1, 0, 100, xpos, ypos, radius, "NSA-AI-001", GREEN2RED);    // draw analog meter
+  int xpos = 40, ypos = 66, gap = 100, radius = 80;                                // position of upper ring and proportion
+  ringMeter (umidadeP1, 0, 100, xpos, ypos, radius, "NSA-AI-001", GREEN2RED);      // draw analog mete
 
   tft.fillRect(0, 295, 240, 1, YELLOW);
   tft.fillRect(0, 319, 240, 1, YELLOW);
@@ -8292,8 +7951,8 @@ void umid_soloP2() {
   tft.setCursor(220, 35);
   tft.print(F("2"));
 
-  int xpos = 40, ypos = 66, gap = 100, radius = 80;                              // position of upper ring and proportion
-  ringMeter (umidadeP2, 0, 100, xpos, ypos, radius, "NSA-AI-002", GREEN2RED);    // draw analog meter
+  int xpos = 40, ypos = 66, gap = 100, radius = 80;                           // position of upper ring and proportion
+  ringMeter (umidadeP2, 0, 100, xpos, ypos, radius, "NSA-AI-002", GREEN2RED);      // draw analog mete
 
   tft.fillRect(0, 295, 240, 1, YELLOW);
   tft.fillRect(0, 319, 240, 1, YELLOW);
@@ -8447,8 +8106,8 @@ void lcd_preciptacao() {
   tft.setTextSize(3);
   tft.print(F("ORVALHO"));
 
-  int xpos = 40, ypos = 90, gap = 100, radius = 80;                                  // position of upper ring and proportion
-  ringMeter (preciptacao, 0, 100, xpos, ypos, radius, "NSA-AI-004", GREEN2RED);      // draw analog meter
+  int xpos = 40, ypos = 90, gap = 100, radius = 80;                           // position of upper ring and proportion
+  ringMeter (preciptacao, 0, 100, xpos, ypos, radius, "NSA-AI-004", GREEN2RED);      // draw analog mete
 
 }
 
@@ -8554,12 +8213,12 @@ void lcd_pressao_atm() {
   tft.print(F("BAROMETRO"));
 
   int xpos = 40, ypos = 70, gap = 100, radius = 80;                           // position of upper ring and proportion
-  ringMeter (p, 0, 1200, xpos, ypos, radius, "NSA-PI-001", GREEN2GREEN);      // draw analog meter
+  ringMeter (p, 0, 1200, xpos, ypos, radius, "NSA-PI-001", GREEN2GREEN);      // draw analog mete
 
   tft.fillRect(0, 295, 240, 1, YELLOW);
   tft.fillRect(0, 319, 240, 1, YELLOW);
 
-  if (pa10 <= 5.00) {
+  if (pa10 <= 4.50 || pMin >= 918.00) {
     tft.setCursor(5, 300);
     tft.setTextColor(CYAN);
     tft.setTextSize(2);
@@ -8679,7 +8338,7 @@ void lcd_alt_atm() {
   tft.print(F("APROXIMADA"));
 
   int xpos = 40, ypos = 90, gap = 100, radius = 80;                           // position of upper ring and proportion
-  ringMeter (alt, 0, 1000, xpos, ypos, radius, "NSA-PI-002", GREEN2GREEN);    // draw analog meter
+  ringMeter (alt, 0, 1000, xpos, ypos, radius, "NSA-PI-002", GREEN2GREEN);      // draw analog mete
 
   tft.setCursor(5, 275);
   tft.setTextColor(WHITE);
@@ -8689,7 +8348,7 @@ void lcd_alt_atm() {
   tft.fillRect(0, 295, 240, 1, YELLOW);
   tft.fillRect(0, 319, 240, 1, YELLOW);
 
-  if (pa10 <= 5.00) {
+  if (pa10 <= 4.50 || pMin >= 918.00) {
     tft.setCursor(5, 300);
     tft.setTextColor(CYAN);
     tft.setTextSize(2);
@@ -8793,23 +8452,26 @@ void lcd_vazao() {
   unsigned long atualiza_lcd;
   unsigned long atualiza_lcd2;
 
-
   atualiza_lcd = millis();
   atualiza_lcd2 = millis();
-  TempoLED = millis();
+  //TempoLED = millis();
 
   while ((millis() - atualiza_lcd2 < 10000)) {
 
-    //Verifica se o intervalo do Led Vermelho já foi atingido
-    if (millis() - TempoLED >= IntervalolLED)
-    {
-      TempoLED = millis();
-      estadoLED = !estadoLED;                 // Inverte o Estado do LED
-      digitalWrite(LED, estadoLED);           // Seta o LED DA PLACA DOS SENSORES
-    }
+  //    //Verifica se o intervalo do Led Vermelho já foi atingido
+  //    if (millis() - TempoLED >= IntervalolLED)
+  //    {
+  //      TempoLED = millis();
+  //      estadoLED = !estadoLED;                 // Inverte o Estado do LED
+  //      digitalWrite(LED, estadoLED);           // Seta o LED DA PLACA DOS SENSORES
+  //    }
 
     //atualiza o display a cada 1 segundo com as informações da Vazão:
     if ((millis() - atualiza_lcd >= 1000)) {
+
+      estadoLED = !estadoLED;                 // Inverte o Estado do LED
+      digitalWrite(LED, estadoLED);           // Seta o LED DA PLACA DOS SENSORES
+      
       detachInterrupt(digitalPinToInterrupt(Pino));
       atualiza_lcd = millis();
 
@@ -8827,6 +8489,9 @@ void lcd_vazao() {
 
       int xpos = 40, ypos = 66, gap = 100, radius = 80;                            // position of upper ring and proportion
       ringMeter (Litros, 0, 4000, xpos, ypos, radius, "NSA-FI-001", GREEN2GREEN);  // draw analog meter
+
+      estadoLED = !estadoLED;                 // Inverte o Estado do LED
+      digitalWrite(LED, estadoLED);           // Seta o LED DA PLACA DOS SENSORES
 
       // ========================================================================================================
       // VARIAVEIS DE INDICAÇÃO DE VAZÃO:
@@ -8894,13 +8559,6 @@ void lcdpluv() {
   tft.print(F("h"));
 
   // ========================================================================================================
-  // VARIAVEIS DE INDICAÇÃO DO PLUVIOMETRO:
-
-  volatile int pluvPulsos = contaPulso1;
-  float volatile pluv = pluviometro;     // Mede a quantidade de chuva totalizada em milimitros!
-  float pluv_hora = pluviometro_hora;    // Mede a quantidade de chuva totalizada em milimitros da última hora!
-
-  // ========================================================================================================
   // EXIBIÇÃO DA VARIAVEL VAZÃO INSTANTANEA:
 
   tft.setCursor(27, 35);
@@ -8913,15 +8571,15 @@ void lcdpluv() {
   tft.print(F("DIGITAL"));
 
   int xpos = 40, ypos = 90, gap = 100, radius = 80;                            // position of upper ring and proportion
-  ringMeter (pluv, 0, 60, xpos, ypos, radius, "NSA-QI-001", GREEN2GREEN);      // draw analog meter
+  ringMeter (pluviometro, 0, 60, xpos, ypos, radius, "NSA-QI-001", GREEN2GREEN);      // draw analog meter
 
   tft.fillRect(0, 265, 240, 1, YELLOW);
   tft.setCursor(5, 270);
   tft.setTextColor(CYAN);
   tft.setTextSize(2);
-  tft.print(F("ULTIMA HORA:"));
+  tft.print(F("ACUMULADO:"));
   tft.setTextColor(WHITE);
-  tft.print(pluv_hora, 2);
+  tft.print(pluviometro_acum, 2);
   tft.print(F("mm"));
 
   tft.fillRect(0, 290, 240, 1, YELLOW);
@@ -8930,7 +8588,7 @@ void lcdpluv() {
   tft.setTextSize(2);
   tft.print(F("PULSOS:"));
   tft.setTextColor(WHITE);
-  tft.print(pluvPulsos);
+  tft.print(contaPulso1);
   tft.fillRect(0, 315, 240, 1, YELLOW);
 
 }
@@ -8956,7 +8614,7 @@ void nivel_cx()  {
   //Serial.print(distance);
 
   // ========================================================================================================
-  // TRATAMENTO DA INDICAÇÃO DA VÁRIALVEL NIVEL, CASO HAJA FALHA NO MÓDULO ELA INDICARÁ Zero CM!!
+  // TRATAMENTO DA INDICAÇÃO DA VÁRIALVEL NIVEL, CASO HAJA FALHA NO MÓDULO ELA INDICARÁ O CM!!
 
   if (distance == 357) {
     nivel = 0;
@@ -9047,8 +8705,7 @@ void nivel_cx()  {
 
 
 // ========================================================================================================
-// FUNÇÃO PARA CÁLCULO DO VOLUME DOS RESERVATÓRIOS: 
-// HÁ 2 RESERVATÓRIOS COM CAPACIDADE MÁXIMA DE 2000L CADA UM.
+// FUNÇÃO PARA CÁLCULO DO VOLUME DOS RESERVATÓRIOS:
 
 void volume_cx()  {
 
@@ -9142,7 +8799,7 @@ void volume_cx()  {
   tft.print(F("RESERVATORIOS"));
 
   int xpos = 40, ypos = 90, gap = 100, radius = 80;                                      // position of upper ring and proportion
-  ringMeter (volume_reservatorio, 0, 4000, xpos, ypos, radius, "NSA-LI-002", GREEN2RED); // draw analog meter
+  ringMeter (volume_reservatorio, 0, 4000, xpos, ypos, radius, "NSA-LI-002", GREEN2RED); // draw analog mete
 
   tft.fillRect(0, 270, 240, 1, YELLOW);
   tft.fillRect(0, 295, 240, 1, YELLOW);
@@ -9326,7 +8983,7 @@ void Calcula_nivel_UV() {
 
   //UV_index = 7,00;
 
-  int xpos = 40, ypos = 70, gap = 100, radius = 80;                              // position of upper ring and proportion
+  int xpos = 40, ypos = 70, gap = 100, radius = 80;                                // position of upper ring and proportion
   ringMeter (UV_index, 0, 11, xpos, ypos, radius, "NSA-AI-005", GREEN2RED);      // draw analog meter
 
   tft.fillRect(0, 295, 240, 1, YELLOW);
@@ -9420,8 +9077,7 @@ void d1() {
   /*
       uint8_t  chargeState   = 0;
       int8_t   chargePercent = 0;
-      uint16_t milliVolts    = 0;
-  */
+      uint16_t milliVolts    = 0;*/
 
   modemGSM.getBattStats(chargeState, chargePercent, milliVolts);
 
@@ -9527,7 +9183,7 @@ void d1() {
   tft.setTextSize(2);
   tft.print(F("SMS SEND:"));
   tft.setTextColor(WHITE);
-  tft.print(msg_counter4);
+  tft.print(msg_sms_env);
 
   tft.fillRect(0, 195, 240, 1, YELLOW);
 
@@ -9658,7 +9314,6 @@ void d2() {
 
   tft.setCursor(5, 125);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("UBIDOTS NSAGRO-V1"));
   tft.setTextColor(WHITE);
   tft.setCursor(5, 150);
@@ -9675,20 +9330,22 @@ void d2() {
 
   tft.setCursor(5, 175);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("ENVIO IoT: "));
   tft.setCursor(125, 175);
   tft.setTextColor(WHITE, BLACK);
 
-  //TEMPO PARA O PRÓXIMO ENVIO DE DADOS AOS SERVERS IOT:
   atual30 = millis();
-  intervalo30 = 900000;   //intervalo de envio de dado aos Servers
-  t_send = (900 - ((atual30 - anterior30) / 1000)); 
+  intervalo30 = 900000;   
+  t_send = (900 - ((atual30 - anterior30) / 1000));
 
   tft.print(t_send);
   tft.print(F("seg."));
+
+  //TEMPO PARA O PRÓXIMO ENVIO DE DADOS AOS SERVERS IOT;
+
   unsigned long atualiza_lcd;
   unsigned long atualiza_lcd2;
+
 
   atualiza_lcd = millis();
   atualiza_lcd2 = millis();
@@ -9702,8 +9359,8 @@ void d2() {
       tft.setTextColor(WHITE, BLACK);
 
       atual30 = millis();
-      intervalo30 = 900000;  
-      t_send = (900 - ((atual30 - anterior30) / 1000)); 
+      intervalo30 = 900000;   //intervalo30 = 1200000; 1200000;
+      t_send = (900 - ((atual30 - anterior30) / 1000)); //t_send = (1200 -((atual30-anterior30)/1000));
 
       tft.print(t_send);
       tft.print(F("seg. "));
@@ -9783,7 +9440,6 @@ void d3() {
 
   tft.setCursor(0, 125);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("THINGSPEAK NSAGRO-V0"));
   tft.setTextColor(WHITE);
   tft.setCursor(5, 150);
@@ -9797,7 +9453,6 @@ void d3() {
 
   tft.setCursor(0, 175);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("THINGSPEAK NSAGRO-V1"));
   tft.setTextColor(WHITE);
   tft.setCursor(5, 200);
@@ -9810,21 +9465,20 @@ void d3() {
   tft.fillRect(0, 220, 240, 1, YELLOW);
   tft.fillRect(0, 270, 240, 1, YELLOW);
 
-  //TEMPO PARA O PRÓXIMO ENVIO DE DADOS AOS SERVERS IOT;
-  
   tft.setCursor(5, 225);
   tft.setTextColor(CYAN);
-  tft.setTextSize(2);
   tft.print(F("ENVIO IoT: "));
   tft.setCursor(125, 225);
   tft.setTextColor(WHITE, BLACK);
 
   atual30 = millis();
-  intervalo30 = 900000;  
-  t_send = (900 - ((atual30 - anterior30) / 1000));
+  intervalo30 = 900000;   
+  t_send = (900 - ((atual30 - anterior30) / 1000)); 
 
   tft.print(t_send);
   tft.print(F("seg."));
+
+  //TEMPO PARA O PRÓXIMO ENVIO DE DADOS AOS SERVERS IOT;
 
   unsigned long atualiza_lcd;
   unsigned long atualiza_lcd2;
@@ -9840,7 +9494,7 @@ void d3() {
       tft.setTextColor(WHITE, BLACK);
 
       atual30 = millis();
-      intervalo30 = 900000; 
+      intervalo30 = 900000;   
       t_send = (900 - ((atual30 - anterior30) / 1000));
 
       tft.print(t_send);
@@ -9861,8 +9515,7 @@ void d3() {
 
 
 
-// ========================================================================================================
-// FUNÇÃO PARA RESETE DOS VALORES MIN E MAX DAS VARIAVEIS:
+
 
 
 void d4() {
@@ -9877,6 +9530,16 @@ void d4() {
 
   if (resete == true) {
 
+    //========================================================================================================
+    // Contagem de vezes que houver falha no envio das mensagens aos Servidores IoT:
+    msg_counternok_resete = 0; //msg não enviada Ubidots 0
+    msg_counternok1_resete = 0; //msg não enviada Ubidots 1
+    msg_counternok_t_resete = 0; // msg não enviada ThingSpeak 0
+    msg_counternok_t1_resete = 0; // msg não enviada ThingSpeak 1
+    msg_counternok_t2_resete = 0; // msg não enviada ThingSpeak 2
+    configuraGSM_nok_resete = 0; // GSM não Ok(resete)
+    configuraGSM_nok = 0; // GSM não ok (SMS envio)
+    
     t1MaxDHT22 = -100.00;
     t1MinDHT22 = 100.00;
     UmaxDHT22 = -100.00;
@@ -9980,8 +9643,6 @@ void d4() {
     tft.print(F(" NOK"));
   }
 
-
-
   delay(1000);
 
   tft.fillRect(0, 120, 240, 1, YELLOW);
@@ -10000,11 +9661,6 @@ void d4() {
   }
 
 }
-
-
-
-
-
 
 
 
@@ -10031,10 +9687,7 @@ void sd_card_setup() {
   tft.setTextColor(WHITE);
   tft.setTextSize(3);
   tft.print(F("SETUP"));
-
   tft.setCursor(59, 43);
-  tft.setTextColor(WHITE);
-  tft.setTextSize(3);
   tft.print(F("SD CARD"));
 
   delay(1000);
@@ -10082,8 +9735,6 @@ void sd_card_setup() {
     delay(2500);
   }
 
-  //SD.end();
-
   tft.setCursor(5, 180);
   tft.setTextColor(CYAN);
   tft.setTextSize(2);
@@ -10116,11 +9767,13 @@ void sd_card_setup() {
 
   // Testando Partição: FAT16 ou FAT32
   tft.setCursor(5, 230);
+  
   if (!volume.init(card)) {
     tft.setTextColor(RED);
     tft.print("Error FAT16/FAT32");
+  
+  // Exibindo o tipo FAT  
   } else {
-    // Exibindo o tipo FAT
     tft.setTextColor(CYAN);
     tft.print("Arquivo tipo: ");
     tft.setTextColor(WHITE);
@@ -10157,7 +9810,6 @@ void sd_card_setup() {
   tft.print("N. Blocks: ");
   tft.setTextColor(WHITE);
   tft.println(volume.blocksPerCluster() * volume.clusterCount());
-
   root.close();
   delay(5000);
 
@@ -10180,10 +9832,7 @@ void sd_card_testegravacao() {
   tft.setTextColor(WHITE);
   tft.setTextSize(3);
   tft.print(F("SETUP"));
-
   tft.setCursor(59, 43);
-  tft.setTextColor(WHITE);
-  tft.setTextSize(3);
   tft.print(F("SD CARD"));
 
   tft.drawRect(0, 90, 240, 40, YELLOW);
@@ -10239,7 +9888,6 @@ void sd_card_testegravacao() {
     tft.setTextSize(2);
     tft.print(F("GRAVACAO CONCLUIDA"));
 
-
     delay(2000);
     myFile.close();
 
@@ -10263,7 +9911,7 @@ void sd_card_testegravacao() {
     tft.print(rtc.getDOWStr());
     delay(10000);
 
-    // SE HOUVER ERRO PARA ABRIR O ARQUIVO, IRÁ INDICAR NO DISPLAY
+  // SE HOUVER ERRO PARA ABRIR O ARQUIVO, IRÁ INDICAR NO DISPLAY
   } else {
     tft.fillRect(0, 130, 240, 34, YELLOW);
     tft.setCursor(5, 136);
@@ -10310,7 +9958,7 @@ void printDirectory(File dir, int numTabs) {
     {
       if (numTabs == 0)
 
-        tft.setTextSize(1);
+      tft.setTextSize(1);
       tft.setTextColor(WHITE);
       tft.println(" ");
       tft.print("   ****  Numero de Arquivos: ");
@@ -10324,7 +9972,7 @@ void printDirectory(File dir, int numTabs) {
       tft.print("  Tamanho: ");
       tft.setTextColor(WHITE);
 
-      tamanho_soma = ( (tamanho[0])  + (tamanho[1]) + (tamanho[2]) + (tamanho[3]) + (tamanho[4])  + (tamanho[5]) + (tamanho[6]) + (tamanho[7]) + (tamanho[8]) + (tamanho[9]));
+      tamanho_soma = ( (tamanho[0])  + (tamanho[1]) + (tamanho[2])  + (tamanho[3]) + (tamanho[4])  + (tamanho[5]) + (tamanho[6]) + (tamanho[7]) + (tamanho[8]) + (tamanho[9]));
       tamanho_soma = tamanho_soma / 1024;
       tamanho_soma = tamanho_soma / 1000; // transformando em MB o valor dos arquivos!
 
@@ -10340,13 +9988,12 @@ void printDirectory(File dir, int numTabs) {
       tft.print(tamanho_soma, DEC);
       tft.print("Mb");
 
-
       entry.close();
       root.close();
-
       delay(10000);
-     
+      
       return;
+      
     }
 
     tft.setTextSize(1);
@@ -10389,12 +10036,8 @@ void teste_Sd() {
   tft.setTextSize(4);
   tft.print(F("SALVANDO"));
   tft.setCursor(25, 145);
-  tft.setTextColor(WHITE);
-  tft.setTextSize(4);
   tft.print(F("DADOS NO"));
   tft.setCursor(38, 210);
-  tft.setTextColor(WHITE);
-  tft.setTextSize(4);
   tft.print(F("SD CARD"));
 
   int pino53 = 53;
@@ -10408,9 +10051,9 @@ void teste_Sd() {
 
     // ========================================================================================================
     // GRAVAÇÃO DOS DADOS DE DIA DA SEMANA, HORÁRIO E DATA.
-    myFile.print(F(" TESTE GRAVACAO NO SD CARD OK"));
+    myFile.print(F("TESTE GRAVACAO NO SD CARD OK"));
     myFile.print(F(";"));
-    myFile.print(F("DATA: "));
+    myFile.print(F(" DATA: "));
     myFile.print(t.date, DEC);
     myFile.print(F("/"));
     myFile.print(t.mon, DEC);
@@ -10463,8 +10106,6 @@ void teste_Sd() {
 
 
 
-
-
 // ========================================================================================================
 // FUNÇÃO PARA GRAVAÇÃO DOS DADOS NO SD CARD:
 
@@ -10488,16 +10129,13 @@ void gravadadosSd() {
   tft.setTextSize(4);
   tft.print(F("SALVANDO"));
   tft.setCursor(25, 145);
-  tft.setTextColor(WHITE);
-  tft.setTextSize(4);
   tft.print(F("DADOS NO"));
   tft.setCursor(38, 210);
-  tft.setTextColor(WHITE);
-  tft.setTextSize(4);
   tft.print(F("SD CARD"));
 
   int pino53 = 53;
   pinMode(pino53, OUTPUT);
+
   delay(500);
   SD.begin(pino53);
   delay(500);
@@ -10993,8 +10631,8 @@ void gravadadosSd() {
     myFile.print(F("mm"));
     myFile.print(F(";"));
 
-    myFile.print(F(" PLUVIOMETRO ULTIMA HORA: "));
-    myFile.print(pluviometro_hora);
+    myFile.print(F(" PLUVIOMETRO ACUMULADO: "));
+    myFile.print(pluviometro_acum);
     myFile.print(F("mm"));
     myFile.print(F(";"));
 
@@ -11145,6 +10783,7 @@ void gravadadosSd() {
     msg_sdcard_ok++;
 
     // SE NÃO HOUVER ERRO PARA ABRIR O ARQUIVO, IRÁ INDICAR: GRAVAÇÃO OK NO DISPLAY
+    
     tft.fillRoundRect(0, 275, 240, 25, 10, RED);
     tft.drawRoundRect(0, 275, 240, 25, 10, WHITE);
     tft.setCursor(50, 280);
@@ -11152,19 +10791,20 @@ void gravadadosSd() {
     tft.setTextSize(2);
     tft.print(F("GRAVACAO OK!"));
 
-  // SE HOUVER ERRO PARA ABRIR O ARQUIVO, IRÁ INDICAR NO DISPLAY
+    // SE HOUVER ERRO PARA ABRIR O ARQUIVO, IRÁ INDICAR NO DISPLAY
+
   }  else {
 
     msg_sdcard_nok++;
-    //tft.fillRect(0, 275, 240, 25, YELLOW);
     tft.fillRoundRect(0, 275, 240, 25, 10, YELLOW);
     tft.drawRoundRect(0, 275, 240, 25, 10, RED);
     tft.setCursor(5, 280);
     tft.setTextColor(RED);
     tft.setTextSize(2);
     tft.print(F("DADOS NAO GRAVADOS!"));
- 
+
   }
+
 
 }
 
@@ -11192,7 +10832,7 @@ void gravadadosSd() {
 // ========================================================================================================
 // FUNÇÃO PARA ENVIO DE COMANDOS AT: Envia comando AT e aguarda até que uma resposta seja obtida!!
 
-String sendATTCC(String command) {
+String sendAT(String command) {
 
   String response = "";
   serialGSM.begin(9600);
@@ -11238,7 +10878,7 @@ String sendATTCC(String command) {
 // FUNÇÃO PARA ENVIO DE COMANDOS AT: Envia comando AT e aguarda até que uma resposta seja obtida!!
 // FUNÇÃO USADA NO SETUP DO MÓDULO GPRS SIM800L.
 
-String sendATT(String command) {
+String sendAT1(String command) {
 
   String response = "";
   serialGSM.begin(9600);
@@ -11453,92 +11093,8 @@ String sendATSMS(String command)
   return response;
 }
 
-// ========================================================================================================
-// FUNÇÃO PARA ENVIO DE COMANDOS AT: Envia comando AT e aguarda até que uma resposta seja obtida!!
-
-String sendAT(String command)
-{
-  unsigned long resetetempo = millis();
-  unsigned long tempointervalo = 10000;
-  unsigned long reseteMEGA = millis();
-  unsigned long intervalo_desliga = 15000;
-  String response = "";
-
-  serialGSM.begin(9600);
-
-  delay(100);              
-  while (!serialGSM) {     // se não responder, inicia o modem sim800l
-    if (((millis() - resetetempo) > tempointervalo)) {
-      response = "GSM EM FALHA";
-      return response;
-      goto falha;
-    }
-    delay(500);
-  }
-
-  serialGSM.println(command);
-  delay(1000);
-
-  // ========================================================================================================
-  // enquanto a serial estiver disponivel lê os bits da Serial
-
-  while (serialGSM.available()) {
-    response = serialGSM.readString();
-    if (((millis() - reseteMEGA) > intervalo_desliga)) {
-      modemGSM.restart();
-      delay(8000);
-      funcReset();
-    }
-  }
 
 
-falha:
-
-  if (command == "AT+CMGS=\"" + telefoneSMS + "\"\n") {
-    tft.setTextColor(CYAN);
-    tft.setTextSize(2);
-    tft.setCursor(10, 258);
-    tft.print(F("Comando GSM:"));
-    tft.setTextColor(WHITE);
-    delay(4000);
-    tft.setTextSize(2);
-    response.trim();
-    tft.print(response);
-    delay(4000);
-  }
-
-  if (command == "AT+CIPCLOSE=?") {
-    tft.fillRect(0, 24, 240, 320, BLACK);
-    tft.setTextColor(CYAN);
-    tft.setTextSize(2);
-    tft.setCursor(0, 40);
-    tft.print(F("CONEXAO FINALIZADA:"));
-    tft.setCursor(0, 60);
-    tft.setTextColor(WHITE);
-    tft.setTextSize(2);
-    response.trim();
-    tft.print(response);
-
-    tft.setCursor(0, 240);
-    tft.setTextColor(CYAN);
-    tft.setTextSize(2);
-    tft.print(F("MSG ENVIADAS:"));
-    tft.setTextColor(WHITE);
-    tft.print(msg_counterok_t);
-
-    tft.setCursor(0, 270);
-    tft.setTextColor(CYAN);
-    tft.setTextSize(2);
-    tft.print(F("MSG NAO ENVIADAS:"));
-    tft.setTextColor(WHITE);
-    tft.print(msg_counternok_t);
-
-    delay(3000);
-    return response;
-  }
-
-  return response;
-}
 
 
 
@@ -11580,7 +11136,7 @@ void setup_gsm_gprs() {
   tft.print(F("SIM800L"));
 
   delay(2000);
-  sendATT("AT+GSMBUSY=1");
+  sendAT1("AT+GSMBUSY=1");
 
   int sim = modemGSM.getSimStatus();
 
@@ -11708,7 +11264,7 @@ void setup_gsm_gprs() {
   tft.setTextColor(WHITE);
 
   if (modemGSM.gprsConnect(apn, gprsUser, gprsPass) == 1) {
-    delay(3000);    
+    delay(3000);    //10000(10seg)
     tft.print(F("OK"));
 
   } else {
@@ -11795,21 +11351,28 @@ void configuraGSM() {
   sendATSMS("AT+CMGDA=DEL ALL\n");
 
   if (modo_sms_ativado == 6) {
+        
+    configuraGSM_ok ++;
+        
     tft.fillRect(0, 285, 240, 35, RED);
     tft.setCursor(5, 295);
     tft.setTextColor(WHITE);
     tft.setTextSize(2);
     tft.print(F("SIM800L MODO SMS OK"));
-    configuraGSM_ok ++;
+
     delay(2000);
 
   } else {
+
+    configuraGSM_nok++;
+    configuraGSM_nok_resete++;
+    
     tft.fillRect(0, 285, 240, 35, YELLOW);
     tft.setCursor(5, 295);
     tft.setTextColor(RED);
     tft.setTextSize(2);
     tft.print(F("FALHA GSM MODO SMS!"));
-    configuraGSM_nok ++;
+
 
     digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
     delay(1500);
@@ -11830,21 +11393,24 @@ void leGSM()
   serialGSM.listen();
 
   static String textoRec = "";
-  static unsigned long delay1 = 0;
   static int count = 0;
-  static unsigned char buffer[64];
+  static unsigned char buffer[512];
 
+  // Exemplo de mensagmem: [+CMGL: 1,"REC UNREAD","+5518999999999","","18/11/30,11:36:14-08"
+  //                          Hello 
+  //                          OK
+  //                       ]
+  
   if (serialGSM.available()) {
-
+  serialGSM.flush();
     while (serialGSM.available()) {
 
       buffer[count++] = serialGSM.read();
-      if (count == 64)break;
-      serialGSM.flush();
+      if (count == 512)break;
+     
     }
 
     textoRec += (char*)buffer;
-    delay1   = millis();
 
     for (int i = 0; i < count; i++) {
       buffer[i] = NULL;
@@ -11852,7 +11418,9 @@ void leGSM()
     count = 0;
   }
 
-  if ( ((millis() - delay1) > 100) && textoRec != "" ) {
+  delay(100);
+  
+  if (textoRec != "" ) {
 
     if ( textoRec.substring(2, 7) == "+CMT:" ) {
       temSMS = true;
@@ -11876,28 +11444,27 @@ void leGSM()
 
         if ( (linha == 1) && (aspas == 1) ) {
           telefoneSMS += textoRec.charAt(nL);
-          delay(100);
+
         }
 
         if ( (linha == 1) && (aspas == 5) ) {
           dataHoraSMS += textoRec.charAt(nL);
-          delay(100);
+
         }
 
         if ( linha == 2 ) {
           mensagemSMS += textoRec.charAt(nL);
-          delay(100);
+
         }
 
         if (textoRec.substring(nL - 1, nL + 1) == "\r\n") {
           linha++;
-          delay(100);
+
         }
       }
 
     } else {
       comandoGSM = textoRec;
-      c_GSM = textoRec;
     }
 
     textoRec = "";
@@ -11910,11 +11477,13 @@ void leGSM()
     comandoGSM = "";
   }
 
-  if (msg_counter4 == 0) {
+  if (msg_sms_env == 0) {
     ultimoGSM = "-> Ok!";
   }
 
 }
+
+
 
 
 // ========================================================================================================
@@ -11957,8 +11526,11 @@ void enviaSMS(String telefoneSMS, String mensagem) {
   serialGSM.print(preciptacao);
   serialGSM.print("%""\n");
 
+  serialGSM.print("Pluviometro: ");
+  serialGSM.print(pluviometro = contaPulso1 * 0.25);  // Variável para exibir a quantidade de chuva totalizada no dia
+  serialGSM.print("mm""\n");
+              
   serialGSM.print((char)26);
-
 
   delay(1000);
 
@@ -11969,40 +11541,16 @@ void enviaSMS(String telefoneSMS, String mensagem) {
 // FUNÇÃO VOID QUE ENVIA MENSAGEM DE RETORNO COM O RELATÓRIO DE ENVIO AOS SERVERS IOT:
 
 void enviaSMS1(String telefoneSMS, String mensagem) {
+ 
+//========================================================================================================
+// Contagem de vezes que houver falha no envio das mensagens aos Servidores IoT:
 
-  int msg0;  //ubidots msg enviada
-  int msg1;  //ubidots msg não enviada
-  int msg2;  //thingspeak msg enviada
-  int msg3;  //thingspeak msg não enviada
-  int msg4;  //sms enviados
-  int msg5;  //thingspeak msg enviada
-  int msg6;  //thingspeak msg não enviada
-  int msg7;  //thingspeak msg enviada
-  int msg8;  //thingspeak msg não enviada
-  int msg9;  //configuração modo sms ok
-  int msg10; //configuração modo sms nok
-  int msg11; //thingspeak ch public msg enviada
-  int msg12; //thingspeak ch public msg não enviada
-  int msg13; //sms recebidos
-
-  unsigned long t_send1 = 0;
-
-  msg0 = msg_counterok;
-  msg1 = msg_counternok;
-  msg2 = msg_counterok1;
-  msg3 = msg_counternok1;
-  msg4 = msg_counter4 + 1;
-  msg5 = msg_counterok_t;
-  msg6 = msg_counternok_t;
-  msg7 = msg_counterok_t1;
-  msg8 = msg_counternok_t1;
-  msg9 = configuraGSM_ok;
-  msg10 = configuraGSM_nok;
-  msg11 = msg_counterok_t2;
-  msg12 = msg_counternok_t2;
-  msg13 = msg_sms_rec;
-
-  t_send1 = t_send;
+//unsigned int msg_counternok_resete; //msg não enviada ubidots 0
+//unsigned int msg_counternok1_resete; //msg não enviada ubidots 1
+//unsigned int msg_counternok_t_resete; // msg não enviada ThingSpeak 0
+//unsigned int msg_counternok_t1_resete; // msg não enviada ThingSpeak 1
+//unsigned int msg_counternok_t2_resete; // msg não enviada ThingSpeak 2
+//unsigned int configuraGSM_nok_resete; // GSM nok
 
   serialGSM.begin(9600);
 
@@ -12011,64 +11559,101 @@ void enviaSMS1(String telefoneSMS, String mensagem) {
   serialGSM.print("Relatorio de Funcionamento:""\n");
   serialGSM.print("\n");
 
-  serialGSM.print("ThingSpeak CH0 msg Ok: ");
-  serialGSM.print(msg5);
+  //========================================================================================================
+  serialGSM.print("ThingSpeak Channel ID: 1062830\n");
+  serialGSM.print("Dados Enviados: ");
+  serialGSM.print(msg_counterok_t);
   serialGSM.print("\n");
 
-  serialGSM.print("ThingSpeak CH0 Falha: ");
-  serialGSM.print(msg6);
+  serialGSM.print("Dados Nao Enviados: ");
+  serialGSM.print(msg_counternok_t);
   serialGSM.print("\n");
 
-  serialGSM.print("ThingSpeak CH1 msg Ok: ");
-  serialGSM.print(msg7);
+  serialGSM.print("Falhas no Dia: ");
+  serialGSM.print(msg_counternok_t_resete);  //unsigned int msg_counternok_t_resete; // msg não enviada ThingSpeak 0
+  serialGSM.print("\n\n");
+  
+  //========================================================================================================
+  serialGSM.print("ThingSpeak Channel ID: 1347631\n");
+  serialGSM.print("Dados Enviados: ");
+  serialGSM.print(msg_counterok_t1);
   serialGSM.print("\n");
 
-  serialGSM.print("ThingSpeak CH1 Falha: ");
-  serialGSM.print(msg8);
+  serialGSM.print("Dados Nao Enviados: ");
+  serialGSM.print(msg_counternok_t1);
   serialGSM.print("\n");
 
-  serialGSM.print("ThingSpeak CH2 msg Ok: ");
-  serialGSM.print(msg11);
+  serialGSM.print("Falhas no Dia: ");
+  serialGSM.print(msg_counternok_t1_resete);  //unsigned int msg_counternok_t1_resete; // msg não enviada ThingSpeak 1
+  serialGSM.print("\n\n");
+
+  //========================================================================================================
+  serialGSM.print("ThingSpeak Channel ID: 1451371\n");
+  serialGSM.print("Dados Enviados: ");
+  serialGSM.print(msg_counterok_t2);
   serialGSM.print("\n");
 
-  serialGSM.print("ThingSpeak CH2 Falha: ");
-  serialGSM.print(msg12);
+  serialGSM.print("Dados Nao Enviados:");
+  serialGSM.print(msg_counternok_t2);
   serialGSM.print("\n");
 
-  serialGSM.print("Ubidots Dev.0 msg Ok: ");
-  serialGSM.print(msg0);
+  serialGSM.print("Falhas no Dia:");
+  serialGSM.print(msg_counternok_t2_resete);  //unsigned int msg_counternok_t2_resete; // msg não enviada ThingSpeak 2
+  serialGSM.print("\n\n");
+
+  //========================================================================================================
+  serialGSM.print("Ubidots Device NSAGRO-V0\n");
+  serialGSM.print("Dados Enviados: ");
+  serialGSM.print(msg_counterok);
   serialGSM.print("\n");
 
-  serialGSM.print("Ubidots Dev.0 Falha: ");
-  serialGSM.print(msg1);
+  serialGSM.print("Dados Nao Enviados: ");
+  serialGSM.print(msg_counternok);
   serialGSM.print("\n");
 
-  serialGSM.print("Ubidots Dev.1 msg Ok: ");
-  serialGSM.print(msg2);
+  serialGSM.print("Falhas no Dia: ");
+  serialGSM.print(msg_counternok_resete);   //unsigned int msg_counternok_resete; //msg não enviada ubidots 0
+  serialGSM.print("\n\n");
+  
+  //========================================================================================================
+  serialGSM.print("Ubidots Device NSAGRO-V1\n");
+  serialGSM.print("Dados Enviados: ");
+  serialGSM.print(msg_counterok1);
   serialGSM.print("\n");
 
-  serialGSM.print("Ubidots Dev.1 Falha: ");
-  serialGSM.print(msg3);
+  serialGSM.print("Dados Nao Enviados: ");
+  serialGSM.print(msg_counternok1);
   serialGSM.print("\n");
 
+  serialGSM.print("Falhas no Dia: ");
+  serialGSM.print(msg_counternok1_resete);     //unsigned int msg_counternok1_resete; //msg não enviada ubidots 1
+  serialGSM.print("\n\n");
+
+  //========================================================================================================
+  serialGSM.print("Modulo SIM800L\n");
   serialGSM.print("GSM modo SMS Ok: ");
-  serialGSM.print(msg9);
+  serialGSM.print(configuraGSM_ok);
   serialGSM.print("\n");
 
   serialGSM.print("GSM modo SMS Nok: ");
-  serialGSM.print(msg10);
+  serialGSM.print(configuraGSM_nok);
   serialGSM.print("\n");
 
+  serialGSM.print("Falhas no Dia: ");
+  serialGSM.print(configuraGSM_nok_resete);     //unsigned int configuraGSM_nok_resete; // GSM nok  serialGSM.print("GSM modo SMS Ok: ");
+  serialGSM.print("\n\n");
+
   serialGSM.print("SMS enviados: ");
-  serialGSM.print(msg4);
+  serialGSM.print(msg_sms_env + 1); // variavel contador de sms enviados
   serialGSM.print("\n");
 
   serialGSM.print("SMS recebidos: ");
-  serialGSM.print(msg13);
+  serialGSM.print(msg_sms_rec);
   serialGSM.print("\n");
 
+  //========================================================================================================
   serialGSM.print("Proximo Envio Iot: ");
-  serialGSM.print(t_send1);
+  serialGSM.print(t_send);
   serialGSM.print("seg");
   serialGSM.print("\n");
 
@@ -12133,27 +11718,19 @@ void enviaSMS2(String telefoneSMS, String mensagem) {
 
 void enviaSMS3(String telefoneSMS, String mensagem) {
 
-  int msg0 = msg_sdcard_ok;
-  int msg1 = msg_sdcard_nok;
-  int msg4 = msg_counter4 + 1;
 
   serialGSM.begin(9600);
 
   serialGSM.print("AT+CMGS=\"" + telefoneSMS + "\"\n");
   serialGSM.print(mensagem + "\n\n");
-  serialGSM.print("Relatorio de Funcionamento:""\n");
-  serialGSM.print("\n");
+  serialGSM.print("Relatorio de Funcionamento""\n\n");
 
   serialGSM.print("SD Card gravacao ok: ");
-  serialGSM.print(msg0);
+  serialGSM.print(msg_sdcard_ok);
   serialGSM.print("\n");
 
   serialGSM.print("SD Card erro de gravacao: ");
-  serialGSM.print(msg1);
-  serialGSM.print("\n");
-
-  serialGSM.print("SMS enviados: ");
-  serialGSM.print(msg4);
+  serialGSM.print(msg_sdcard_nok);
   serialGSM.print("\n");
 
   serialGSM.print((char)26);
@@ -12267,6 +11844,8 @@ void enviaSMS5(String telefoneSMS, String mensagem) {
 
 void enviaSMS6(String telefoneSMS, String mensagem) {
 
+  tft.fillRect(0, 0, 240, 320, BLACK);
+  
   serialGSM.begin(9600);
 
   // ========================================================================================================
@@ -12274,6 +11853,72 @@ void enviaSMS6(String telefoneSMS, String mensagem) {
 
   rtc.begin();
   t = rtc.getTime();
+
+  digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
+  delay(250);
+  digitalWrite(BUZZER_VCC, false);         // Seta o BUZZER
+  delay(250);
+  digitalWrite(BUZZER_VCC, true);        // Seta o BUZZER
+  delay(250);
+  digitalWrite(BUZZER_VCC, false);        // Seta o BUZZER
+  delay(250);
+  digitalWrite(BUZZER_VCC, true);         // Seta o BUZZER
+  delay(250);
+  digitalWrite(BUZZER_VCC, false);        // Seta o BUZZER
+
+  tft.fillRoundRect(0, 0, 240, 95, 15, RED);
+  tft.drawRoundRect(0, 0, 240, 95, 15, WHITE);
+  tft.setCursor(23, 10);
+  tft.setTextColor(WHITE);
+  tft.setTextSize(3);
+  tft.print(F("VERIFICANDO"));
+
+  tft.setCursor(52, 37);
+  tft.print(F("ENVIO DE"));
+
+  tft.setCursor(14, 64);
+  tft.print(F("MENSAGEM SMS"));
+
+  tft.fillRoundRect(10, 110, 220, 30, 15, YELLOW);
+  tft.drawRoundRect(10, 110, 220, 30, 15, RED);
+  tft.setCursor(30, 114);
+  tft.setTextColor(RED);
+  tft.print(F("ENVIAR SMS!"));
+
+  // ========================================================================================================
+  // Enviando SMS para o celular +5515999999!
+
+  tft.setCursor(10, 158);
+  tft.setTextColor(CYAN);
+  tft.setTextSize(2);
+  tft.print(F("SMS para:"));
+  tft.setTextColor(WHITE);
+  if(telefoneSMS == "+5515999999999"){
+      tft.print(F("Walter R."));
+  }
+    if(telefoneSMS == "+551599XXXXXXXX"){
+      tft.print(F("Tanti"));
+  }
+    if(telefoneSMS == "+55159YYYYYYYYY"){
+      tft.print(F("Arnaldo"));
+  }
+    if(telefoneSMS == "+55159ZZZZZZZZ"){
+      tft.print(F("Suzana"));
+  }
+
+  tft.setCursor(10, 178);
+  tft.setTextColor(CYAN);
+  tft.print(F("Cel:"));
+  tft.setTextColor(WHITE);
+  tft.print(telefoneSMS);
+
+  tft.setCursor(10, 198);
+  tft.setTextColor(CYAN);
+  tft.print(F("Mensagem: "));
+  tft.setTextColor(WHITE);
+  tft.print(F("Aviso de Possibilidade de Chuva!"));
+
+  delay(3000);
 
   serialGSM.print("AT+CMGS=\"" + telefoneSMS + "\"\n");
   serialGSM.print(mensagem + "\n\n");
@@ -12285,16 +11930,21 @@ void enviaSMS6(String telefoneSMS, String mensagem) {
   serialGSM.print("mBar");
   serialGSM.print("\n");
 
+  serialGSM.print("Pressao Atm Min Abaixo de 917mBar: ");
+  serialGSM.print(pMin);
+  serialGSM.print("mBar");
+  serialGSM.print("\n");
+
   serialGSM.print("Diferencial Atm: ");
   serialGSM.print((pMax - pMin));
   serialGSM.print("mBar");
   serialGSM.print("\n");
   serialGSM.print("\n");
 
-  serialGSM.print("Aviso Confirmado em:""\n");
   // ========================================================================================================
   // EXIBIÇÃO DA DATA:
-
+  
+  serialGSM.print("Aviso Confirmado em:""\n");
   serialGSM.print("Data: ");
   char const divider = '/';
   serialGSM.print(rtc.getDateStr(FORMAT_SHORT, FORMAT_LITTLEENDIAN, divider));
@@ -12321,9 +11971,58 @@ void enviaSMS6(String telefoneSMS, String mensagem) {
 
   serialGSM.print((char)26);
 
+  delay(3000);
+  tft.fillRect(0, 280, 240, 38, RED);
+  tft.setCursor(5, 282);
+  tft.setTextColor(WHITE);
+  tft.print(F(" Previsao de Chuva!"));
+  tft.setCursor(25, 300);
+  tft.print(F("  SMS Enviado!  "));
+
+  msg_sms_env++;
+
+  delay(3000);
+
+  int pino53 = 53;
+  pinMode(pino53, OUTPUT);
+
+  delay(500);
+  SD.begin(pino53);
+  delay(500);
+
+  myFile = SD.open("SMS.txt", FILE_WRITE);
+  myFile.print(F("NANO SMART AGRO - Mensagem SMS Enviada"));
+  myFile.print(F(";"));
+  myFile.print(F(" Possibilidade de chuva detectada!"));
+  myFile.print(F(";"));
+  myFile.print(F(" Envio de aviso de chuva por SMS"));
+  myFile.print(F(";"));
+  myFile.print(F(" Cel:"));
+  myFile.print(telefoneSMS);
+  myFile.print(F(";"));
+  myFile.print(F(" SMS Enviados: "));
+  myFile.print(msg_sms_env);
+  myFile.print(F(";"));
+  myFile.print(F(" DATA: "));
+  myFile.print(t.date, DEC);
+  myFile.print(F("/"));
+  myFile.print(t.mon, DEC);
+  myFile.print(F("/"));
+  myFile.print(t.year, DEC);
+  myFile.print(F(";"));
+  myFile.print(F(" HORARIO: "));
+  myFile.print(rtc.getTimeStr());
+  myFile.print(F(";"));
+  myFile.println();
+  myFile.println();
+  delay(1000);
+  myFile.close();
   delay(1000);
 
+  SD.end();
+
 }
+
 
 // ========================================================================================================
 // FUNÇÃO VOID QUE ENVIA MENSAGEM DE DETECÇÃO DE ÍNDICE PLUVIOMETRICO MAIOR QUE 1.00MM DE CHUVA:
@@ -12392,13 +12091,6 @@ void enviaSMS7(String telefoneSMS, String mensagem) {
 void enviaSMS8(String telefoneSMS, String mensagem) {
 
   serialGSM.begin(9600);
-
-  // ========================================================================================================
-  // EXIBIÇÃO DA DATA E HORÁRIO:
-
-  rtc.begin();
-  t = rtc.getTime();
-
   serialGSM.print("AT+CMGS=\"" + telefoneSMS + "\"\n");
   serialGSM.print(mensagem);
   serialGSM.print((char)26);
@@ -12407,6 +12099,13 @@ void enviaSMS8(String telefoneSMS, String mensagem) {
 }
 
 
+// ========================================================================================================
+// FUNÇÕES UTEIS PARA CONFIGURAÇÃO DAS FUNÇÕES DE ENVIO AOS SERVIDORES:
+
+//  modemGSM.restart();
+//  modemGSM.init();
+//  modemGSM.gprsDisconnect();
+//  modemGSM.isNetworkConnected();
 
 /********************************************************************************************************/
 /********************************************************************************************************/
@@ -12418,6 +12117,14 @@ void enviaSMS8(String telefoneSMS, String mensagem) {
 /********************************************************************************************************/
 /********************************************************************************************************/
 
+//      msg_counternok_resete = 0; //msg não enviada Ubidots 0
+//      msg_counternok1_resete = 0; //msg não enviada Ubidots 1
+//      msg_counternok_t_resete = 0; // msg não enviada ThingSpeak 0
+//      msg_counternok_t1_resete = 0; // msg não enviada ThingSpeak 1
+//      msg_counternok_t2_resete = 0; // msg não enviada ThingSpeak 2
+//      configuraGSM_nok_resete = 0; // GSM não Ok(resete)
+//      configuraGSM_nok = 0; // GSM não ok (SMS envio)
+//      configuraGSM_ok = 0; // GSM ok (SMS)
 
 
 // ========================================================================================================
@@ -12448,7 +12155,7 @@ void iot_ubidots() {
   tft.setTextSize(2);
   tft.print(F("Client ID:"));
   tft.setTextColor(WHITE);
-  tft.print(F("NSAGRO-V0"));
+  tft.print(F("*******"));
 
   sendAT("AT+GSMBUSY=1");
   delay(1000);
@@ -12489,7 +12196,7 @@ void iot_ubidots() {
     SD.begin(pino53);
     delay(500);
     myFile = SD.open("IoT0.txt", FILE_WRITE);   
-    myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER UBIDOTS, DEVICE: NSAGRO-V0"));
+    myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER UBIDOTS, DEVICE: *******"));
     myFile.print(F(";"));
     myFile.print(F(" Mensagens Enviadas: "));
     myFile.print(msg_counterok);
@@ -12618,7 +12325,7 @@ void iot_ubidots() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT0.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER UBIDOTS, DEVICE: NSAGRO-V0"));
+      myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER UBIDOTS, DEVICE: ********"));
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Enviadas: "));
       myFile.print(msg_counterok);
@@ -12749,7 +12456,7 @@ void iot_ubidots() {
     SD.begin(pino53);
     delay(500);
     myFile = SD.open("IoT0.txt", FILE_WRITE);
-    myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER UBIDOTS, DEVICE: NSAGRO-V0"));
+    myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER UBIDOTS, DEVICE: *************"));
     myFile.print(F(";"));
     myFile.print(F(" Mensagens Enviadas: "));
     myFile.print(msg_counterok);
@@ -12851,7 +12558,7 @@ void iot_ubidots() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT0.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO - Mensagem Enviada ao Sever UBIDOTS, Device: NSAGRO-V0"));
+      myFile.print(F("NANO SMART AGRO - Mensagem Enviada ao Sever UBIDOTS, Device: ******"));
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Enviadas: "));
       myFile.print(msg_counterok);
@@ -12918,7 +12625,7 @@ void iot_ubidots() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT0.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER UBIDOTS, DEVICE: NSAGRO-V0"));
+      myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER UBIDOTS, DEVICE: ************"));
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Enviadas: "));
       myFile.print(msg_counterok);
@@ -13218,7 +12925,7 @@ void iot_ubidots1() {
   tft.setTextSize(2);
   tft.print(F("Client ID:"));
   tft.setTextColor(WHITE);
-  tft.print(F("NSAGRO-V1"));
+  tft.print(F("********"));
 
   sendAT("AT+GSMBUSY=1");
   delay(1000);
@@ -13259,7 +12966,7 @@ void iot_ubidots1() {
     SD.begin(pino53);
     delay(500);
     myFile = SD.open("IoT1.txt", FILE_WRITE);
-    myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER UBIDOTS, DEVICE: NSAGRO-V1"));
+    myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER UBIDOTS, DEVICE: *********"));
     myFile.print(F(";"));
     myFile.print(F(" Mensagens Enviadas: "));
     myFile.print(msg_counterok1);
@@ -13388,7 +13095,7 @@ void iot_ubidots1() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT1.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER UBIDOTS, DEVICE: NSAGRO-V1"));
+      myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER UBIDOTS, DEVICE: *********"));
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Enviadas: "));
       myFile.print(msg_counterok1);
@@ -13519,7 +13226,7 @@ void iot_ubidots1() {
     SD.begin(pino53);
     delay(500);
     myFile = SD.open("IoT1.txt", FILE_WRITE);
-    myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER UBIDOTS, DEVICE: NSAGRO-V1"));
+    myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER UBIDOTS, DEVICE: ********"));
     myFile.print(F(";"));
     myFile.print(F(" Mensagens Enviadas: "));
     myFile.print(msg_counterok1);
@@ -13620,7 +13327,7 @@ void iot_ubidots1() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT1.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO - Mensagem Enviada ao Sever UBIDOTS, Device: NSAGRO-V1"));
+      myFile.print(F("NANO SMART AGRO - Mensagem Enviada ao Sever UBIDOTS, Device: **********"));
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Enviadas: "));
       myFile.print(msg_counterok1);
@@ -13687,7 +13394,7 @@ void iot_ubidots1() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT1.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER UBIDOTS, DEVICE: NSAGRO-V1"));
+      myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER UBIDOTS, DEVICE: **********"));
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Enviadas: "));
       myFile.print(msg_counterok1);
@@ -13937,7 +13644,7 @@ void iot_thingspeak() {
   tft.setTextSize(2);
   tft.print(F("Channel ID:"));
   tft.setTextColor(WHITE);
-  tft.print(F("1062830"));
+  tft.print(F("9999999"));
 
   sendAT("AT+GSMBUSY=1");
   delay(1000);
@@ -13978,7 +13685,7 @@ void iot_thingspeak() {
     SD.begin(pino53);
     delay(500);
     myFile = SD.open("IoT2.txt", FILE_WRITE);
-    myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 1062830"));
+    myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 999999"));
     myFile.print(F(";"));
     myFile.print(F(" Mensagens Enviadas: "));
     myFile.print(msg_counterok_t);
@@ -14108,7 +13815,7 @@ void iot_thingspeak() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT2.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 1062830"));
+      myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 999999"));
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Enviadas: "));
       myFile.print(msg_counterok_t);
@@ -14243,7 +13950,7 @@ void iot_thingspeak() {
     SD.begin(pino53);
     delay(500);
     myFile = SD.open("IoT2.txt", FILE_WRITE);
-    myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 1062830"));
+    myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 99999"));
     myFile.print(F(";"));
     myFile.print(F(" Mensagens Enviadas: "));
     myFile.print(msg_counterok_t);
@@ -14357,7 +14064,7 @@ void iot_thingspeak() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT2.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO - Mensagem Enviada ao Sever THINGSPEAK, Channel: 1062830"));
+      myFile.print(F("NANO SMART AGRO - Mensagem Enviada ao Sever THINGSPEAK, Channel: 999999"));
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Enviadas: "));
       myFile.print(msg_counterok_t);
@@ -14424,7 +14131,7 @@ void iot_thingspeak() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT2.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 1062830"));
+      myFile.print(F("NANO SMART AGRO - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 999999"));
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Enviadas: "));
       myFile.print(msg_counterok_t);
@@ -14699,7 +14406,7 @@ void iot_thingspeak1() {
   tft.setTextSize(2);
   tft.print(F("Channel ID:"));
   tft.setTextColor(WHITE);
-  tft.print(F("1347631"));
+  tft.print(F("888888"));
 
   sendAT("AT+GSMBUSY=1");
   delay(1000);
@@ -14740,7 +14447,7 @@ void iot_thingspeak1() {
     SD.begin(pino53);
     delay(500);
     myFile = SD.open("IoT3.txt", FILE_WRITE);
-    myFile.print(F("NANO SMART AGRO1 - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 1347631"));
+    myFile.print(F("NANO SMART AGRO1 - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 8888888"));
     myFile.print(F(";"));
     myFile.print(F(" Mensagens Enviadas: "));
     myFile.print(msg_counterok_t1);
@@ -14868,7 +14575,7 @@ void iot_thingspeak1() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT3.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO1 - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 1347631"));
+      myFile.print(F("NANO SMART AGRO1 - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 8888888"));
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Enviadas: "));
       myFile.print(msg_counterok_t1);
@@ -15001,7 +14708,7 @@ void iot_thingspeak1() {
     SD.begin(pino53);
     delay(500);
     myFile = SD.open("IoT3.txt", FILE_WRITE);
-    myFile.print(F("NANO SMART AGRO1 - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 1347631"));
+    myFile.print(F("NANO SMART AGRO1 - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 8888888"));
     myFile.print(F(";"));
     myFile.print(F(" Mensagens Enviadas: "));
     myFile.print(msg_counterok_t1);
@@ -15117,7 +14824,7 @@ void iot_thingspeak1() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT3.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO1 - Mensagem Enviada ao Sever THINGSPEAK, CHANNEL: 1347631"));
+      myFile.print(F("NANO SMART AGRO1 - Mensagem Enviada ao Sever THINGSPEAK, CHANNEL: 888888"));
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Enviadas: "));
       myFile.print(msg_counterok_t1);
@@ -15184,7 +14891,7 @@ void iot_thingspeak1() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT3.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO1 - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 1347631"));
+      myFile.print(F("NANO SMART AGRO1 - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 888888"));
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Enviadas: "));
       myFile.print(msg_counterok_t1);
@@ -15364,7 +15071,7 @@ void iot_thingspeak2() {
   tft.setTextSize(2);
   tft.print(F("Channel ID:"));
   tft.setTextColor(WHITE);
-  tft.print(F("1451371"));
+  tft.print(F("777777"));
 
   sendAT("AT+GSMBUSY=1");
   delay(1000);
@@ -15403,7 +15110,7 @@ void iot_thingspeak2() {
     SD.begin(pino53);
     delay(500);
     myFile = SD.open("IoT4.txt", FILE_WRITE);
-    myFile.print(F("NANO SMART AGRO2 - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 1451371"));
+    myFile.print(F("NANO SMART AGRO2 - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 777777"));
     myFile.print(F(";"));
     myFile.print(F(" Mensagens Enviadas: "));
     myFile.print(msg_counterok_t1);
@@ -15533,7 +15240,7 @@ void iot_thingspeak2() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT4.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO2 - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 1451371"));
+      myFile.print(F("NANO SMART AGRO2 - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 777777"));
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Enviadas: "));
       myFile.print(msg_counterok_t1);
@@ -15666,7 +15373,7 @@ void iot_thingspeak2() {
     SD.begin(pino53);
     delay(500);
     myFile = SD.open("IoT4.txt", FILE_WRITE);
-    myFile.print(F("NANO SMART AGRO2 - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 1451371"));
+    myFile.print(F("NANO SMART AGRO2 - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 777777"));
     myFile.print(F(";"));
     myFile.print(F(" Mensagens Enviadas: "));
     myFile.print(msg_counterok_t1);
@@ -15782,7 +15489,7 @@ void iot_thingspeak2() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT4.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO2 - Mensagem Enviada ao Sever THINGSPEAK, CHANNEL: 1451371"));
+      myFile.print(F("NANO SMART AGRO2 - Mensagem Enviada ao Sever THINGSPEAK, CHANNEL: 777777"));
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Enviadas: "));
       myFile.print(msg_counterok_t1);
@@ -15849,7 +15556,7 @@ void iot_thingspeak2() {
       SD.begin(pino53);
       delay(500);
       myFile = SD.open("IoT4.txt", FILE_WRITE);
-      myFile.print(F("NANO SMART AGRO2 - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 1451371"));
+      myFile.print(F("NANO SMART AGRO2 - MENSAGEM NÃO ENVIADA AO SERVER THINGSPEAK, CHANNEL: 777777"));
       myFile.print(F(";"));
       myFile.print(F(" Mensagens Enviadas: "));
       myFile.print(msg_counterok_t1);
@@ -16089,22 +15796,4 @@ String createJsonString4()
   String data = String("field1=") + String(t40, 1) + "&field2=" + String(h40, 1) + "&field3=" + String(u40, 2) + "&field4=" + String(uu40, 2) + "&field5=" + String(p40, 1) + "&field6=" + String(c40, 2) + "&field7=" + String(v40, 1) + "&field8=" + String(n40, 1);
 
   return data;
-}
-
-unsigned long testLines_SD(uint16_t color) {
-  int           x1, y1, x2, y2,
-                w = tft.width(),
-                h = tft.height();
-
-  tft.fillRect(0, 0, 240, 320, BLACK);
-  yield();
-
-  x1    = 0;
-  y1    = h - 1;
-  y2    = 0;
-
-  for (x2 = 0; x2 < w; x2 += 6) tft.drawLine(x1, y1, x2, y2, color);
-  x2    = w - 1;
-  for (y2 = 0; y2 < h; y2 += 6) tft.drawLine(x1, y1, x2, y2, color);
-
 }
