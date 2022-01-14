@@ -4,9 +4,9 @@
   
   PROJETO: NANO SMART AGRO PARA AGRICULTURA DE PRECISÃO
   
-  VERSÃO: 4.01.34
-  DATA: 23/12/2021
-  HORÁRIO:18H55MIN
+  VERSÃO: 4.01.35
+  DATA: 14/01/2021
+  HORÁRIO:13H30MIN
   ARQUIVO: PROJETO_IoT
   
 *********************************************************************
@@ -14,6 +14,8 @@
   COMENTÁRIOS COM AS ALTERAÇÕES PARA REGISTRO DE CONTROLE DAS VERSÕES:
   
   VERSÃO:
+
+  4.01.35:        ALTERADO FUNÇÃO DE ENVIO AO SERVER THINSPEAK, DEVIDO A ATUALIZAÇÃO DO PROTOCOLO MQTT3 E CONFIGURAÇÃO USADAS PELO SERVER.
 
   4.01.34:        ALTERADO FUNÇÃO PARA CONSULTA SALDO DO CHIP NA VIVO, DEVIDO A MUDANÇA DE NÚMERO PARA ENVIAR SMS  DE CONSULTA SALDO DA OPERADORA VIVO.
   
@@ -380,9 +382,11 @@ unsigned int msg_counternok1;
 // ========================================================================================================
 // CREDENCIAIS DE ACESSO AO SERVER DA MATHLAB - THINGSPEAK
 
-const char* server_T = "mqtt.thingspeak.com";
-char mqttUserName[] = "*****************Demo";  // Use any name.
-char mqttPass[] = "****************";           // Change to your MQTT API Key from Account > MyProfile.
+// Atualização dos Parâmetros para envio ao Server ThingSpeak:
+char clientIdMQTT[] = "****************";
+char mqttUserName[] = "****************";
+char mqttPassword[] = "****************";
+const char server_T1[] = "mqtt3.thingspeak.com";
 
 //DEVICE: 01
 void iot_thingspeak();
@@ -391,7 +395,7 @@ unsigned int msg_counterok_t;
 unsigned int msg_counternok_t;
 String createJsonString2();
 long channelID = 9999999;                       // Change to your channel ID.
-char writeAPIKey[] = "****************";        // Change to your channel write API key.
+//char writeAPIKey[] = "****************";      // Não é mais necessário esse parâmetro para a comunicação com o Server
 
 //DEVICE: 02
 void iot_thingspeak1();
@@ -400,7 +404,7 @@ unsigned int msg_counterok_t1;
 unsigned int msg_counternok_t1;
 String createJsonString3();
 long channelID1 = 8888888;                       // Change to your channel ID.
-char writeAPIKey1[] = "****************";        // Change to your channel write API key.
+//char writeAPIKey1[] = "****************";      // Não é mais necessário esse parâmetro para a comunicação com o Server
 
 //DEVICE: IoT - Vinhedo (PIEDADE-SP) CANAL PÚBLICO:
 void iot_thingspeak2();
@@ -409,7 +413,7 @@ unsigned int msg_counterok_t2;
 unsigned int msg_counternok_t2;
 String createJsonString4();
 long channelID2 = 7777777;                       // Change to your channel ID.
-char writeAPIKey2[] = "****************";        // Change to your channel write API key.
+//char writeAPIKey2[] = "****************";      // Não é mais necessário esse parâmetro para a comunicação com o Server
 
 //========================================================================================================
 // Contagem de vezes que houver falha no envio das mensagens aos Servidores IoT:
@@ -13862,9 +13866,9 @@ void iot_thingspeak() {
   tft.print(local);
 
   delay(1000);
-  client.setServer(server_T, 1883);
+  client.setServer(server_T1, 1883); // atualizado Server
 
-  while (!!!client.connect("NSAGRO", mqttUserName, mqttPass)) {
+  while (!!!client.connect(clientIdMQTT, mqttUserName, mqttPassword)) {  // atualizado parâmetros do client connect
     tft.setCursor(5, 180);
     tft.setTextColor(WHITE);
     tft.print(F("ID:"));
@@ -14017,8 +14021,11 @@ void iot_thingspeak() {
     tft.print(data);
     tft.drawRect(0, 255, 240, 1, YELLOW);
 
-    // Create a topic string and publish data to ThingSpeak channel feed:
-    String topicString = "channels/" + String( channelID ) + "/publish/" + String(writeAPIKey);
+    //Parametro topic antigo:
+    //String topicString = "channels/" + String( channelID ) + "/publish/" + String(writeAPIKey);
+    
+    // Atualizado o parametro topic:
+    String topicString = "channels/" + String( channelID ) + "/publish";
     length = topicString.length();
     const char *topicBuffer;
     topicBuffer = topicString.c_str();
@@ -14622,9 +14629,9 @@ void iot_thingspeak1() {
   tft.print(local);
 
   delay(1000);
-  client.setServer(server_T, 1883);
+  client.setServer(server_T1, 1883); // atualizado Server
 
-  while (!!!client.connect("NSAGRO1", mqttUserName, mqttPass)) {
+  while (!!!client.connect(clientIdMQTT, mqttUserName, mqttPassword)) {  // atualizado parâmetros do client connect
     tft.setCursor(5, 180);
     tft.setTextColor(WHITE);
     tft.print(F("ID:"));
@@ -14776,9 +14783,12 @@ void iot_thingspeak1() {
     //tft.print(msgBuffer);
     tft.print(data);
     tft.drawRect(0, 255, 240, 1, YELLOW);
-
-    // Create a topic string and publish data to ThingSpeak channel feed:
-    String topicString = "channels/" + String( channelID1 ) + "/publish/" + String(writeAPIKey1);
+    
+    //Parametro topic antigo:
+    //String topicString = "channels/" + String( channelID1 ) + "/publish/" + String(writeAPIKey1);
+    
+    // Atualizado o parametro topic:
+    String topicString = "channels/" + String( channelID1 ) + "/publish";
     length = topicString.length();
     const char *topicBuffer;
     topicBuffer = topicString.c_str();
@@ -15287,9 +15297,9 @@ void iot_thingspeak2() {
   tft.print(local);
 
   delay(1000);
-  client.setServer(server_T, 1883);
+  client.setServer(server_T1, 1883); // atualizado Server
 
-  while (!!!client.connect("NSAGRO2", mqttUserName, mqttPass)) {
+  while (!!!client.connect(clientIdMQTT, mqttUserName, mqttPassword)) {  // atualizado parâmetros do client connect
     tft.setCursor(5, 180);
     tft.setTextColor(WHITE);
     tft.print(F("ID:"));
@@ -15442,8 +15452,11 @@ void iot_thingspeak2() {
     tft.print(data);
     tft.drawRect(0, 255, 240, 1, YELLOW);
 
-    // Create a topic string and publish data to ThingSpeak channel feed:
-    String topicString = "channels/" + String( channelID2 ) + "/publish/" + String(writeAPIKey2);
+    //Parametro topic antigo:
+    //String topicString = "channels/" + String( channelID2 ) + "/publish/" + String(writeAPIKey2);
+    
+    // Atualizado o parametro topic:
+    String topicString = "channels/" + String( channelID2 ) + "/publish";
     length = topicString.length();
     const char *topicBuffer;
     topicBuffer = topicString.c_str();
