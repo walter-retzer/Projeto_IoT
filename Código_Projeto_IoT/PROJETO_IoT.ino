@@ -4,9 +4,9 @@
   
   PROJETO: NANO SMART AGRO PARA AGRICULTURA DE PRECISÃO
   
-  VERSÃO: 4.01.35
-  DATA: 14/01/2021
-  HORÁRIO:13H30MIN
+  VERSÃO: 4.01.36
+  DATA: 19/02/2021
+  HORÁRIO:19H50MIN
   ARQUIVO: PROJETO_IoT
   
 *********************************************************************
@@ -14,6 +14,8 @@
   COMENTÁRIOS COM AS ALTERAÇÕES PARA REGISTRO DE CONTROLE DAS VERSÕES:
   
   VERSÃO:
+
+  4.01.36:        ALTERADO ENDEREÇOS DOS SENSORES PARA A NOVA PLACA DO PROTÓTIPO E INCLUIDO FUNÇÃO PISCA LED E LIMPADO VARIÁVEIS QUE ESTAVAM RENOMEADAS.
 
   4.01.35:        ALTERADO FUNÇÃO DE ENVIO AO SERVER THINSPEAK, DEVIDO A ATUALIZAÇÃO DO PROTOCOLO MQTT3 E CONFIGURAÇÃO USADAS PELO SERVER.
 
@@ -47,37 +49,59 @@
                   ALTERADO EXIBIÇÃO DA TELA INICIAL DO PROTÓTIPO, INCLUIDO A MESMA TELA INICIAL, NO MENU DO TOUCH SCREEN DA EXIBIÇÃO DE DATA HORA.
 
 
+ *********************************************************************
+  CONFIGURAÇÃO DOS BORNES DO PROTÓTIPO:
+
+  ***************SINAL ANALÓGICO***************
+
+  BORNE 01(FIO AZUL):     SINAL VCC SENSOR DE UMIDADE P1
+  BORNE 02(FIO ROXO):     SINAL VCC SENSOR DE UMIDADE P1
+  SENSOR A0(FIO AZUL):    SINAL ANALÓGICO UMIDADE P1 ARDUINO A10
+
+  BORNE 03(FIO CINZA):    SINAL VCC SENSOR DE UMIDADE P2
+  BORNE 04(FIO BRANCO):   SINAL VCC SENSOR DE UMIDADE P2
+  SENSOR A0(FIO ROXO):    SINAL ANALÓGICO UMIDADE P2 ARDUINO A11
+
+  BORNE 05(FIO PRETO):    SINAL VCC SENSOR DE ORVALHO
+  BORNE 06(FIO MARROM):   SINAL VCC SENSOR DE ORVALHO
+  SENSOR A0(FIO CINZA):   SINAL ANALÓGICO ORVALHO ARDUINO A12
   
-*********************************************************************
-  CONFIGURAÇÃO DOS BORNES DA PLACA DE ALIMENTAÇÃO EXTERNA DOS SENSORES:
+  BORNE 07(FIO VERMELHO): SENSOR TERMOPAR +
+  BORNE 08(FIO LARANJA):  SENSOR TERMOPAR -
 
-  BORNE 01(FIO VERDE):    GND SENSOR DE UMIDADE P1
-  BORNE 02(FIO AMARELO):  VCC SENSOR DE UMIDADE P1
-  BORNE 03(FIO ROXO):     SINAL ANALÓGICO SENSOR DE UMIDADE P1
+  BORNE 09(FIO AMARELO):  ALIMENTAÇÃO +5VCC SENSOR DHT22 EXTERNO
+  BORNE 10(FIO VERDE):    ALIMENTAÇÃO GND SENSOR DHT22 EXTERNO
+  BORNE 11(FIO AZUL):     SINAL ANALÓGICO SENSOR DHT22 EXTERNO ARDUINO A13
 
-  BORNE 04(FIO CINZA):    SINAL ANALÓGICO SENSOR DE UMIDADE P2
-  BORNE 05(FIO AZUL):     VCC SENSOR DE UMIDADE P2
-  BORNE 06(FIO VERDE):    GND SENSOR DE UMIDADE P2
+  BORNE 12(FIO ROXO):     SINAL ANALÓGICO RESERVA ARDUINO A14
 
-  BORNE 07(FIO AZUL):     VCC SENSOR DE ORVALHO/PRECIPTAÇÃO
-  BORNE 08(FIO VERDE):    SINAL ANALÓGICO SENSOR DE ORVALHO/PRECIPTAÇÃO
+  BORNE 13(FIO CINZA):    SINAL ANALÓGICO SENSOR INDEX UV ARDUINO A15
+  BORNE 14(FIO BRANCO):   ALIMENTAÇÃO +5VCC SENSOR INDEX UV
+  BORNE 15(FIO PRETO):    ALIMENTAÇÃO GND SENSOR INDEX UV
 
-  BORNE 09(FIO VERMELHO): A11 - ENTRADA ANALÓGICA RESERVA(FIO VERMELHO)
-  BORNE 10(FIO LARANJA):  A12 - ENTRADA ANALÓGICA RESERVA(FIO LARANJA)
-  BORNE 11(FIO AMARELO):  D17 - ENTRADA DIGITAL RESERVA(FIO MARROM)
-  BORNE 12(FIO VERDE):    D42 - ENTRADA DIGITAL RESERVA(FIO PRETO)
-  BORNE 13(FIO AZUL):     D43 - ENTRADA DIGITAL RESERVA(FIO BRANCO)
+  ***************SINAL DIGITAL***************
 
-  BORNE 14(FIO LARANJA):  SINAL - ENTRADA TERMOPAR
-  BORNE 15(FIO AMARELO):  SINAL + ENTRADA TERMOPAR
+  BORNE 01(FIO VERDE):     SINAL PULSO SENSOR PLUVIÔMETRO ARDUINO D18
+  BORNE 02(FIO AMARELO):   ALIMENTAÇÃO GND SENSOR PLUVIÔMETRO ARDUINO D23
+  BORNE 03(FIO LARANJA):   ALIMENTAÇÃO +5VCC SENSOR PLUVIÔMETRO ARDUINO D24
+  *RESISTOR DE 1KOHMS ENTRE OS BORNES 01 E 02
+  
+  BORNE 04(FIO VERMELHO):  RESERVA
+  BORNE 05(FIO MARROM):    RESERVA
+  BORNE 06(FIO PRETO):     RESERVA
+  BORNE 07(FIO BRANCO):    RESERVA
+  BORNE 08(FIO CINZA):     RESERVA
+  BORNE 09(FIO ROXO):      RESERVA
+  BORNE 10(FIO AZUL):      RESERVA
+  BORNE 11(FIO VERDE):     RESERVA
+  BORNE 12(FIO AMARELO ):  RESERVA
+  
+  BORNE 13(FIO LARANJA):    ALIMENTAÇÃO +5VCC SENSOR VAZÃO ARDUINO D24
+  BORNE 14(FIO VERMELHO):   ALIMENTAÇÃO GND SENSOR VAZÃO ARDUINO D23
+  BORNE 15(FIO MARROM):     SINAL PULSO SENSOR VAZÃO ARDUINO D19
+  *RESISTOR DE 1KOHMS ENTRE OS BORNES 13 E 15
 
-  BORNE 16(FIO ROXO):     SINAL ANALÓGICO SENSOR UV
-  BORNE 17(FIO CINZA):    GND SENSOR UV
-  BORNE 18(FIO BRANCO):   VCC SENSOR UV
-
-  BORNE 19(FIO PRETO):    GND SENSOR UV - RESERVA
-  BORNE 20(FIO CINZA):    VCC SENSOR UV - RESERVA
-
+ 
 *********************************************************************
   BORNES DHT22 INTERN0:
 
@@ -86,86 +110,30 @@
   BORNE 03(FIO BRANCO):   NÃO CONECTADO
   BORNE 04(FIO PRETO):    GND SENSOR DHT22 INTERNO
 
-*********************************************************************
-  BORNES DHT22 EXTERNO:
-
-  BORNE 01(FIO CINZA):    VCC SENSOR DHT22 EXTERNO
-  BORNE 02(FIO ROXO):     SINAL ANALÓGICO SENSOR DHT22 EXTERNO
-  BORNE 03(FIO AZUL):     NÃO CONECTADO
-  BORNE 04(FIO VERDE):    GND SENSOR DHT22 EXTERNO
 
 *********************************************************************
   BORNES EXTERNOS DE ALIMENTAÇÃO BH1750:
 
-  BORNE 01(FIO MARROM):    GND SENSOR BH1750(FIO MARROM)
-  BORNE 02(FIO VERMELHO):  VCC SENSOR BH1750(FIO VERMELHO)
-  BORNE 03(FIO LARANJA):   SCL SENSOR BH1750(FIO LARANJA)
-  BORNE 04(FIO AMARELO):   SDA SENSOR BH1750(FIO PRETO)
+  BORNE 01(FIO VERMELHO):  VCC SENSOR BH1750(FIO VERMELHO)
+  BORNE 02(FIO MARROM):    GND SENSOR BH1750(FIO MARROM)
+  BORNE 03(FIO AMARELO):   SCL SENSOR BH1750(FIO AMARELO)
+  BORNE 04(FIO LARANJA):   SDA SENSOR BH1750(FIO LARANJA)
 
 *********************************************************************
-  BORNES EXTERNOS DE ALIMENTAÇÃO DOS SENSOR DE VAZÃO E PLUVIÔMETRO:
-
-  BORNE 01(FIO BRANCO):    VCC SENSOR BH1750
-  BORNE 02(FIO PRETO):     GND SENSOR BH1750
-  BORNE 03(FIO MARROM):    SINAL PULSO SENSOR DE VAZÃO
-
-  BORNE 04(FIO VERMELHO):  VCC SENSOR PLUVIÔMETRO (NÃO CONECTADO!)
-  BORNE 05(FIO LARANJA):   SINAL PULSO PLUVIÔMETRO (PRETO/VERDE)
-  BORNE 06(FIO AMARELO):   GND PLUVIÔMETRO (AMARELO/VERMELHO)
-
-*********************************************************************
-  PINAGEM CHUVA/ORVALHO
-  VCC    - 5V
-  GND    - GND
-  A0     - PIN A10 FIO BRANCO PLACA / BRANCO MEGA
-
-*********************************************************************
-  PINAGEM UMIDADE PONTO 1
-  VCC    - 5V
-  GND    - GND
-  A0     - PIN A7 FIO CINZA PLACA / BRANCO MEGA
-
-*********************************************************************
-  PINAGEM SENSOR DHT22:
-  VCC    - 5V
-  GND    - GND
-  A0     - PIN A12  FIO ROXO PLACA / AMARELO MEGA
-
-*********************************************************************
-  PINAGEM UMIDADE PONTO 2
-  VCC    - 5V
-  GND    - GND
-  A0     - PIN A6 FIO --- PLACA / VERDE MEGA
-
-*********************************************************************
-  PINAGEM INDICE UV:
-  VCC    - 5V
-  GND    - GND
-  AOUT   - PIN A15 FIO CINZA PLACA / FIO ROXO BORNE 16 DOS SENSORES
-
-*********************************************************************
-  FIOS DIGITAIS RESERVAS:
-  FIO AMARELO  D44 MEGA
-  FIO VERMELHO D43 MEGA
-  FIO LARANJA  D42 MEGA
-
-*********************************************************************
-  SD CARD - MEGA
-    GND  - GND
-    VCC  - 5V
-    MOSI - PIN 50 FIO LARANJA CD_DO LCD marrom
-    MISO - PIN 51 FIO VERMELHO CD_DI LCD preto
-  CSK/CLK  - PIN 52 FIO AMARELO CD_CSK LCD vermelho
-    CS   - PIN 53 FIO MARROM CD_SS LCD branco
-
+  PINAGEM SENSOR DHT22 INTERNO:
+  PIN 01 - +5VCC FIO BRANCO
+  PIN 02 - A0 SINAL ANALÓGICO A17  FIO CINZA
+  PIN 03 - NC FIO ROXO
+  PIN 04 - GND FIO AZUL
+  
 **********************************************************************
   PINAGEM SENSOR MAX 6675 - TERMPOAR TIPO K
   SENSOR   - MEGA
-  GND    - GND
-  VCC    - 5V
-  SCK    - 45   FIO CINZA PLACA   /   CINZA MEGA
-  CS     - 47   FIO BRANCO PLACA  /   BRANCO MEGA
-  SO     - 46   FIO PRETO PLACA   /   PRETO MEGA
+  GND    - GND   FIO PRETO
+  VCC    - 5V    FIO BRANCO
+  SCK    - D49   FIO CINZA
+  CS     - D48   FIO ROXO
+  SO     - D47   FIO AZUL
 
 ***********************************************************************
   PINAGEM SENSOR BMP 280
@@ -188,13 +156,20 @@
 ***********************************************************************
   MÓDULO SENSOR DE NÍVEL AJ-SR04M:
 
-  5V  PIN     ->  Arduino D13 - VCC(FIO ROXO)
-  TRIGGER PIN ->  Arduino D12 - TRIGGER(CINZA)
-  ECHO PIN    ->  Arduino D11 - ECHO(FIO BRANCO)
-  GND PIN     ->  Arduino D10 - GND(FIO PRETO)
+  5V  PIN     ->  Arduino VCC - VCC(FIO BRANCO)
+  TRIGGER PIN ->  Arduino D11 - TRIGGER(FIO AZIL)
+  ECHO PIN    ->  Arduino D10 - ECHO(FIO ROXO)
+  GND PIN     ->  Arduino GND - GND(FIO PRETO)
+
+***********************************************************************
+  MÓDULO DISPLAY TFT 2.8':
+
+  SD_SCK   ->  Arduino D52 - SCK(BRANCO)
+  SD_DO    ->  Arduino D50 - MISO(ROXO)
+  SD_DI    ->  Arduino D51 - MOSI(AZUL)
+  SD_SS    ->  Arduino D53 - SS(VERDE)
 
 ***********************************************************************/
-
 
 
 
@@ -322,10 +297,7 @@ float luxmin;
 
 #include <Ultrasonic.h>
 
-#define pinVCC_Nivel 13       // ALIMENTAÇÃO AUXILIAR DA PLACA INTERNA DO SENSOR DE NÍVEL
-#define pinGND_Nivel 10       // ALIMENTAÇÃO AUXILIAR DA PLACA INTERNA DO SENSOR DE NÍVEL
-
-Ultrasonic ultrasonic(12, 11);  // 12 - TRIGGER CINZA E 11 - BRANCO ECHO
+Ultrasonic ultrasonic(11, 10);  // 11 - TRIGGER AZUL E 10 - ROXO ECHO;  // 12 - TRIGGER CINZA E 11 - BRANCO ECHO
 int distance;
 
 const int altura_caixa = 109;
@@ -547,14 +519,29 @@ unsigned long intervalo18 = 180000;
 unsigned long intervalo19 = 190000;
 unsigned long intervalo20 = 200000;
 
-unsigned long intervalo30 = 900000;  
+unsigned long intervalo30 = 900000;   //intervalo30 = 1200000;
 
+unsigned long atual = 0;
+unsigned long atual2 = 0;
+unsigned long atual3 = 0;
+unsigned long atual4 = 0;
+unsigned long atual5 = 0;
+unsigned long atual6 = 0;
+unsigned long atual7 = 0;
+unsigned long atual8 = 0;
+unsigned long atual9 = 0;
+unsigned long atual10 = 0;
+unsigned long atual11 = 0;
+unsigned long atual12 = 0;
+unsigned long atual13 = 0;
+unsigned long atual14 = 0;
+unsigned long atual15 = 0;
+unsigned long atual16 = 0;
+unsigned long atual17 = 0;
+unsigned long atual18 = 0;
+unsigned long atual19 = 0;
+unsigned long atual20 = 0;
 
-// ========================================================================================================
-// ENTRADAS E SAIDAS DIGITAIS AUXILIARES NÃO ESTÃO SENDO USADAS PELO PROGRAMA:
-
-#define pinVCC1 17       // ALIMENTAÇÃO AUXILIAR DA PLACA INTERNA DE SENSORES
-#define pinVCC2 40      // ALIMENTAÇÃO AUXILIAR DA PLACA INTERNA DE SENSORES
 
 // ==============================================================================
 // SD CARD:
@@ -599,14 +586,14 @@ float pluviometro_acum;          //Variável para armazenar o valor do pluviomet
 const byte Pino1 = 18;           //Pino 19 - interrupção 3 do Arduino Mega!
 byte sms_pluviometro;            //Variável auxiliar para enviar SMS quando houver precipitação maior que 1.00mm
 
-#define VCC_PLUV 37  // PINO DE ALIMENTAÇÃO VCC AUXILIAR DO PLUVIOMETRO
-#define GND_PLUV 36  // PINO DE ALIMENTAÇÃO GND AUXILIAR DO PLUVIOMETRO
+#define VCC_PLUV 24  // PINO DE ALIMENTAÇÃO VCC AUXILIAR DO PLUVIOMETRO
+#define GND_PLUV 23  // PINO DE ALIMENTAÇÃO GND AUXILIAR DO PLUVIOMETRO
 
 // ==============================================================================
 //SENSOR DE VAZÃO:
 
-#define VCC_VAZAO 39  // PINO DE ALIMENTAÇÃO VCC AUXILIAR DO PLUVIOMETRO
-#define GND_VAZAO 38  // PINO DE ALIMENTAÇÃO GND AUXILIAR DO PLUVIOMETRO
+#define VCC_VAZAO 34  // PINO DE ALIMENTAÇÃO VCC AUXILIAR DO PLUVIOMETRO
+#define GND_VAZAO 35  // PINO DE ALIMENTAÇÃO GND AUXILIAR DO PLUVIOMETRO
 
 static float vazao;       //Variável para armazenar o valor em L/min
 float Litros;             //Variável para Quantidade de agua
@@ -643,56 +630,40 @@ unsigned int pulsos_vazao_seg;
 // ==============================================================================
 //SENSOR DE UMIDADE DO SOLO PONTO 1:
 
-#define SensorUmidadeP1 A6 // PINO DO SENSOR DE UMIDADE DO SOLO P1
+#define SensorUmidadeP1 A10 // PINO DO SENSOR DE UMIDADE DO SOLO P1
 
 //declaração das variaveis referentes a leitura do sensor de umidade:
 
 void umid_soloP1();
 
 float umidadeP1;
-float minimoP1 = 8.00;   
-float maximoP1 = 1010.50;  
 float sensorP1;
-
-float umidP1_analog;
-float valorumidadeP1;
-
 float umSmaxP1;
 float umSminP1;
 
 // ==============================================================================
 //SENSOR DE UMIDADE DO SOLO PONTO 2
 
-#define SensorUmidadeP2 A7 // PINO DO SENSOR DE UMIDADE DO SOLO P2
+#define SensorUmidadeP2 A11 // PINO DO SENSOR DE UMIDADE DO SOLO P2
 
 //declaração das variaveis referentes a leitura do sensor de umidade:
 
 void umid_soloP2();
 
 float umidadeP2;
-float minimoP2 = 7.00;  
-float maximoP2 = 1011.50;  
 float sensorP2;
-
-float umidP2_analog;
-float valorumidadeP2;
-
 float umSmaxP2;
 float umSminP2;
 
 // ==============================================================================
 // SENSOR DE PRECIPTAÇÃO DE ORVALHO:
 
-#define chuvaPIN A10 // VALOR ANALÓGICO DA CHUVA
+#define chuvaPIN A12 // VALOR ANALÓGICO DA CHUVA
 
 void lcd_preciptacao();
-float chuva_analog;
-float minimo2 = 230.50;
-float maximo2 = 941.50;
-float preciptacao1;
-float preciptacao;
-float valor5 = 0;
 
+float chuva_analog;
+float preciptacao;
 float cpmin;
 float cpmax;
 
@@ -725,8 +696,8 @@ byte sms_prev_chuva;
 // ==============================================================================
 // SENSORES DTH22:
 
-#define DHT1_PIN A14         // pino que estamos conectado sensor externo
-#define DHT2_PIN A13         // pino que estamos conectado sensor interno
+#define DHT1_PIN A13         // pino que estamos conectado sensor externo
+#define DHT2_PIN A7         // pino que estamos conectado sensor interno
 
 #define DHTTYPE DHT22      // SENSOR DHT 22
 
@@ -734,7 +705,6 @@ DHT dht1(DHT1_PIN, DHTTYPE);
 DHT dht2(DHT2_PIN, DHTTYPE);
 
 // SENSOR DHT22 INTERNO - DHT2_PIN A12
-
 void lcd_temp_amb_int();
 float t1_int;
 float h1_int;
@@ -770,9 +740,9 @@ float tt1;
 
 void lcd_temp_solo();
 
-const int   thermoDO  = 46;     //Pino SO (ou DO)
-const int   thermoCS  = 47;     //PINO CS
-const int   thermoCLK = 45;     //Pino SCK (ou CLK)
+const int   thermoDO  = 47;     //Pino SO (ou DO)
+const int   thermoCS  = 48;     //PINO CS
+const int   thermoCLK = 49;     //Pino SCK (ou CLK)
 
 float termoparMax;
 float termoparMin;
@@ -820,23 +790,34 @@ void d4();
 
 void (*funcReset)() = 0;
 
-
-
 // ========================================================================================================
-// ESTADO DO LED:
+// ESTADO DO LED PISCA:
 
-#define LED 44
+void pisca_led();
+#define LED 40
 bool estadoLED = 1;
 unsigned long TempoLED = 0;
 unsigned long IntervalolLED = 250;
 unsigned long TempoAtuallLED;
 
+// ========================================================================================================
+// ESTADO DO LED STATUS OK:
+
+#define LED1 39
+bool estadoLED1 = 1;
+
+// ========================================================================================================
+// ESTADO DO LED ENVIA DADOS:
+
+#define LED2 41
+bool estadoLED2 = 1;
+
 
 // ========================================================================================================
 // ESTADO DO BUZZER:
 
-#define BUZZER_VCC 26
-#define BUZZER_GND 27
+#define BUZZER_VCC 43
+#define BUZZER_GND 44
 
 volatile boolean estado_buzzer = false;
 volatile boolean aux_estado_buzzer = false;
@@ -875,24 +856,6 @@ void setup() {
   delay(1000);
   lightMeter.begin();
   delay(1000);
-
-  //========================================================================================================
-  // PINOS DE ALIMENTAÇÃO AUXILIAR:
-
-  pinMode(pinVCC1, OUTPUT);           // ALIMENTAÇÃO AUXILIAR DA PLACA INTERNA DE SENSORES
-  pinMode(pinVCC2, OUTPUT);           // ALIMENTAÇÃO AUXILIAR DA PLACA INTERNA DE SENSORES
-
-  digitalWrite(pinVCC1, true);        // aux VCC
-  digitalWrite(pinVCC2, false);       // aux GND
-
-  //========================================================================================================
-  // PINOS DE ALIMENTAÇÃO AUXILIAR SENSOR DE NÍVEL:
-
-  pinMode(pinVCC_Nivel, OUTPUT);           // ALIMENTAÇÃO AUXILIAR DA PLACA INTERNA DE SENSORES
-  pinMode(pinGND_Nivel, OUTPUT);           // ALIMENTAÇÃO AUXILIAR DA PLACA INTERNA DE SENSORES
-
-  digitalWrite(pinVCC_Nivel, true);        // aux VCC
-  digitalWrite(pinGND_Nivel, false);       // aux GND
 
   //==============================================================================
   // ALIMNETAÇÃO DO PLUVIOMETRO:
@@ -1174,28 +1137,19 @@ void setup() {
 
   umSmaxP1 = -100.00;
   umSminP1 = 100.00;
-
-  sensorP1 = 0;
-  umidP1_analog = 0;
+  sensorP1 = 0.0;
+  umidadeP1 = 0.0;
 
   //========================================================================================================
   // CÁLCULO PARA EXIBIR A VARIÁVEL UMIDADE P1 DO SOLO EM %:
 
-  for (int i = 0; i <= 200; i++) {
-    sensorP1 = analogRead(SensorUmidadeP1);
-    umidP1_analog = umidP1_analog + sensorP1;
-  }
+   sensorP1 = analogRead(SensorUmidadeP1);
+    //   Serial.print("VALOR ANALOGICO P1: ");
+    //   Serial.println(sensorP1);
+    //   delay(1000);
 
-  //========================================================================================================
-  // FILTRO PARA GARATIR UMA LEITURA MAIS ESTÁVEL COM 200 MEDIÇÕES:
-
-  valorumidadeP1 = umidP1_analog / 200;
-  //Serial.print(valorumidadeP1);
-  umidadeP1 = ((valorumidadeP1 - minimoP1) / (maximoP1 - minimoP1)) * 100;
-  umidadeP1 = (umidadeP1 - 100) * -1;
-
-  umidP1_analog = 0;
-  valorumidadeP1 = 0;
+   umidadeP1 = map(sensorP1, 993, 2, 0, 100);
+   sensorP1 = 0.0;
 
   //========================================================================================================
   // LÓGICA DE PARA INDICAÇÃO DOS VALORES MÁXIMOS E MÍNIMOS:
@@ -1224,28 +1178,19 @@ void setup() {
 
   umSmaxP2 = -100.00;
   umSminP2 = 100.00;
-
-  sensorP2 = 0;
-  umidP2_analog = 0;
+  sensorP2 = 0.0;
+  umidadeP2 = 0.0;
 
   //========================================================================================================
   // CÁLCULO PARA EXIBIR A VARIÁVEL UMIDADE P2 DO SOLO EM %:
 
-  for (int i = 0; i <= 200; i++) {
-    sensorP2 = analogRead(SensorUmidadeP2);
-    umidP2_analog = umidP2_analog + sensorP2;
-  }
+  sensorP2 = analogRead(SensorUmidadeP2);
+    //   Serial.print("VALOR ANALOGICO P2: ");
+    //   Serial.println(sensorP2);
+    //   delay(1000);
 
-  //========================================================================================================
-  // FILTRO PARA GARATIR UMA LEITURA MAIS ESTÁVEL COM 200 MEDIÇÕES:
-
-  valorumidadeP2 = umidP2_analog / 200;
-  //Serial.print(valorumidadeP2);
-  umidadeP2 = ((valorumidadeP2 - minimoP2) / (maximoP2 - minimoP2)) * 100;
-  umidadeP2 = (umidadeP2 - 100) * -1;
-
-  umidP2_analog = 0;
-  valorumidadeP2 = 0;
+   umidadeP2 = map(sensorP2, 992, 2, 0, 100);
+   sensorP2 = 0.0;
 
   //========================================================================================================
   // LÓGICA DE PARA INDICAÇÃO DOS VALORES MÁXIMOS E MÍNIMOS:
@@ -1272,41 +1217,21 @@ void setup() {
   //========================================================================================================
   // CÁLCULO PARA EXIBIR A VARIÁVEL PRECIPTAÇÃO EM %:
 
-  valor5 = 0;
-  preciptacao1 = 0;
-
   cpmin = 100.00;
   cpmax = -100.00;
+  chuva_analog = 0.0;
 
   //========================================================================================================
   // CÁLCULO PARA EXIBIR A VARIÁVEL PRECIPTAÇÃO DE ORVALHO EM %:
+  
+  chuva_analog = analogRead(chuvaPIN);
+  //   Serial.begin(9600);
+  //   Serial.print("VALOR ANALOGICO CHUVA: ");
+  //   Serial.println(chuva_analog);
+  //   delay(1000);
 
-  for (int i = 0; i <= 100; i++) {
-    chuva_analog = analogRead(chuvaPIN);
-    valor5 = valor5 + chuva_analog;
-  }
-
-  preciptacao1 = valor5 / 100;
-
-  preciptacao = ((preciptacao1 - minimo2) / (maximo2 - minimo2)) * 100;
-  preciptacao = (preciptacao - 100) * -1;
-  valor5 = 0;
-  preciptacao1 = 0;
-
-  if (preciptacao < cpmin) {
-    cpmin = preciptacao;
-  }
-  if (preciptacao > cpmax) {
-    cpmax = preciptacao;
-  }
-
-  if (preciptacao <= 4.99) {
-    preciptacao = 0.0;
-  }
-
-  if (preciptacao >= 100.00) {
-    preciptacao = 99.9;
-  }
+  preciptacao = map(chuva_analog, 988, 2, 0, 100);
+  chuva_analog = 0.0;
 
   //========================================================================================================
   // VARIAVEIS DE INDICAÇÃO MÁXIMA E MÍNIMA DA ALTITUDE - MÓDULO BMP280:
@@ -1321,20 +1246,11 @@ void setup() {
                          Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
 
 
-  valor2 = 0;
-  valoralt = 0;
-
+  alt = 0;
   altMax = -1500.00;
   altMin = 1500.00;
 
-  for (int i = 0; i <= 100; i++) {
-    valoralt = sensor_bmp.readAltitude(1013.25);
-    valor2 = valor2 + valoralt;
-  }
-
-  alt = valor2 / 100;
-  valor2 = 0;
-  valoralt = 0;
+  alt = sensor_bmp.readAltitude(1013.25);
 
   if (alt < altMin) {
     altMin = alt;
@@ -1346,22 +1262,12 @@ void setup() {
 
   //========================================================================================================
   // VARIAVEIS DE INDICAÇÃO MÁXIMA E MÍNIMA DA PRESSÃO ATMOSFÉRICA - MÓDULO BMP280:
-
-  valor3 = 0;
-  valorp = 0;
+  
+  p = 0.0;
   pMin = 1500;
   pMax = -1500;
 
-  for (int i = 0; i <= 100; i++) {
-    valorp = sensor_bmp.readPressure();
-    valor3 = valor3 + valorp;
-  }
-
-  p = valor3 / 100;
-
-  p = p / 100;    // transformando 1Pa em 1 mBar
-  valor3 = 0;
-  valorp = 0;
+  p = (sensor_bmp.readPressure()/100);
 
   if (p < pMin) {
     pMin = p;
@@ -1609,164 +1515,22 @@ void setup() {
 
   anterior30 = millis();              // (t_send) tempo para sincronizar o "time" de envio a cada 15 minutos a partir desse momento!
 
-  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-  digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-  digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-  digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-  digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-  digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-  digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-
-  iot_ubidots();                     // server iot ubidots
-  delay(1000);
-  tft.fillRect(0, 0, 240, 320, BLACK);
-
-  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-  digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-  digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-  digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-  digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-  digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-  digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-
+  pisca_led();
+  iot_ubidots();                     // server iot ubidots 
+  
+  pisca_led();
   iot_ubidots1();                    // server iot ubidots
-  delay(2000);
-  tft.fillRect(0, 0, 240, 320, BLACK);
 
-  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-  digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-  digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-  digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-  digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-  digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-  digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-
+  pisca_led();
   iot_thingspeak();
-  delay(1000);
-  tft.fillRect(0, 0, 240, 320, BLACK);
-
-  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-  digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-  digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-  digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-  digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-  digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-  digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-
+  
+  pisca_led();
   iot_thingspeak1();
-  delay(1000);
-  tft.fillRect(0, 0, 240, 320, BLACK);
-
-  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-  digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-  digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-  digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-  digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-  digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-  digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-
+  
+  pisca_led();
   iot_thingspeak2();
-  delay(1000);
-  tft.fillRect(0, 0, 240, 320, BLACK);
-
-  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-  digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-  digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-  digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-  digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, false);   // Reseta o LED DA PLACA ARDUINO
-  digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-  delay(200);
-
-  //digitalWrite(LED_BUILTIN, true);   // Seta o LED DA PLACA ARDUINO
-  digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-
+  
+  pisca_led();
   d2();
 
   d3();
@@ -1856,47 +1620,26 @@ void setup() {
   //========================================================================================================
   // VARIAVEIS PARA A FUNÇÃO MILLIS PARA QUE NÃO HAJA DELAY E O ENVIO DE SMS FUNCIONE MELHOR!!!
 
-  unsigned long intervalo =  10000;
-  unsigned long intervalo2 = 20000;
-  unsigned long intervalo3 = 30000;
-  unsigned long intervalo4 = 40000;
-  unsigned long intervalo5 = 50000;
-  unsigned long intervalo6 = 60000;
-  unsigned long intervalo7 = 70000;
-  unsigned long intervalo8 = 80000;
-  unsigned long intervalo9 = 90000;
-  unsigned long intervalo10 = 100000;
-  unsigned long intervalo11 = 110000;
-  unsigned long intervalo12 = 120000;
-  unsigned long intervalo13 = 130000;
-  unsigned long intervalo14 = 140000;
-  unsigned long intervalo15 = 150000;
-  unsigned long intervalo16 = 160000;
-  unsigned long intervalo17 = 170000;
-  unsigned long intervalo18 = 180000;
-  unsigned long intervalo19 = 190000;
-  unsigned long intervalo20 = 200000;
-
-  unsigned long atual = millis();
-  unsigned long atual2 = atual;
-  unsigned long atual3 = atual2;
-  unsigned long atual4 = atual3;
-  unsigned long atual5 = atual4;
-  unsigned long atual6 = atual5;
-  unsigned long atual7 = atual6;
-  unsigned long atual8 = atual7;
-  unsigned long atual9 = atual8;
-  unsigned long atual10 = atual9;
-  unsigned long atual11 = atual10;
-  unsigned long atual12 = atual11;
-  unsigned long atual13 = atual12;
-  unsigned long atual14 = atual13;
-  unsigned long atual15 = atual14;
-  unsigned long atual16 = atual15;
-  unsigned long atual17 = atual16;
-  unsigned long atual18 = atual17;
-  unsigned long atual19 = atual18;
-  unsigned long atual20 = atual19;
+   atual = millis();
+  atual2 = atual;
+  atual3 = atual2;
+  atual4 = atual3;
+  atual5 = atual4;
+  atual6 = atual5;
+  atual7 = atual6;
+  atual8 = atual7;
+  atual9 = atual8;
+  atual10 = atual9;
+  atual11 = atual10;
+  atual12 = atual11;
+  atual13 = atual12;
+  atual14 = atual13;
+  atual15 = atual14;
+  atual16 = atual15;
+  atual17 = atual16;
+  atual18 = atual17;
+  atual19 = atual18;
+  atual20 = atual19;
 
   anterior = atual;
   anterior2 = atual2;
@@ -1918,6 +1661,7 @@ void setup() {
   anterior18 = atual18;
   anterior19 = atual19;
   anterior20 = atual20;
+
 
   //========================================================================================================
   // Habilita interrupção do Pluviometro e sensor de vazão.
@@ -4200,146 +3944,30 @@ void loop() {
 
               anterior30 = millis();
 
-              digitalWrite(LED_BUILTIN, false);   // Seta o LED DA PLACA ARDUINO
-              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-              delay(250);
-
-              digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(250);
-
-              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-              delay(250);
-
-              digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(250);
-
-              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-
-              tft.fillRect(0, 0, 240, 320, BLACK);
+              pisca_led();
               iot_ubidots();                      // server iot ubidots
 
-              digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-
-
-              tft.fillRect(0, 0, 240, 320, BLACK);
+              pisca_led();
               iot_ubidots1();                     // server iot ubidots
 
-              digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, true);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              tft.fillRect(0, 0, 240, 320, BLACK);
+              pisca_led();
               iot_thingspeak();
 
-              digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-
-              tft.fillRect(0, 0, 240, 320, BLACK);
+              pisca_led();
               iot_thingspeak1();
 
-              digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(200);
-              
-              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-
-              tft.fillRect(0, 0, 240, 320, BLACK);
+              pisca_led();
               iot_thingspeak2();
 
-              digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-              delay(200);
-              
-              digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-
+              pisca_led();
               d2();
 
               d3();
 
               tft.fillRect(0, 0, 240, 320, BLACK);
               configuraGSM();
-
-              digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-              delay(200);
-
-              digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
+              
+              pisca_led();
               delay(5000);
 
 
@@ -4405,27 +4033,26 @@ void loop() {
 
   serialGSM.begin(9600);
   //Serial.begin(9600);
-
-  unsigned long atual = millis();
-  unsigned long atual2 = atual;
-  unsigned long atual3 = atual2;
-  unsigned long atual4 = atual3;
-  unsigned long atual5 = atual4;
-  unsigned long atual6 = atual5;
-  unsigned long atual7 = atual6;
-  unsigned long atual8 = atual7;
-  unsigned long atual9 = atual8;
-  unsigned long atual10 = atual9;
-  unsigned long atual11 = atual10;
-  unsigned long atual12 = atual11;
-  unsigned long atual13 = atual12;
-  unsigned long atual14 = atual13;
-  unsigned long atual15 = atual14;
-  unsigned long atual16 = atual15;
-  unsigned long atual17 = atual16;
-  unsigned long atual18 = atual17;
-  unsigned long atual19 = atual18;
-  unsigned long atual20 = atual19;
+  atual = millis();
+  atual2 = atual;
+  atual3 = atual2;
+  atual4 = atual3;
+  atual5 = atual4;
+  atual6 = atual5;
+  atual7 = atual6;
+  atual8 = atual7;
+  atual9 = atual8;
+  atual10 = atual9;
+  atual11 = atual10;
+  atual12 = atual11;
+  atual13 = atual12;
+  atual14 = atual13;
+  atual15 = atual14;
+  atual16 = atual15;
+  atual17 = atual16;
+  atual18 = atual17;
+  atual19 = atual18;
+  atual20 = atual19;
 
   //========================================================================================================
   // EXIBE NO DISPLAY TFT A BARRA DE INICIALIZAÇÃO DAS VARIAVEIS:
@@ -4477,7 +4104,10 @@ void loop() {
     delay(1000);
 
     tft.fillRect(0, 305, 240, 6, YELLOW);
+    delay(250);
+    digitalWrite(BUZZER_VCC, true);         // Reseta o BUZZER
     delay(1000);
+    digitalWrite(BUZZER_VCC, false);         // Reseta o BUZZER
   }
 
   // ========================================================================================================
@@ -4495,11 +4125,8 @@ void loop() {
   //========================================================================================================
   // Contadores de Falha na gravação no Sd Card:  Solicita RESETE do Arduino
 
-  if (msg_sdcard_nok >= 50) {
-    delay(1000);
-    modemGSM.restart();
-    delay(5000);
-    funcReset();
+  if (msg_sdcard_nok >= 01) {
+      digitalWrite(LED2, false);               // Seta o LED de Status
   }
 
   //========================================================================================================
@@ -4597,17 +4224,10 @@ void loop() {
   //========================================================================================================
   // CÁLCULO PARA EXIBIR A VARIÁVEL PRECIPTAÇÃO DE ORVALHO EM %:
 
-  for (int i = 0; i <= 100; i++) {
-    chuva_analog = analogRead(chuvaPIN);
-    valor5 = valor5 + chuva_analog;
-  }
-
-  preciptacao1 = valor5 / 100;
-
-  preciptacao = ((preciptacao1 - minimo2) / (maximo2 - minimo2)) * 100;
-  preciptacao = (preciptacao - 100) * -1;
-  valor5 = 0;
-  preciptacao1 = 0;
+  chuva_analog = 0.0;
+  chuva_analog = analogRead(chuvaPIN);
+  preciptacao = map(chuva_analog, 988, 2, 0, 100);
+  chuva_analog = 0.0;
 
   if (preciptacao < cpmin) {
     cpmin = preciptacao;
@@ -4640,9 +4260,7 @@ void loop() {
     tft.fillRect(0, 0, 240, 320, BLACK);
     detachInterrupt(digitalPinToInterrupt(Pino));
 
-    //Calcula_nivel_UV();
     lcd_temp_amb();
-
     intervalo = atual;
     attachInterrupt(digitalPinToInterrupt(Pino), pulse, RISING);
   } // FECHA IF - FUNÇÃO PARA EXIBIÇÃO DA TEMPERATURA AMBIENTE NO DISPLAY TFT:
@@ -4654,7 +4272,6 @@ void loop() {
     detachInterrupt(digitalPinToInterrupt(Pino));
 
     lcd_umid_amb();
-    //volume_cx();
 
     intervalo = atual;
     intervalo2 = atual2;
@@ -5100,42 +4717,9 @@ void loop() {
 
     anterior30 = millis();
 
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-    delay(250);
-
-    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-    delay(250);
-
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-    delay(250);
-
-    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-    delay(250);
-
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-
-    tft.fillRect(0, 0, 240, 320, BLACK);
-
-    iot_thingspeak();
+    pisca_led();
+    iot_ubidots();        // server iot ubidots
     
-    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-    delay(200);
-    
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-
-
     // ========================================================================================================
     // CÁLCULO DO VALOR GERADO PELO PLUVIÔMETRO:
   
@@ -5148,30 +4732,12 @@ void loop() {
     } else {
       
       Read_Pulso1 = Read_Pulso1Antigo;        // caso haja pulsos, mas o senssor de chuva não marcar acima de 5%, o pulso será o mesmo do anterior.
-      contaPulso1 = Read_Pulso1;              // Variável para a quantidade de pulsos a cada "tombo do medidor"
+      contaPulso1 = Read_Pulso1;          // Variável para a quantidade de pulsos a cada "tombo do medidor"
 
     }
 
-    tft.fillRect(0, 0, 240, 320, BLACK);
-    iot_ubidots(); 
-
-    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-    delay(200);
-    
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-
+    pisca_led();
+    iot_ubidots1(); 
 
     // ========================================================================================================
     // VARIAVEIS DE INDICAÇÃO MÁXIMA E MÍNIMA DOS SENSORES SERÃO RESETADOS ENTRE 00H00MIN A 00H03MIN
@@ -5191,6 +4757,7 @@ void loop() {
       msg_counternok_t2_resete = 0; // msg não enviada ThingSpeak 2
       configuraGSM_nok_resete = 0; // GSM não Ok(resete)
       configuraGSM_nok = 0; // GSM não ok (SMS envio)
+      //configuraGSM_ok = 0; // GSM ok (SMS)
 
       //========================================================================================================
 
@@ -5245,49 +4812,16 @@ void loop() {
     } else {
       
       Read_Pulso1 = Read_Pulso1Antigo;        // caso haja pulsos, mas o senssor de chuva não marcar acima de 5%, o pulso será o mesmo do anterior.
-      contaPulso1 = Read_Pulso1;              // Variável para a quantidade de pulsos a cada "tombo do medidor"
+      contaPulso1 = Read_Pulso1;          // Variável para a quantidade de pulsos a cada "tombo do medidor"
 
     }
 
-    tft.fillRect(0, 0, 240, 320, BLACK);
+    pisca_led();
+    iot_thingspeak();
+
+    
+    pisca_led();
     iot_thingspeak1();
-
-    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-    delay(200);
-    
-    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-
-    tft.fillRect(0, 0, 240, 320, BLACK);
-    iot_ubidots1();
-
-    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-    delay(200);
-    
-    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
 
     // ========================================================================================================
     // CÁLCULO DO VALOR GERADO PELO PLUVIÔMETRO:
@@ -5300,31 +4834,14 @@ void loop() {
       
     } else {
       
-      Read_Pulso1 = Read_Pulso1Antigo;    // caso haja pulsos, mas o senssor de chuva não marcar acima de 5%, o pulso será o mesmo do anterior.
+      Read_Pulso1 = Read_Pulso1Antigo;        // caso haja pulsos, mas o senssor de chuva não marcar acima de 5%, o pulso será o mesmo do anterior.
       contaPulso1 = Read_Pulso1;          // Variável para a quantidade de pulsos a cada "tombo do medidor"
       
     }
   
-    tft.fillRect(0, 0, 240, 320, BLACK);
-    
+    pisca_led();
     iot_thingspeak2();
-
-    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-    delay(200);
-    
-    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
+    pisca_led();
 
     d2();
 
@@ -5332,24 +4849,7 @@ void loop() {
     
     tft.fillRect(0, 0, 240, 320, BLACK);
     configuraGSM();
-
-    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-    delay(200);
-    
-    digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
-    delay(200);
-
-    digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
-    delay(5000);
+    pisca_led();
 
 
     //========================================================================================================
@@ -6198,7 +5698,7 @@ void data_hora() {
   tft.setCursor(37, 275);
   tft.print(F("  DATALLOGER  "));
   tft.setCursor(25, 292);
-  tft.print(F("VERSAO: V4.01.34"));
+  tft.print(F("VERSAO: V4.01.35"));
 
   delay(3000);
   tft.fillRect(0, 0, 240, 320, BLACK);
@@ -7715,22 +7215,15 @@ void umid_soloP1() {
   // ========================================================================================================
   // CÁLCULO PARA EXIBIR A VARIÁVEL UMIDADE P1 DO SOLO EM %:
 
-  for (int i = 0; i <= 200; i++) {
-    sensorP1 = analogRead(SensorUmidadeP1);
-    umidP1_analog = umidP1_analog + sensorP1;
-  }
+   sensorP1 = analogRead(SensorUmidadeP1);
+    //   Serial.begin(9600);
+    //   Serial.print("VALOR ANALOGICO P1: ");
+    //   Serial.println(sensorP1);
+    //   delay(1000);
 
-  // FILTRO PARA GARATIR UMA LEITURA MAIS ESTÁVEL COM 200 MEDIÇÕES:
+   umidadeP1 = map(sensorP1, 993, 2, 0, 100);
+   sensorP1 = 0.0;
 
-  valorumidadeP1 = umidP1_analog / 200;
-
-  //Serial.begin(9600);
-  //Serial.print(valorumidadeP1);
-  umidadeP1 = ((valorumidadeP1 - minimoP1) / (maximoP1 - minimoP1)) * 100;
-  umidadeP1 = (umidadeP1 - 100) * -1;
-
-  umidP1_analog = 0;
-  valorumidadeP1 = 0;
 
   // LÓGICA DE PARA INDICAÇÃO DOS VALORES MÁXIMOS E MÍNIMOS:
 
@@ -7876,27 +7369,16 @@ void umid_soloP2() {
   tft.print(F("h"));
 
   // ========================================================================================================
-  // CÁLCULO PARA EXIBIR A VARIÁVEL UMIDADE P1 DO SOLO EM %:
+  // CÁLCULO PARA EXIBIR A VARIÁVEL UMIDADE P2 DO SOLO EM %:
 
-  //Serial.begin(9600);
+ sensorP2 = analogRead(SensorUmidadeP2);
+  //   Serial.begin(9600);
+  //   Serial.print("VALOR ANALOGICO P2: ");
+  //   Serial.println(sensorP2);
+  //   delay(1000);
 
-  for (int i = 0; i <= 200; i++) {
-    sensorP2 = analogRead(SensorUmidadeP2);
-    umidP2_analog = umidP2_analog + sensorP2;
-  }
-
-  // FILTRO PARA GARATIR UMA LEITURA MAIS ESTÁVEL COM 200 MEDIÇÕES:
-
-  valorumidadeP2 = umidP2_analog / 200;
-
-  //Serial.begin(9600);
-  //Serial.print(valorumidadeP2);
-
-  umidadeP2 = ((valorumidadeP2 - minimoP2) / (maximoP2 - minimoP2)) * 100;
-  umidadeP2 = (umidadeP2 - 100) * -1;
-
-  umidP2_analog = 0;
-  valorumidadeP2 = 0;
+  umidadeP2 = map(sensorP2, 992, 2, 0, 100);
+  sensorP2 = 0.0;
 
 
   // LÓGICA DE PARA INDICAÇÃO DOS VALORES MÁXIMOS E MÍNIMOS:
@@ -8047,17 +7529,14 @@ void lcd_preciptacao() {
   // ========================================================================================================
   // CÁLCULO PARA EXIBIR A VARIÁVEL PRECIPTAÇÃO DE ORVALHO EM %:
 
-  for (int i = 0; i <= 100; i++) {
-    chuva_analog = analogRead(chuvaPIN);
-    valor5 = valor5 + chuva_analog;
-  }
+  chuva_analog = analogRead(chuvaPIN);
+  //   Serial.begin(9600);
+  //   Serial.print("VALOR ANALOGICO CHUVA: ");
+  //   Serial.println(chuva_analog);
+  //   delay(1000);
 
-  preciptacao1 = valor5 / 100;
-
-  preciptacao = ((preciptacao1 - minimo2) / (maximo2 - minimo2)) * 100;
-  preciptacao = (preciptacao - 100) * -1;
-  valor5 = 0;
-  preciptacao1 = 0;
+  preciptacao = map(chuva_analog, 988, 2, 0, 100);
+  chuva_analog = 0.0;
 
   if (preciptacao < cpmin)
   {
@@ -8153,19 +7632,7 @@ void lcd_pressao_atm() {
   // ========================================================================================================
   // VARIAVEIS DE INDICAÇÃO MÁXIMA E MÍNIMA DA PRESSÃO ATMOSFÉRICA - MÓDULO BMP280:
 
-  valor3 = 0;
-  valorp = 0;
-
-  for (int i = 0; i <= 100; i++) {
-    valorp = sensor_bmp.readPressure();
-    valor3 = valor3 + valorp;
-  }
-
-  p = valor3 / 100;
-  p = p / 100;  // tranformando 1Pa em 1 mili Bar
-  valor3 = 0;
-  valorp = 0;
-
+  p = (sensor_bmp.readPressure()/100);
   float p10 = p;
 
   if (p < pMin)
@@ -8274,17 +7741,7 @@ void lcd_alt_atm() {
   // ========================================================================================================
   // VARIAVEIS DE INDICAÇÃO MÁXIMA E MÍNIMA DA ALTITUDE - MÓDULO BMP280:
 
-  valor2 = 0;
-  valoralt = 0;
-
-  for (int i = 0; i <= 100; i++) {
-    valoralt = sensor_bmp.readAltitude(1013.25);
-    valor2 = valor2 + valoralt;
-  }
-
-  alt = valor2 / 100;
-  valor2 = 0;
-  valoralt = 0;
+   alt = sensor_bmp.readAltitude(1013.25);
 
   if (alt < altMin)
   {
@@ -8300,19 +7757,7 @@ void lcd_alt_atm() {
   // ========================================================================================================
   // VARIAVEIS DE INDICAÇÃO MÁXIMA E MÍNIMA DA PRESSÃO ATMOSFÉRICA - MÓDULO BMP280:
 
-  valor3 = 0;
-  valorp = 0;
-
-  for (int i = 0; i <= 100; i++) {
-    valorp = sensor_bmp.readPressure();
-    valor3 = valor3 + valorp;
-  }
-
-  p = valor3 / 100;
-  p = p / 100;  // tranformando 1Pa em 1 mili Bar
-  valor3 = 0;
-  valorp = 0;
-
+  p = (sensor_bmp.readPressure()/100);
   float p10 = p;
 
   if (p < pMin)
@@ -8605,15 +8050,8 @@ void lcdpluv() {
 void nivel_cx()  {
 
   //Serial.begin(9600);
-
-  pinMode(pinVCC_Nivel, OUTPUT);           // ALIMENTAÇÃO AUXILIAR DA PLACA INTERNA DE SENSORES
-  pinMode(pinGND_Nivel, OUTPUT);           // ALIMENTAÇÃO AUXILIAR DA PLACA INTERNA DE SENSORES
-
-  digitalWrite(pinVCC_Nivel, true);        // aux VCC
-  digitalWrite(pinGND_Nivel, false);       // aux GND
-
   delay(1000);
-  Ultrasonic ultrasonic(12, 11); // 12 - CINZA ECHO // 11 - TRIGGER BRANCO
+  Ultrasonic ultrasonic(11, 10);  // 11 - TRIGGER AZUL E 10 - ROXO ECHO; // 12 - CINZA ECHO // 11 - TRIGGER BRANCO
   distance = ultrasonic.read();
   //Serial.print(distance);
 
@@ -8715,13 +8153,8 @@ void volume_cx()  {
 
   //Serial.begin(9600);
 
-  pinMode(pinVCC_Nivel, OUTPUT);           // ALIMENTAÇÃO AUXILIAR DA PLACA INTERNA DE SENSORES
-  pinMode(pinGND_Nivel, OUTPUT);           // ALIMENTAÇÃO AUXILIAR DA PLACA INTERNA DE SENSORES
-  digitalWrite(pinVCC_Nivel, true);        // aux VCC
-  digitalWrite(pinGND_Nivel, false);       // aux GND
-
   delay(1000);
-  Ultrasonic ultrasonic(12, 11); // 12 - CINZA ECHO // 11 - TRIGGER BRANCO
+  Ultrasonic ultrasonic(11, 10);  // 11 - TRIGGER AZUL E 10 - ROXO ECHO; // 12 - CINZA ECHO // 11 - TRIGGER BRANCO
   distance = ultrasonic.read();
 
   //Serial.print(distance);
@@ -10285,19 +9718,10 @@ void gravadadosSd() {
     // ========================================================================================================
     // CÁLCULO PARA EXIBIR A VARIÁVEL UMIDADE P1 DO SOLO EM %:
 
-    for (int i = 0; i <= 200; i++) {
-      sensorP1 = analogRead(SensorUmidadeP1);
-      umidP1_analog = umidP1_analog + sensorP1;
-    }
-
-    // FILTRO PARA GARATIR UMA LEITURA MAIS ESTÁVEL COM 200 MEDIÇÕES:
-
-    valorumidadeP1 = umidP1_analog / 200;
-    umidadeP1 = ((valorumidadeP1 - minimoP1) / (maximoP1 - minimoP1)) * 100;
-    umidadeP1 = (umidadeP1 - 100) * -1;
-
-    umidP1_analog = 0;
-    valorumidadeP1 = 0;
+   sensorP1 = 0.0;
+   sensorP1 = analogRead(SensorUmidadeP1);
+   umidadeP1 = map(sensorP1, 993, 2, 0, 100);
+   sensorP1 = 0.0;
 
 
     // LÓGICA DE PARA INDICAÇÃO DOS VALORES MÁXIMOS E MÍNIMOS:
@@ -10374,19 +9798,10 @@ void gravadadosSd() {
     // ========================================================================================================
     // CÁLCULO PARA EXIBIR A VARIÁVEL UMIDADE P2 DO SOLO EM %:
 
-    for (int i = 0; i <= 200; i++) {
-      sensorP2 = analogRead(SensorUmidadeP2);
-      umidP2_analog = umidP2_analog + sensorP2;
-    }
-
-    // FILTRO PARA GARATIR UMA LEITURA MAIS ESTÁVEL COM 200 MEDIÇÕES:
-
-    valorumidadeP2 = umidP2_analog / 200;
-    umidadeP2 = ((valorumidadeP2 - minimoP2) / (maximoP2 - minimoP2)) * 100;
-    umidadeP2 = (umidadeP2 - 100) * -1;
-
-    umidP2_analog = 0;
-    valorumidadeP2 = 0;
+   sensorP2 = 0.0;
+   sensorP2 = analogRead(SensorUmidadeP2);
+   umidadeP2 = map(sensorP2, 992, 2, 0, 100);
+   sensorP2 = 0.0;
 
 
     // LÓGICA DE PARA INDICAÇÃO DOS VALORES MÁXIMOS E MÍNIMOS:
@@ -10482,19 +9897,7 @@ void gravadadosSd() {
     // ========================================================================================================
     // VARIAVEIS DE INDICAÇÃO MÁXIMA E MÍNIMA DA PRESSÃO ATMOSFÉRICA - MÓDULO BMP280:
 
-    valor3 = 0;
-    valorp = 0;
-
-    for (int i = 0; i <= 100; i++) {
-      valorp = sensor_bmp.readPressure();
-      valor3 = valor3 + valorp;
-    }
-
-    p = valor3 / 100;
-
-    p = p / 100;  // tranformando 1Pa em 1 milibar
-    valor3 = 0;
-    valorp = 0;
+     p = (sensor_bmp.readPressure()/100);
 
     if (p < pMin)
     {
@@ -10524,17 +9927,8 @@ void gravadadosSd() {
     // ========================================================================================================
     // VARIAVEIS DE INDICAÇÃO MÁXIMA E MÍNIMA DA ALTITUDE - MÓDULO BMP280:
 
-    valor2 = 0;
-    valoralt = 0;
 
-    for (int i = 0; i <= 100; i++) {
-      valoralt = sensor_bmp.readAltitude(1013.25);
-      valor2 = valor2 + valoralt;
-    }
-
-    alt = valor2 / 100;
-    valor2 = 0;
-    valoralt = 0;
+    alt = sensor_bmp.readAltitude(1013.25);
 
     if (alt < altMin)
     {
@@ -10585,18 +9979,10 @@ void gravadadosSd() {
     // ========================================================================================================
     // CÁLCULO PARA EXIBIR A VARIÁVEL PRECIPTAÇÃO DE ORVALHO EM %:
 
-    valor5 = 0;
-    preciptacao1 = 0;
-
-    for (int i = 0; i <= 100; i++) {
-      chuva_analog = analogRead(chuvaPIN);
-      valor5 = valor5 + chuva_analog;
-    }
-    preciptacao1 = valor5 / 100;
-    preciptacao = ((preciptacao1 - minimo2) / (maximo2 - minimo2)) * 100;
-    preciptacao = (preciptacao - 100) * -1;
-    valor5 = 0;
-    preciptacao1 = 0;
+    chuva_analog = 0.0;
+    chuva_analog = analogRead(chuvaPIN);
+    preciptacao = map(chuva_analog, 988, 2, 0, 100);
+    chuva_analog = 0.0;
 
     if (preciptacao < cpmin)
     {
@@ -10664,13 +10050,8 @@ void gravadadosSd() {
 
     myFile.print(F(" NIVEL DOS RESERVATORIOS: "));
 
-    pinMode(pinVCC_Nivel, OUTPUT);           // ALIMENTAÇÃO AUXILIAR DA PLACA INTERNA DE SENSORES
-    pinMode(pinGND_Nivel, OUTPUT);           // ALIMENTAÇÃO AUXILIAR DA PLACA INTERNA DE SENSORES
-    digitalWrite(pinVCC_Nivel, true);        // aux VCC
-    digitalWrite(pinGND_Nivel, false);       // aux GND
-
     delay(1000);
-    Ultrasonic ultrasonic(12, 11); // 12 - CINZA ECHO // 11 - TRIGGER BRANCO
+    Ultrasonic ultrasonic(11, 10);  // 11 - TRIGGER AZUL E 10 - ROXO ECHO; // 12 - CINZA ECHO // 11 - TRIGGER BRANCO
     distance = ultrasonic.read();
 
     // ========================================================================================================
@@ -12721,19 +12102,10 @@ String createJsonString()
   // ========================================================================================================
   // CÁLCULO PARA EXIBIR A VARIÁVEL UMIDADE P1 DO SOLO EM %:
 
-  for (int i = 0; i <= 200; i++) {
-    sensorP1 = analogRead(SensorUmidadeP1);
-    umidP1_analog = umidP1_analog + sensorP1;
-  }
-
-  // FILTRO PARA GARATIR UMA LEITURA MAIS ESTÁVEL COM 200 MEDIÇÕES:
-
-  valorumidadeP1 = umidP1_analog / 200;
-  umidadeP1 = ((valorumidadeP1 - minimoP1) / (maximoP1 - minimoP1)) * 100;
-  umidadeP1 = (umidadeP1 - 100) * -1;
-
-  umidP1_analog = 0;
-  valorumidadeP1 = 0;
+   sensorP1 = 0.0;
+   sensorP1 = analogRead(SensorUmidadeP1);
+   umidadeP1 = map(sensorP1, 993, 2, 0, 100);
+   sensorP1 = 0.0;
 
   // LÓGICA DE PARA INDICAÇÃO DOS VALORES MÁXIMOS E MÍNIMOS:
 
@@ -12763,19 +12135,10 @@ String createJsonString()
   // ========================================================================================================
   // CÁLCULO PARA EXIBIR A VARIÁVEL UMIDADE P1 DO SOLO EM %:
 
-  for (int i = 0; i <= 200; i++) {
-    sensorP2 = analogRead(SensorUmidadeP2);
-    umidP2_analog = umidP2_analog + sensorP2;
-  }
-
-  // FILTRO PARA GARATIR UMA LEITURA MAIS ESTÁVEL COM 200 MEDIÇÕES:
-
-  valorumidadeP2 = umidP2_analog / 200;
-  umidadeP2 = ((valorumidadeP2 - minimoP2) / (maximoP2 - minimoP2)) * 100;
-  umidadeP2 = (umidadeP2 - 100) * -1;
-
-  umidP2_analog = 0;
-  valorumidadeP2 = 0;
+   sensorP2 = 0.0;
+   sensorP2 = analogRead(SensorUmidadeP2);
+   umidadeP2 = map(sensorP2, 992, 2, 0, 100);
+   sensorP2 = 0.0;
 
   // LÓGICA DE PARA INDICAÇÃO DOS VALORES MÁXIMOS E MÍNIMOS:
 
@@ -12805,19 +12168,7 @@ String createJsonString()
   // ========================================================================================================
   // VARIAVEIS DE INDICAÇÃO MÁXIMA E MÍNIMA DA PRESSÃO ATMOSFÉRICA - MÓDULO BMP280:
 
-  valor3 = 0;
-  valorp = 0;
-
-  for (int i = 0; i <= 100; i++) {
-    valorp = sensor_bmp.readPressure();
-    valor3 = valor3 + valorp;
-  }
-
-  p = valor3 / 100;
-  p = p / 100;  // tranformando 1Pa em 1 mili Bar
-  valor3 = 0;
-  valorp = 0;
-
+  p = (sensor_bmp.readPressure()/100);
   float p10 = p;
 
   if (p < pMin)
@@ -12838,17 +12189,8 @@ String createJsonString()
   // ========================================================================================================
   // VARIAVEIS DE INDICAÇÃO MÁXIMA E MÍNIMA DA ALTITUDE - MÓDULO BMP280:
 
-  valor2 = 0;
-  valoralt = 0;
 
-  for (int i = 0; i <= 100; i++) {
-    valoralt = sensor_bmp.readAltitude(1013.25);
-    valor2 = valor2 + valoralt;
-  }
-  alt = valor2 / 100;
-  valor2 = 0;
-  valoralt = 0;
-
+  alt = sensor_bmp.readAltitude(1013.25);
   float a10 = alt;
 
   // ========================================================================================================
@@ -13464,13 +12806,8 @@ String createJsonString1()
   // ========================================================================================================
   // TRATAMENTO DA INDICAÇÃO DA VÁRIALVEL NIVEL E VOLUME DOS RESERVATÓRIOS, CASO HAJA FALHA NO MÓDULO ELA INDICARÁ O CM!!
 
-  pinMode(pinVCC_Nivel, OUTPUT);           // ALIMENTAÇÃO AUXILIAR DA PLACA INTERNA DE SENSORES
-  pinMode(pinGND_Nivel, OUTPUT);           // ALIMENTAÇÃO AUXILIAR DA PLACA INTERNA DE SENSORES
-  digitalWrite(pinVCC_Nivel, true);        // aux VCC
-  digitalWrite(pinGND_Nivel, false);       // aux GND
-
   delay(1000);
-  Ultrasonic ultrasonic(12, 11); // 12 - CINZA ECHO // 11 - TRIGGER BRANCO
+  Ultrasonic ultrasonic(11, 10);  // 11 - TRIGGER AZUL E 10 - ROXO ECHO; // 12 - CINZA ECHO // 11 - TRIGGER BRANCO
   distance = ultrasonic.read();
 
   // ========================================================================================================
@@ -13499,17 +12836,10 @@ String createJsonString1()
   // ========================================================================================================
   // CÁLCULO PARA EXIBIR A VARIÁVEL PRECIPTAÇÃO EM %:
 
-  for (int i = 0; i <= 100; i++) {
-    chuva_analog = analogRead(chuvaPIN);
-    valor5 = valor5 + chuva_analog;
-  }
-
-  preciptacao1 = valor5 / 100;
-
-  preciptacao = ((preciptacao1 - minimo2) / (maximo2 - minimo2)) * 100;
-  preciptacao = (preciptacao - 100) * -1;
-  valor5 = 0;
-  preciptacao1 = 0;
+  chuva_analog = 0.0;
+  chuva_analog = analogRead(chuvaPIN);
+  preciptacao = map(chuva_analog, 988, 2, 0, 100);
+  chuva_analog = 0.0;
 
   if (preciptacao < cpmin)
   {
@@ -13594,28 +12924,6 @@ String createJsonString1()
 
   return data;
 }
-
-
-
-unsigned long testLines_SD(uint16_t color) {
-  int           x1, y1, x2, y2,
-                w = tft.width(),
-                h = tft.height();
-
-  tft.fillRect(0, 0, 240, 320, BLACK);
-  yield();
-
-  x1    = 0;
-  y1    = h - 1;
-  y2    = 0;
-
-  for (x2 = 0; x2 < w; x2 += 6) tft.drawLine(x1, y1, x2, y2, color);
-  x2    = w - 1;
-  for (y2 = 0; y2 < h; y2 += 6) tft.drawLine(x1, y1, x2, y2, color);
-
-}
-
-
 
 // ========================================================================================================
 // FUNÇÃO PARA ENVIO DAS VARIAVEIS AO SERVIDOR DO THINGSPEAK:
@@ -14217,19 +13525,10 @@ String createJsonString2()
   // ========================================================================================================
   // CÁLCULO PARA EXIBIR A VARIÁVEL UMIDADE P1 DO SOLO EM %:
 
-  for (int i = 0; i <= 200; i++) {
-    sensorP1 = analogRead(SensorUmidadeP1);
-    umidP1_analog = umidP1_analog + sensorP1;
-  }
-
-  // FILTRO PARA GARATIR UMA LEITURA MAIS ESTÁVEL COM 200 MEDIÇÕES:
-
-  valorumidadeP1 = umidP1_analog / 200;
-  umidadeP1 = ((valorumidadeP1 - minimoP1) / (maximoP1 - minimoP1)) * 100;
-  umidadeP1 = (umidadeP1 - 100) * -1;
-
-  umidP1_analog = 0;
-  valorumidadeP1 = 0;
+   sensorP1 = 0.0;
+   sensorP1 = analogRead(SensorUmidadeP1);
+   umidadeP1 = map(sensorP1, 993, 2, 0, 100);
+   sensorP1 = 0.0;
 
   // LÓGICA DE PARA INDICAÇÃO DOS VALORES MÁXIMOS E MÍNIMOS:
 
@@ -14259,19 +13558,10 @@ String createJsonString2()
   // ========================================================================================================
   // CÁLCULO PARA EXIBIR A VARIÁVEL UMIDADE P1 DO SOLO EM %:
 
-  for (int i = 0; i <= 200; i++) {
-    sensorP2 = analogRead(SensorUmidadeP2);
-    umidP2_analog = umidP2_analog + sensorP2;
-  }
-
-  // FILTRO PARA GARATIR UMA LEITURA MAIS ESTÁVEL COM 200 MEDIÇÕES:
-
-  valorumidadeP2 = umidP2_analog / 200;
-  umidadeP2 = ((valorumidadeP2 - minimoP2) / (maximoP2 - minimoP2)) * 100;
-  umidadeP2 = (umidadeP2 - 100) * -1;
-
-  umidP2_analog = 0;
-  valorumidadeP2 = 0;
+   sensorP2 = 0.0;
+   sensorP2 = analogRead(SensorUmidadeP2);
+   umidadeP2 = map(sensorP2, 992, 2, 0, 100);
+   sensorP2 = 0.0;
 
   // LÓGICA DE PARA INDICAÇÃO DOS VALORES MÁXIMOS E MÍNIMOS:
 
@@ -14307,17 +13597,10 @@ String createJsonString2()
   // ========================================================================================================
   // CÁLCULO PARA EXIBIR A VARIÁVEL PRECIPTAÇÃO EM %:
 
-  for (int i = 0; i <= 100; i++) {
-    chuva_analog = analogRead(chuvaPIN);
-    valor5 = valor5 + chuva_analog;
-  }
-
-  preciptacao1 = valor5 / 100;
-
-  preciptacao = ((preciptacao1 - minimo2) / (maximo2 - minimo2)) * 100;
-  preciptacao = (preciptacao - 100) * -1;
-  valor5 = 0;
-  preciptacao1 = 0;
+  chuva_analog = 0.0;
+  chuva_analog = analogRead(chuvaPIN);
+  preciptacao = map(chuva_analog, 988, 2, 0, 100);
+  chuva_analog = 0.0;
 
   if (preciptacao < cpmin)
   {
@@ -14341,19 +13624,7 @@ String createJsonString2()
   // ========================================================================================================
   // VARIAVEIS DE INDICAÇÃO MÁXIMA E MÍNIMA DA PRESSÃO ATMOSFÉRICA - MÓDULO BMP280:
 
-  valor3 = 0;
-  valorp = 0;
-
-  for (int i = 0; i <= 100; i++) {
-    valorp = sensor_bmp.readPressure();
-    valor3 = valor3 + valorp;
-  }
-
-  p = valor3 / 100;
-  p = p / 100;  // tranformando 1Pa em 1 mili Bar
-  valor3 = 0;
-  valorp = 0;
-
+  p = (sensor_bmp.readPressure()/100);
   float p20 = p;
 
   if (p < pMin)
@@ -14984,13 +14255,8 @@ String createJsonString3()
   // ========================================================================================================
   // TRATAMENTO DA INDICAÇÃO DA VÁRIALVEL NIVEL E VOLUME DOS RESERVATÓRIOS, CASO HAJA FALHA NO MÓDULO ELA INDICARÁ O CM!!
 
-  pinMode(pinVCC_Nivel, OUTPUT);           // ALIMENTAÇÃO AUXILIAR DA PLACA INTERNA DE SENSORES
-  pinMode(pinGND_Nivel, OUTPUT);           // ALIMENTAÇÃO AUXILIAR DA PLACA INTERNA DE SENSORES
-  digitalWrite(pinVCC_Nivel, true);        // aux VCC
-  digitalWrite(pinGND_Nivel, false);       // aux GND
-
   delay(1000);
-  Ultrasonic ultrasonic(12, 11); // 12 - CINZA ECHO // 11 - TRIGGER BRANCO
+  Ultrasonic ultrasonic(11, 10);  // 11 - TRIGGER AZUL E 10 - ROXO ECHO; // 12 - CINZA ECHO // 11 - TRIGGER BRANCO
   int distance1 = ultrasonic.read();
 
   // ========================================================================================================
@@ -15650,19 +14916,10 @@ String createJsonString4()
   // ========================================================================================================
   // CÁLCULO PARA EXIBIR A VARIÁVEL UMIDADE P1 DO SOLO EM %:
 
-  for (int i = 0; i <= 200; i++) {
-    sensorP1 = analogRead(SensorUmidadeP1);
-    umidP1_analog = umidP1_analog + sensorP1;
-  }
-
-  // FILTRO PARA GARATIR UMA LEITURA MAIS ESTÁVEL COM 200 MEDIÇÕES:
-
-  valorumidadeP1 = umidP1_analog / 200;
-  umidadeP1 = ((valorumidadeP1 - minimoP1) / (maximoP1 - minimoP1)) * 100;
-  umidadeP1 = (umidadeP1 - 100) * -1;
-
-  umidP1_analog = 0;
-  valorumidadeP1 = 0;
+   sensorP1 = 0.0;
+   sensorP1 = analogRead(SensorUmidadeP1);
+   umidadeP1 = map(sensorP1, 993, 2, 0, 100);
+   sensorP1 = 0.0;
 
   // LÓGICA DE PARA INDICAÇÃO DOS VALORES MÁXIMOS E MÍNIMOS:
 
@@ -15692,19 +14949,10 @@ String createJsonString4()
   // ========================================================================================================
   // CÁLCULO PARA EXIBIR A VARIÁVEL UMIDADE P1 DO SOLO EM %:
 
-  for (int i = 0; i <= 200; i++) {
-    sensorP2 = analogRead(SensorUmidadeP2);
-    umidP2_analog = umidP2_analog + sensorP2;
-  }
-
-  // FILTRO PARA GARATIR UMA LEITURA MAIS ESTÁVEL COM 200 MEDIÇÕES:
-
-  valorumidadeP2 = umidP2_analog / 200;
-  umidadeP2 = ((valorumidadeP2 - minimoP2) / (maximoP2 - minimoP2)) * 100;
-  umidadeP2 = (umidadeP2 - 100) * -1;
-
-  umidP2_analog = 0;
-  valorumidadeP2 = 0;
+   sensorP2 = 0.0;
+   sensorP2 = analogRead(SensorUmidadeP2);
+   umidadeP2 = map(sensorP2, 992, 2, 0, 100);
+   sensorP2 = 0.0;
 
   // LÓGICA DE PARA INDICAÇÃO DOS VALORES MÁXIMOS E MÍNIMOS:
 
@@ -15733,19 +14981,7 @@ String createJsonString4()
   // ========================================================================================================
   // VARIAVEIS DE INDICAÇÃO MÁXIMA E MÍNIMA DA PRESSÃO ATMOSFÉRICA - MÓDULO BMP280:
 
-  valor3 = 0;
-  valorp = 0;
-
-  for (int i = 0; i <= 100; i++) {
-    valorp = sensor_bmp.readPressure();
-    valor3 = valor3 + valorp;
-  }
-
-  p = valor3 / 100;
-  p = p / 100;  // tranformando 1Pa em 1 mili Bar
-  valor3 = 0;
-  valorp = 0;
-
+  p = (sensor_bmp.readPressure()/100);
   float p40 = p;
 
   if (p < pMin)
@@ -15768,13 +15004,8 @@ String createJsonString4()
   // ========================================================================================================
   // TRATAMENTO DA INDICAÇÃO DA VÁRIALVEL NIVEL E VOLUME DOS RESERVATÓRIOS, CASO HAJA FALHA NO MÓDULO ELA INDICARÁ O CM!!
 
-  pinMode(pinVCC_Nivel, OUTPUT);           // ALIMENTAÇÃO AUXILIAR DA PLACA INTERNA DE SENSORES
-  pinMode(pinGND_Nivel, OUTPUT);           // ALIMENTAÇÃO AUXILIAR DA PLACA INTERNA DE SENSORES
-  digitalWrite(pinVCC_Nivel, true);        // aux VCC
-  digitalWrite(pinGND_Nivel, false);       // aux GND
-
   delay(1000);
-  Ultrasonic ultrasonic(12, 11); // 12 - CINZA ECHO // 11 - TRIGGER BRANCO
+  Ultrasonic ultrasonic(11, 10);  // 11 - TRIGGER AZUL E 10 - ROXO ECHO; // 12 - CINZA ECHO // 11 - TRIGGER BRANCO
   int distance4 = ultrasonic.read();
 
   // ========================================================================================================
@@ -15809,4 +15040,40 @@ String createJsonString4()
   String data = String("field1=") + String(t40, 1) + "&field2=" + String(h40, 1) + "&field3=" + String(u40, 2) + "&field4=" + String(uu40, 2) + "&field5=" + String(p40, 1) + "&field6=" + String(c40, 2) + "&field7=" + String(v40, 1) + "&field8=" + String(n40, 1);
 
   return data;
+}
+
+void pisca_led(){
+
+  delay(1000);
+  tft.fillRect(0, 0, 240, 320, BLACK);
+  
+  digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
+  delay(200);
+  digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
+  delay(200);
+  digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
+  delay(200);
+  digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
+  delay(200);
+  digitalWrite(LED, false);           // Reseta o LED DA PLACA DOS SENSORES
+  delay(200);
+  digitalWrite(LED, true);           // Seta o LED DA PLACA DOS SENSORES
+}
+
+unsigned long testLines_SD(uint16_t color) {
+  int           x1, y1, x2, y2,
+                w = tft.width(),
+                h = tft.height();
+
+  tft.fillRect(0, 0, 240, 320, BLACK);
+  yield();
+
+  x1    = 0;
+  y1    = h - 1;
+  y2    = 0;
+
+  for (x2 = 0; x2 < w; x2 += 6) tft.drawLine(x1, y1, x2, y2, color);
+  x2    = w - 1;
+  for (y2 = 0; y2 < h; y2 += 6) tft.drawLine(x1, y1, x2, y2, color);
+
 }
